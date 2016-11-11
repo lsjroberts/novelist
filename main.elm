@@ -6,6 +6,7 @@ import Html.App as App
 import Html.Events exposing (onClick)
 
 import Defaults exposing (..)
+import Analysis exposing (..)
 
 main : Program Never
 main =
@@ -78,6 +79,12 @@ view model =
                 model.sceneContent
             )
         ]
+    , section
+        []
+        ( map
+            (\token -> p [] [ Html.text (token.tokenType ++ " (" ++ token.kind ++ "): " ++ token.value) ])
+            (tokenise (toString model.sceneContent))
+        )
     , section
         [ menuStyle
         , rightMenuStyle
