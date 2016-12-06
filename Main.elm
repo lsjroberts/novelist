@@ -53,7 +53,7 @@ update message model =
             { model | isWriting = True }
 
         StopWriting ->
-            Debug.log "StopWriting" model
+            { model | isWriting = False }
 
         -- { model | isWriting = False }
         Write sceneContent ->
@@ -69,7 +69,10 @@ update message model =
             --         Nothing ->
             --             { model | sceneContent = "nope" }
             -- { model | sceneContent = Debug.log "write" <| sceneContent }
-            { model | sceneContent = Debug.log "write" <| String.join "\n" sceneContent }
+            { model
+                | sceneContent = Debug.log "write" <| String.join "\n" sceneContent
+                , isWriting = False
+            }
 
 
 
@@ -79,24 +82,7 @@ update message model =
 view : Model -> Html Message
 view model =
     div [ styles [ padding (px 30) ], textStyle ]
-        [ section
-            [ menuStyle
-            , leftMenuStyle
-            , if model.isWriting then
-                menuIsWritingStyle
-              else
-                noStyle
-            ]
-            [ div
-                [ menuGroupStyle ]
-                [ span [ menuGroupTitleStyle ] [ Html.text "Modes" ]
-                , ul [ menuGroupOptionsStyle ]
-                    [ li [ menuGroupItemStyle, menuGroupItemSelectedStyle ] [ Html.text "Distraction Free" ]
-                    , li [ menuGroupItemStyle ] [ Html.text "Conversation" ]
-                    , li [ menuGroupItemStyle ] [ Html.text "Editor" ]
-                    ]
-                ]
-            ]
+        [ leftSideBarView model
         , section [ sceneStyle ]
             [ header []
                 [ h1 [ sceneTitleStyle ] [ Html.text model.sceneTitle ]
@@ -110,32 +96,64 @@ view model =
                 , contenteditable True
                 , spellcheck False
                 , onFocus StartWriting
-                , onBlur StopWriting
+                  -- , onBlur StopWriting
                   -- , onBlur <| Debug.log "hello" <| (Write [ "boo" ])
                   -- , on "blur" <| Debug.log "hello" <| (Decode.map Write <| Decode.at [ "target", "firstChild" ] textContentDecoder)
-                , on "blur" <| Debug.log "hello" <| (Decode.map Write <| childrenContentDecoder)
+                , on "blur" (Decode.map Write childrenContentDecoder)
                 ]
-                (sceneAsTokensView model.sceneContent)
+                (sceneAsTokensView model)
             ]
-        , section
-            [ menuStyle
-            , rightMenuStyle
-            , if model.isWriting then
-                menuIsWritingStyle
-              else
-                noStyle
-            ]
-            [ Html.text "info" ]
+        , rightSideBarView model
         ]
 
 
-sceneAsTokensView : String -> List (Html a)
-sceneAsTokensView scene =
-    -- |> debugTokens
-    scene
-        |> tokenise
-        |> splitSceneTokensIntoParagraphs
-        |> mapSceneParagraphsIntoElements
+leftSideBarView model =
+    section
+        [ menuStyle
+        , leftMenuStyle
+        , if model.isWriting then
+            menuIsWritingStyle
+          else
+            noStyle
+        ]
+        [ div
+            [ menuGroupStyle ]
+            [ span [ menuGroupTitleStyle ] [ Html.text "Modes" ]
+            , ul [ menuGroupOptionsStyle ]
+                [ li [ menuGroupItemStyle, menuGroupItemSelectedStyle ] [ Html.text "Distraction Free" ]
+                , li [ menuGroupItemStyle ] [ Html.text "Conversation" ]
+                , li [ menuGroupItemStyle ] [ Html.text "Editor" ]
+                ]
+            ]
+        ]
+
+
+rightSideBarView model =
+    section
+        [ menuStyle
+        , rightMenuStyle
+        , if model.isWriting then
+            menuIsWritingStyle
+          else
+            noStyle
+        ]
+        [ Html.text "info" ]
+
+
+sceneAsTokensView : Model -> List (Html a)
+sceneAsTokensView model =
+    case model.isWriting of
+        True ->
+            model.sceneContent
+                |> tokenise
+                |> splitSceneTokensIntoParagraphs
+                |> (mapSceneParagraphsIntoElements noopFormatter)
+
+        False ->
+            model.sceneContent
+                |> tokenise
+                |> splitSceneTokensIntoParagraphs
+                |> (mapSceneParagraphsIntoElements punctuatorFormatter)
 
 
 debugTokens : List Token -> List (Html a)
@@ -150,41 +168,69 @@ splitSceneTokensIntoParagraphs tokens =
         |> splitWith (\t -> t.tokenType == "NewLine")
 
 
-mapSceneParagraphsIntoElements : List (List Token) -> List (Html a)
-mapSceneParagraphsIntoElements paragraphs =
+mapSceneParagraphsIntoElements : TokenFormatter a -> List (List Token) -> List (Html a)
+mapSceneParagraphsIntoElements tokenFormatter paragraphs =
     paragraphs
-        |> map mapSceneTokensIntoElements
+        |> map (mapSceneTokensIntoElements tokenFormatter)
         |> map (\paragraph -> p [ sceneParagraphStyle ] paragraph)
 
 
-mapSceneTokensIntoElements : List Token -> List (Html a)
-mapSceneTokensIntoElements tokens =
+mapSceneTokensIntoElements : TokenFormatter a -> List Token -> List (Html a)
+mapSceneTokensIntoElements tokenFormatter tokens =
     tokens
-        |> map tokenIntoElement
+        |> map (tokenIntoElement tokenFormatter)
 
 
-tokenIntoElement : Token -> Html a
-tokenIntoElement token =
+type alias TokenFormatter msg =
+    Token -> Html.Attribute msg
+
+
+tokenIntoElement : TokenFormatter a -> Token -> Html a
+tokenIntoElement tokenFormatter token =
     let
         tokenStyle =
-            case token.tokenType of
-                "Punctuator" ->
-                    tokenPunctuatorStyle
-
-                _ ->
-                    styles []
+            tokenFormatter token
     in
         span [ tokenStyle ] [ Html.text token.value ]
 
 
+noopFormatter : Token -> Html.Attribute a
+noopFormatter token =
+    styles []
+
+
+punctuatorFormatter : Token -> Html.Attribute a
+punctuatorFormatter token =
+    case token.tokenType of
+        "Punctuator" ->
+            tokenPunctuatorStyle
+
+        _ ->
+            styles []
+
+
 childrenContentDecoder : Decode.Decoder (List String)
 childrenContentDecoder =
-    Decode.at [ "target", "childNodes" ] (Decode.list textContentDecoder)
+    Decode.at [ "target", "childNodes" ] (Decode.keyValuePairs textContentDecoder)
+        |> Decode.map
+            (\nodes ->
+                nodes
+                    |> List.filterMap
+                        (\( key, text ) ->
+                            case String.toInt key of
+                                Err msg ->
+                                    Nothing
+
+                                Ok value ->
+                                    Just text
+                        )
+                    |> List.reverse
+            )
 
 
 textContentDecoder : Decode.Decoder String
 textContentDecoder =
-    Decode.field "textContent" Decode.string
+    Decode.oneOf [ Decode.field "textContent" Decode.string, Decode.succeed "nope" ]
 
 
 styles : List Mixin -> Html.Attribute msg
