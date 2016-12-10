@@ -1,7 +1,7 @@
 {
     "version": "0.0.0",
-    "summary": "A writers environment",
-    "repository": "https://github.com/lsjroberts/writing-app.git",
+    "summary": "A Writer's Environment",
+    "repository": "https://github.com/lsjroberts/novelist.git",
     "license": "Unlicensed",
     "source-directories": [
         "src",

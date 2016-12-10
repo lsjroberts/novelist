@@ -1,23 +1,5 @@
 {
-  "name": "novelist",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "build:osx": "electron-packager . Novelist --platform=darwin --arch=x64 --version=1.4.11 --out=dist/",
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lsjroberts/writing-app.git"
-  },
-  "author": "Laurence Roberts <lsjroberts@outlook.com>",
-  "license": "UNLICENSED",
-  "bugs": {
-    "url": "https://github.com/lsjroberts/writing-app/issues"
-  },
-  "homepage": "https://github.com/lsjroberts/writing-app#readme"
 }
