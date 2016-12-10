@@ -31,9 +31,12 @@ type Msg
 markdownToTokens : String -> List Model
 markdownToTokens string =
     let
+        cleanString =
+            Regex.replace Regex.All (Regex.regex "\n+$") (\_ -> "") string
+
         tokens =
-            if String.contains "\n" string then
-                string
+            if String.contains "\n" cleanString then
+                cleanString
                     |> String.split "\n"
                     |> List.map paragraph
             else if String.contains "“" string then
@@ -41,7 +44,7 @@ markdownToTokens string =
             else if String.contains "\"" string then
                 wrap "\"" speech text string
             else
-                [ text string ]
+                [ text cleanString ]
     in
         tokens |> filterEmptyParagraphTokens
 

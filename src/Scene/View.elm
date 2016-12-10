@@ -5,6 +5,7 @@ import Json.Decode as Json
 import Html exposing (Html, div, h1, article, p)
 import Html.Attributes exposing (contenteditable, spellcheck)
 import Html.Events exposing (on, onFocus)
+import Html.Keyed
 import Styles exposing (styles)
 import Scene.Types exposing (..)
 import Token.Types
@@ -47,17 +48,22 @@ nameView model =
 
 contentView : Model -> Html Msg
 contentView model =
-    article
-        [ styles
-            [ sceneFont
-            , fontSize (px 24)
-            ]
-        , contenteditable True
-        , spellcheck False
-        , onFocus StartWriting
-        , on "blur" (Json.map Write childrenContentDecoder)
+    Html.Keyed.node "div"
+        []
+        [ ( toString model.commit
+          , article
+                [ styles
+                    [ sceneFont
+                    , fontSize (px 24)
+                    ]
+                , contenteditable True
+                , spellcheck False
+                , onFocus StartWriting
+                , on "blur" (Json.map Write childrenContentDecoder)
+                ]
+                (List.map (\x -> Html.map TokenMsg (Token.View.root x)) model.content)
+          )
         ]
-        (List.map (\x -> Html.map TokenMsg (Token.View.root x)) model.content)
 
 
 

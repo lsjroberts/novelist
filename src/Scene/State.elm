@@ -9,6 +9,8 @@ init : ( Model, Cmd Msg )
 init =
     ( Model "Chapter 1"
         prideAndPrejudice
+        0
+        []
         (Children [])
         False
     , Cmd.none
@@ -21,6 +23,8 @@ update msg model =
         Write content ->
             ( { model
                 | content = Token.Types.markdownToTokens (Debug.log "WRITE" content)
+                , commit = model.commit + 1
+                , history = ( model.commit, model.content ) :: model.history
                 , isWriting = False
               }
             , Cmd.none
