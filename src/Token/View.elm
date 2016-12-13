@@ -13,33 +13,22 @@ type alias HtmlTag =
 root : Model -> Html Msg
 root model =
     case model.token of
-        Text ->
-            text model.value
-
         Paragraph ->
-            paragraph model.children
+            paragraph model
 
         Speech ->
-            speech model.children
+            speech model
+
+        Emphasis ->
+            emphasis model
+
+        Text ->
+            text model
 
 
-text : String -> Html Msg
-text string =
-    Html.text string
-
-
-
--- children : HtmlTag -> Children -> Html Msg
--- children element (Children tokens) =
---     tokens
---         |> List.map root
---         |> element []
-
-
-paragraph : Children -> Html Msg
-paragraph (Children tokens) =
-    tokens
-        |> List.map root
+paragraph : Token.Types.Model -> Html Msg
+paragraph token =
+    inner token.children
         |> p
             [ styles
                 [ marginTop (em 0)
@@ -49,8 +38,52 @@ paragraph (Children tokens) =
             ]
 
 
-speech : Children -> Html Msg
-speech (Children tokens) =
-    tokens
-        |> List.map root
+speech : Token.Types.Model -> Html Msg
+speech token =
+    token
+        |> wrap
         |> span [ styles [ backgroundColor (rgba 0 189 156 0.2) ] ]
+
+
+emphasis : Token.Types.Model -> Html Msg
+emphasis token =
+    token
+        |> wrap
+        |> span [ styles [ fontStyle italic ] ]
+
+
+wrap : Token.Types.Model -> List (Html Msg)
+wrap token =
+    let
+        before =
+            case token.before of
+                Just b ->
+                    b
+
+                Nothing ->
+                    ""
+
+        after =
+            case token.after of
+                Just a ->
+                    a
+
+                Nothing ->
+                    ""
+    in
+        [ Html.text before ] ++ inner token.children ++ [ Html.text after ]
+
+
+inner : Children -> List (Html Msg)
+inner (Children children) =
+    List.map root children
+
+
+text : Token.Types.Model -> Html Msg
+text token =
+    case token.inner of
+        Just inner ->
+            Html.text inner
+
+        Nothing ->
+            Html.text ""

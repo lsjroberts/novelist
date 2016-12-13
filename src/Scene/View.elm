@@ -66,27 +66,6 @@ contentView model =
         ]
 
 
-
--- <|
---     case model.isWriting of
---         True ->
---             [ contentAsStringView model.content ]
---
---         False ->
---             [ contentThruLensesView model.content ]
--- contentAsStringView : List Token.Types.Model -> Html msg
--- contentAsStringView tokens =
---     tokens
---         |> List.map (\x -> p [] [ Html.text x.value ])
---         |> div []
---
---
--- contentThruLensesView : List Token.Types.Model -> Html msg
--- contentThruLensesView tokens =
---     contentAsStringView tokens
--- STYLES
-
-
 sceneFont =
     fontFamilies [ "Cochin", "Georgia", "serif" ]
 

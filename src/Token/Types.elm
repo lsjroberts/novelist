@@ -5,15 +5,18 @@ import Regex
 
 type alias Model =
     { token : TokenType
-    , value : String
+    , before : Maybe String
+    , after : Maybe String
+    , inner : Maybe String
     , children : Children
     }
 
 
 type TokenType
-    = Text
-    | Paragraph
+    = Paragraph
     | Speech
+    | Emphasis
+    | Text
 
 
 type Children
@@ -39,10 +42,12 @@ markdownToTokens string =
                 cleanString
                     |> String.split "\n"
                     |> List.map paragraph
-            else if String.contains "“" string then
+            else if String.contains "“" cleanString then
                 wrap2 "“" "”" speech text string
-            else if String.contains "\"" string then
+            else if String.contains "\"" cleanString then
                 wrap "\"" speech text string
+            else if String.contains "_" cleanString then
+                wrap "_" emphasis text cleanString
             else
                 [ text cleanString ]
     in
@@ -60,16 +65,14 @@ wrap2 left right inside outside string =
             Regex.regex (left ++ ".+?" ++ right)
 
         insides =
-            Regex.find Regex.All exp (Debug.log "string" string)
+            Regex.find Regex.All exp string
                 |> List.map .match
                 |> List.map inside
-                |> Debug.log "insides"
 
         outsides =
             Regex.split Regex.All exp string
                 |> List.map outside
                 |> filterEmptyTextTokens
-                |> Debug.log "outsides"
     in
         zip insides outsides
 
@@ -88,38 +91,53 @@ filterEmptyParagraphTokens =
         )
 
 
-tokensFromChildren : Children -> List Model
-tokensFromChildren (Children tokens) =
-    tokens
-
-
 filterEmptyTextTokens : List Model -> List Model
 filterEmptyTextTokens =
     List.filter
         (\x ->
             if x.token == Text then
-                if x.value == "" then
-                    False
-                else
-                    True
+                case x.inner of
+                    Just inner ->
+                        True
+
+                    Nothing ->
+                        False
             else
                 True
         )
 
 
-text : String -> Model
-text string =
-    Model Text string (Children [])
+tokensFromChildren : Children -> List Model
+tokensFromChildren (Children tokens) =
+    tokens
 
 
 paragraph : String -> Model
 paragraph string =
-    Model Paragraph "" (Children (markdownToTokens string))
+    Model Paragraph Nothing Nothing Nothing (Children (markdownToTokens string))
 
 
 speech : String -> Model
 speech string =
-    Model Speech "" (Children [ text (string) ])
+    string
+        |> Regex.replace Regex.All (Regex.regex "“|”|\"") (\_ -> "")
+        |> markdownToTokens
+        |> Children
+        |> Model Speech (Just "“") (Just "”") Nothing
+
+
+emphasis : String -> Model
+emphasis string =
+    string
+        |> Regex.replace Regex.All (Regex.regex "_") (\_ -> "")
+        |> markdownToTokens
+        |> Children
+        |> Model Emphasis Nothing Nothing Nothing
+
+
+text : String -> Model
+text string =
+    Model Text Nothing Nothing (Just string) (Children [])
 
 
 zip : List Model -> List Model -> List Model
