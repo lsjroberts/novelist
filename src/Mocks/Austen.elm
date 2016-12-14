@@ -1,6 +1,6 @@
 module Mocks.Austen exposing (..)
 
-import Token.Types exposing (..)
+import Token.Factories exposing (markdownToTokens)
 
 
 prideAndPrejudice =

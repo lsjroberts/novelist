@@ -22,7 +22,7 @@ root model =
         Emphasis ->
             emphasis model
 
-        Text ->
+        Text a ->
             text model
 
 
@@ -56,9 +56,9 @@ wrap : Token.Types.Model -> List (Html Msg)
 wrap token =
     let
         before =
-            case token.before of
+            case openingTag token of
                 Just b ->
-                    if token.showTags then
+                    if showTags token then
                         [ Html.text b ]
                     else
                         [ span [ styles [ display none ] ] [ Html.text b ] ]
@@ -67,9 +67,9 @@ wrap token =
                     []
 
         after =
-            case token.after of
+            case closingTag token of
                 Just a ->
-                    if token.showTags then
+                    if showTags token then
                         [ Html.text a ]
                     else
                         [ span [ styles [ display none ] ] [ Html.text a ] ]
@@ -87,9 +87,9 @@ inner (Children children) =
 
 text : Token.Types.Model -> Html Msg
 text token =
-    case token.inner of
-        Just inner ->
-            Html.text inner
+    case token.token of
+        Text value ->
+            Html.text value
 
-        Nothing ->
+        _ ->
             Html.text ""
