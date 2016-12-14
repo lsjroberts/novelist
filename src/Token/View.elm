@@ -58,20 +58,26 @@ wrap token =
         before =
             case token.before of
                 Just b ->
-                    b
+                    if token.showTags then
+                        [ Html.text b ]
+                    else
+                        [ span [ styles [ display none ] ] [ Html.text b ] ]
 
                 Nothing ->
-                    ""
+                    []
 
         after =
             case token.after of
                 Just a ->
-                    a
+                    if token.showTags then
+                        [ Html.text a ]
+                    else
+                        [ span [ styles [ display none ] ] [ Html.text a ] ]
 
                 Nothing ->
-                    ""
+                    []
     in
-        [ Html.text before ] ++ inner token.children ++ [ Html.text after ]
+        before ++ inner token.children ++ after
 
 
 inner : Children -> List (Html Msg)

@@ -7,6 +7,7 @@ type alias Model =
     { token : TokenType
     , before : Maybe String
     , after : Maybe String
+    , showTags : Bool
     , inner : Maybe String
     , children : Children
     }
@@ -74,7 +75,10 @@ wrap2 left right inside outside string =
                 |> List.map outside
                 |> filterEmptyTextTokens
     in
-        zip insides outsides
+        if String.startsWith left string then
+            zip insides outsides
+        else
+            zip outsides insides
 
 
 filterEmptyParagraphTokens : List Model -> List Model
@@ -98,7 +102,10 @@ filterEmptyTextTokens =
             if x.token == Text then
                 case x.inner of
                     Just inner ->
-                        True
+                        if String.length inner > 0 then
+                            True
+                        else
+                            False
 
                     Nothing ->
                         False
@@ -114,7 +121,7 @@ tokensFromChildren (Children tokens) =
 
 paragraph : String -> Model
 paragraph string =
-    Model Paragraph Nothing Nothing Nothing (Children (markdownToTokens string))
+    Model Paragraph Nothing Nothing False Nothing (Children (markdownToTokens string))
 
 
 speech : String -> Model
@@ -123,7 +130,7 @@ speech string =
         |> Regex.replace Regex.All (Regex.regex "“|”|\"") (\_ -> "")
         |> markdownToTokens
         |> Children
-        |> Model Speech (Just "“") (Just "”") Nothing
+        |> Model Speech (Just "“") (Just "”") True Nothing
 
 
 emphasis : String -> Model
@@ -132,12 +139,12 @@ emphasis string =
         |> Regex.replace Regex.All (Regex.regex "_") (\_ -> "")
         |> markdownToTokens
         |> Children
-        |> Model Emphasis Nothing Nothing Nothing
+        |> Model Emphasis (Just "_") (Just "_") False Nothing
 
 
 text : String -> Model
 text string =
-    Model Text Nothing Nothing (Just string) (Children [])
+    Model Text Nothing Nothing False (Just string) (Children [])
 
 
 zip : List Model -> List Model -> List Model
