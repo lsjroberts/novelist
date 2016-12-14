@@ -1,5 +1,13 @@
 {
   "scripts": {
-    "build:osx": "electron-packager . Novelist --platform=darwin --arch=x64 --version=1.4.11 --out=dist/",
+    "start": "npm run compile && npm run app",
+    "app": "electron ./app/electron",
+    "compile": "elm make ./src/Main.elm --output ./app/elm.js || true",
+    "build": "sudo rm -rf ./dist && npm run compile && electron-packager ./app Novelist --all --version=1.4.11 --out=./dist --prune=false",
+    "build:osx": "sudo rm -rf ./dist && npm run compile && electron-packager ./app Novelist --platform=darwin --arch=x64 --version=1.4.11 --out=./dist --prune=false"
   },
+  "dependencies": {
+    "electron": "^1.4.12",
+    "electron-packager": "^8.4.0"
+  }
 }
