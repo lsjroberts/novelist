@@ -58,6 +58,32 @@ showTags { token } =
             False
 
 
+openingTagMatches : Model -> Maybe (List String)
+openingTagMatches { token } =
+    case token of
+        Speech ->
+            Just [ "“", "\"" ]
+
+        Emphasis ->
+            Just [ "_" ]
+
+        _ ->
+            Nothing
+
+
+closingTagMatches : Model -> Maybe (List String)
+closingTagMatches { token } =
+    case token of
+        Speech ->
+            Just [ "”", "\"" ]
+
+        Emphasis ->
+            Just [ "_" ]
+
+        _ ->
+            Nothing
+
+
 value : Model -> Maybe String
 value { token } =
     case token of

@@ -30,7 +30,10 @@ markdownToTokens string =
 
 paragraph : String -> Model
 paragraph string =
-    Model Paragraph (Children (markdownToTokens string))
+    string
+        |> markdownToTokens
+        |> Children
+        |> Model Paragraph
 
 
 speech : String -> Model
