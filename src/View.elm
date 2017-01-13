@@ -18,8 +18,5 @@ root model =
             , fontFamilies [ "Avenir Next" ]
             ]
         ]
-        [ Scene.View.root model.scene |> Html.map SceneMsg ]
-
-
-
--- [ Welcome.View.root model.welcome |> Html.map WelcomeMsg ]
+        -- [ Scene.View.root model.scene |> Html.map SceneMsg ]
+        [ Welcome.View.root model.welcome |> Html.map WelcomeMsg ]

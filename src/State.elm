@@ -1,6 +1,5 @@
 module State exposing (init, update, subscriptions)
 
-import Platform.Cmd
 import Response exposing (..)
 import Types exposing (..)
 import Scene.State
@@ -29,10 +28,15 @@ update msg model =
                 |> mapModel (\x -> { model | scene = x })
                 |> mapCmd SceneMsg
 
-        _ ->
-            ( model, Cmd.none )
+        WelcomeMsg welcomeMsg ->
+            Welcome.State.update welcomeMsg model.welcome
+                |> mapModel (\x -> { model | welcome = x })
+                |> mapCmd WelcomeMsg
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Sub.batch
+        [ Sub.map WelcomeMsg (Welcome.State.subscriptions model.welcome)
+        , Sub.map SceneMsg (Scene.State.subscriptions model.scene)
+        ]
