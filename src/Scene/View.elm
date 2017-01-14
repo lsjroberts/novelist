@@ -37,7 +37,7 @@ nameView model =
         [ styles
             [ marginTop (px 0)
             , marginBottom (px 40)
-            , sceneFont
+              -- , sceneFont
             , fontWeight normal
             , fontSize (px 48)
             , textAlign center

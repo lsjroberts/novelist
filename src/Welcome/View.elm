@@ -4,7 +4,7 @@ import Color
 import Css exposing (..)
 import Html exposing (Html, div, h1, button)
 import Html.Attributes
-import Html.Events exposing (onClick, onMouseOver, onMouseOut)
+import Html.Events exposing (onClick)
 import Svg exposing (svg, line)
 import Svg.Attributes exposing (x1, x2, y1, y2, stroke, strokeWidth)
 import Animation
@@ -41,7 +41,8 @@ startButton model =
     Html.map InteractableMsg <|
         button
             (Interactable.View.attributes model.startButton
-                ++ [ startButtonStyles ]
+                ++ [ startButtonStyles
+                   ]
             )
             [ Html.text "Start writing your first story"
             , svg

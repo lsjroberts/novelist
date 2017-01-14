@@ -6,6 +6,8 @@ import Scene.State
 import Scene.Types
 import Welcome.State
 import Welcome.Types
+import Wizard.State
+import Wizard.Types
 
 
 init : ( Model, Cmd Msg )
@@ -16,8 +18,11 @@ init =
 
         ( welcome, _ ) =
             Welcome.State.init
+
+        ( wizard, _ ) =
+            Wizard.State.init
     in
-        ( Model scene welcome, Cmd.none )
+        ( Model scene welcome wizard, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -33,10 +38,16 @@ update msg model =
                 |> mapModel (\x -> { model | welcome = x })
                 |> mapCmd WelcomeMsg
 
+        WizardMsg wizardMsg ->
+            Wizard.State.update wizardMsg model.wizard
+                |> mapModel (\x -> { model | wizard = x })
+                |> mapCmd WizardMsg
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map WelcomeMsg (Welcome.State.subscriptions model.welcome)
-        , Sub.map SceneMsg (Scene.State.subscriptions model.scene)
+        [ Sub.map SceneMsg (Scene.State.subscriptions model.scene)
+        , Sub.map WelcomeMsg (Welcome.State.subscriptions model.welcome)
+        , Sub.map WizardMsg (Wizard.State.subscriptions model.wizard)
         ]

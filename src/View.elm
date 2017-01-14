@@ -7,6 +7,8 @@ import Scene.Types
 import Scene.View
 import Welcome.Types
 import Welcome.View
+import Wizard.Types
+import Wizard.View
 import Styles exposing (..)
 
 
@@ -15,8 +17,9 @@ root model =
     div
         [ styles
             [ padding (px 30)
-            , fontFamilies [ "Avenir Next" ]
+            , fontFamilies [ "Quicksand" ]
             ]
         ]
         -- [ Scene.View.root model.scene |> Html.map SceneMsg ]
-        [ Welcome.View.root model.welcome |> Html.map WelcomeMsg ]
+        -- [ Welcome.View.root model.welcome |> Html.map WelcomeMsg ]
+        [ Wizard.View.root model.wizard |> Html.map WizardMsg ]
