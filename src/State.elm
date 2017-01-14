@@ -43,6 +43,7 @@ update msg model =
             ( { model
                 | route = route
                 , nextRoute = Nothing
+                , routeTransition = resetRouteTransition model.routeTransition
               }
             , Cmd.none
             )
@@ -57,7 +58,7 @@ update msg model =
                         Nothing ->
                             WelcomeRoute
                 , nextRoute = Just route
-                , routeTransition = nextRouteAnimation model.routeTransition
+                , routeTransition = nextRouteTransition model.routeTransition
               }
             , Cmd.none
             )
@@ -80,7 +81,7 @@ update msg model =
         WizardMsg wizardMsg ->
             case wizardMsg of
                 Wizard.Types.StartScene ->
-                    update (ChangeRoute SceneRoute) model
+                    update (SetRoute SceneRoute) model
 
                 _ ->
                     Wizard.State.update wizardMsg model.wizard
@@ -97,18 +98,24 @@ update msg model =
                 )
 
 
-routeFromStyle =
+routeStyle =
     [ Animation.marginLeft (Animation.percent 0) ]
 
 
-routeToStyle =
+nextRouteStyle =
     [ Animation.marginLeft (Animation.percent -100) ]
 
 
-nextRouteAnimation =
+resetRouteTransition =
+    Animation.interrupt
+        [ Animation.set routeStyle
+        ]
+
+
+nextRouteTransition =
     Animation.queue
-        [ Animation.set routeFromStyle
-        , Animation.to routeToStyle
+        [ Animation.set routeStyle
+        , Animation.to nextRouteStyle
         ]
 
 

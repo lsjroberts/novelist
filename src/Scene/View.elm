@@ -37,7 +37,7 @@ nameView model =
         [ styles
             [ marginTop (px 0)
             , marginBottom (px 40)
-              -- , sceneFont
+              -- , fontFamilies [ "'Slabo 27px"]
             , fontWeight normal
             , fontSize (px 48)
             , textAlign center
@@ -55,6 +55,7 @@ contentView model =
                 [ styles
                     [ sceneFont
                     , fontSize (px 24)
+                    , outline none
                     ]
                 , contenteditable True
                 , spellcheck False
