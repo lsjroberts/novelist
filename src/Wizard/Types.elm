@@ -1,12 +1,12 @@
 module Wizard.Types exposing (..)
 
+import Dict exposing (Dict)
+
 
 type alias Model =
-    { title : String
-    , planningMethod : String
+    { fields : Dict String String
     }
 
 
 type Msg
-    = SetTitle String
-    | SetPlanningMethod String
+    = SetField String String

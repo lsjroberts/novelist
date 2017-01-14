@@ -1,12 +1,16 @@
 module Wizard.State exposing (init, update, subscriptions)
 
+import Dict
 import Wizard.Types exposing (..)
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { title = "Pride and Prejudice"
-      , planningMethod = "Story Grid"
+    ( { fields =
+            Dict.fromList
+                [ ( "title", "Pride And Prejudice" )
+                , ( "planningMethod", "Story Grid" )
+                ]
       }
     , Cmd.none
     )
@@ -15,11 +19,8 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        SetTitle title ->
-            ( { model | title = title }, Cmd.none )
-
-        SetPlanningMethod method ->
-            ( { model | planningMethod = method }, Cmd.none )
+        SetField field value ->
+            ( { model | fields = Dict.insert field value model.fields }, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg

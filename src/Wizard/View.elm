@@ -1,9 +1,10 @@
 module Wizard.View exposing (root)
 
 import Css exposing (..)
+import Dict
 import Html exposing (Html, div, span, h1, label, input)
 import Html.Attributes
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 import Styles exposing (styles)
 import Wizard.Types exposing (..)
 
@@ -15,7 +16,7 @@ root model =
             [ displayFlex
               -- , flex3 0 1 auto
             , flexDirection column
-              -- , alignItems center
+            , alignItems center
             ]
         ]
         [ h1
@@ -28,16 +29,26 @@ root model =
                 ]
             ]
             [ Html.text "Novelist" ]
-        , formInput "What is your story called?" (textInput model.title)
+        , formInput "What is your story called?" (textInput (SetField "title") (getField "title" model.fields))
         , formInput "How do you like to plan?"
-            (choiceInput (SetPlanningMethod)
+            (choiceInput (SetField "planningMethod")
                 [ "Story Grid"
                 , "Snowflake"
                 , "I don't need a plan!"
                 ]
-                model.planningMethod
+                (getField "planningMethod" model.fields)
             )
+        , formInput "What name are you writing under?" (textInput (SetField "author") (getField "author" model.fields))
         ]
+
+
+getField key fields =
+    case Dict.get key fields of
+        Just value ->
+            value
+
+        Nothing ->
+            ""
 
 
 formInput labelText child =
@@ -57,13 +68,15 @@ formInput labelText child =
         ]
 
 
-textInput value =
+textInput msg value =
     input
         [ Html.Attributes.value value
+        , onInput msg
         , styles
             [ display block
             , marginTop (em 0.5)
-            , border (px 0)
+            , padding2 (em 0.1) (em 0.3)
+            , border3 (px 1) solid (hex "eee")
             , outline none
             , width (pct 100)
             , fontFamilies [ "Quicksand" ]
@@ -82,6 +95,7 @@ radio msg value choice =
         [ styles
             [ display block
             , marginTop (px 8)
+            , cursor pointer
             ]
         , onClick (msg choice)
         ]
