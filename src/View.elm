@@ -1,5 +1,6 @@
 module View exposing (root)
 
+import Animation
 import Css exposing (..)
 import Html exposing (Html, div)
 import Types exposing (..)
@@ -18,22 +19,56 @@ root model =
         [ styles
             [ padding (px 30)
             , fontFamilies [ "Quicksand" ]
+            , overflowX hidden
             ]
         ]
-        [ activeView model ]
+        [ slidingView model ]
 
 
 activeView : Model -> Html Msg
 activeView model =
-    case model.router.route of
-        "welcome" ->
-            Welcome.View.root model.welcome |> Html.map WelcomeMsg
+    case model.route of
+        WelcomeRoute ->
+            welcomeView model
 
-        "wizard" ->
-            Wizard.View.root model.wizard |> Html.map WizardMsg
+        WizardRoute ->
+            wizardView model
 
-        "scene" ->
-            Scene.View.root model.scene |> Html.map SceneMsg
+        SceneRoute ->
+            sceneView model
 
-        _ ->
-            div [] [ Html.text "An error occurred, please restart Novelist" ]
+
+slidingView : Model -> Html Msg
+slidingView model =
+    let
+        page p =
+            div
+                [ styles
+                    [ display inlineBlock
+                    , verticalAlign top
+                    , width (pct 50)
+                    ]
+                ]
+                [ p ]
+    in
+        div
+            (Animation.render model.routeTransition
+                ++ [ styles
+                        [ width (pct 200) ]
+                   ]
+            )
+            [ welcomeView model |> page
+            , wizardView model |> page
+            ]
+
+
+welcomeView model =
+    Welcome.View.root model.welcome |> Html.map WelcomeMsg
+
+
+wizardView model =
+    Wizard.View.root model.wizard |> Html.map WizardMsg
+
+
+sceneView model =
+    Scene.View.root model.scene |> Html.map SceneMsg

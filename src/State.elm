@@ -1,7 +1,9 @@
 module State exposing (init, update, subscriptions)
 
-import Set
+import Animation
+import Animation.Messenger
 import Response exposing (..)
+import Set
 import Types exposing (..)
 import Scene.State
 import Scene.Types
@@ -14,9 +16,6 @@ import Wizard.Types
 init : ( Model, Cmd Msg )
 init =
     let
-        router =
-            Router "welcome" (Set.fromList [ "welcome", "wizard", "scene" ])
-
         ( scene, _ ) =
             Scene.State.init
 
@@ -26,18 +25,35 @@ init =
         ( wizard, _ ) =
             Wizard.State.init
     in
-        ( Model router scene welcome wizard, Cmd.none )
+        ( { route = WelcomeRoute
+          , nextRoute = Nothing
+          , routeTransition = (Animation.style [])
+          , scene = scene
+          , welcome = welcome
+          , wizard = wizard
+          }
+        , Cmd.none
+        )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         SetRoute route ->
-            let
-                router =
-                    model.router
-            in
-                ( { model | router = { router | route = route } }, Cmd.none )
+            ( { model
+                | route = route
+                , nextRoute = Nothing
+              }
+            , Cmd.none
+            )
+
+        ChangeRoute route ->
+            ( { model
+                | nextRoute = Just route
+                , routeTransition = nextRouteAnimation model.routeTransition
+              }
+            , Cmd.none
+            )
 
         SceneMsg sceneMsg ->
             Scene.State.update sceneMsg model.scene
@@ -47,7 +63,7 @@ update msg model =
         WelcomeMsg welcomeMsg ->
             case welcomeMsg of
                 Welcome.Types.StartWizard ->
-                    update (SetRoute "wizard") model
+                    update (ChangeRoute WizardRoute) model
 
                 _ ->
                     Welcome.State.update welcomeMsg model.welcome
@@ -59,11 +75,36 @@ update msg model =
                 |> mapModel (\x -> { model | wizard = x })
                 |> mapCmd WizardMsg
 
+        RouteTransition time ->
+            let
+                ( newAnimation, cmds ) =
+                    Animation.Messenger.update time model.routeTransition
+            in
+                ( { model | routeTransition = newAnimation }
+                , cmds
+                )
+
+
+routeFromStyle =
+    [ Animation.marginLeft (Animation.percent 0) ]
+
+
+routeToStyle =
+    [ Animation.marginLeft (Animation.percent -100) ]
+
+
+nextRouteAnimation =
+    Animation.interrupt
+        [ Animation.set routeFromStyle
+        , Animation.to routeToStyle
+        ]
+
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map SceneMsg (Scene.State.subscriptions model.scene)
+        [ Animation.subscription RouteTransition [ model.routeTransition ]
+        , Sub.map SceneMsg (Scene.State.subscriptions model.scene)
         , Sub.map WelcomeMsg (Welcome.State.subscriptions model.welcome)
         , Sub.map WizardMsg (Wizard.State.subscriptions model.wizard)
         ]

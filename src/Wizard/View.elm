@@ -22,9 +22,9 @@ root model =
         [ h1
             [ styles
                 [ marginBottom (px 62)
+                , fontFamilies [ "'Slabo 27px'" ]
                 , fontSize (px 48)
-                , fontWeight (int 400)
-                , letterSpacing (px 8)
+                , fontWeight (int 300)
                 , color (hex "333333")
                 ]
             ]

@@ -23,10 +23,6 @@ init =
                         { stiffness = 400
                         , damping = 23
                         }
-                    -- Animation.easing
-                    --     { duration = 100 * Time.millisecond
-                    --     , ease = \t -> t * (2 - t)
-                    --     }
                 }
       }
     , Cmd.none
