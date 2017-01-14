@@ -2,5 +2,6 @@
 index.html
 _old
 dist
+app/elm.js
 elm-stuff
 node_modules
