@@ -49,7 +49,14 @@ update msg model =
 
         ChangeRoute route ->
             ( { model
-                | nextRoute = Just route
+                | route =
+                    case model.nextRoute of
+                        Just r ->
+                            r
+
+                        Nothing ->
+                            WelcomeRoute
+                , nextRoute = Just route
                 , routeTransition = nextRouteAnimation model.routeTransition
               }
             , Cmd.none
@@ -71,9 +78,14 @@ update msg model =
                         |> mapCmd WelcomeMsg
 
         WizardMsg wizardMsg ->
-            Wizard.State.update wizardMsg model.wizard
-                |> mapModel (\x -> { model | wizard = x })
-                |> mapCmd WizardMsg
+            case wizardMsg of
+                Wizard.Types.StartScene ->
+                    update (ChangeRoute SceneRoute) model
+
+                _ ->
+                    Wizard.State.update wizardMsg model.wizard
+                        |> mapModel (\x -> { model | wizard = x })
+                        |> mapCmd WizardMsg
 
         RouteTransition time ->
             let
@@ -94,7 +106,7 @@ routeToStyle =
 
 
 nextRouteAnimation =
-    Animation.interrupt
+    Animation.queue
         [ Animation.set routeFromStyle
         , Animation.to routeToStyle
         ]

@@ -2,11 +2,12 @@ module Wizard.View exposing (root)
 
 import Css exposing (..)
 import Dict
-import Html exposing (Html, div, span, h1, label, input)
+import Html exposing (Html, div, span, h1, label, input, button)
 import Html.Attributes
 import Html.Events exposing (onClick, onInput)
 import Styles exposing (styles)
 import Wizard.Types exposing (..)
+import Interactable.View
 
 
 root : Model -> Html Msg
@@ -28,7 +29,7 @@ root model =
                 , color (hex "333333")
                 ]
             ]
-            [ Html.text "Novelist" ]
+            [ Html.text "Start Your Story" ]
         , formInput "What is your story called?" (textInput (SetField "title") (getField "title" model.fields))
         , formInput "How do you like to plan?"
             (choiceInput (SetField "planningMethod")
@@ -39,6 +40,7 @@ root model =
                 (getField "planningMethod" model.fields)
             )
         , formInput "What name are you writing under?" (textInput (SetField "author") (getField "author" model.fields))
+        , div [ onClick StartScene ] [ startButton model ]
         ]
 
 
@@ -127,4 +129,29 @@ radio msg value choice =
                 []
             )
         , span [ styles [ fontSize (em 1.4) ] ] [ Html.text choice ]
+        ]
+
+
+startButton model =
+    Html.map StartButtonInteraction <|
+        button
+            (Interactable.View.attributes model.startButton
+                ++ [ startButtonStyles
+                   ]
+            )
+            [ Html.text "Start"
+            ]
+
+
+startButtonStyles =
+    styles
+        [ padding2 (px 8) (px 18)
+        , outline none
+        , border (px 0)
+        , borderRadius (px 2)
+        , boxShadow4 (px 0) (px 2) (px 4) (rgba 0 0 0 0.5)
+        , cursor pointer
+        , fontSize (px 24)
+        , fontWeight (int 200)
+        , color (hex "ffffff")
         ]

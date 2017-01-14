@@ -2,7 +2,7 @@ module View exposing (root)
 
 import Animation
 import Css exposing (..)
-import Html exposing (Html, div)
+import Html exposing (Html, div, span)
 import Types exposing (..)
 import Scene.Types
 import Scene.View
@@ -27,15 +27,7 @@ root model =
 
 activeView : Model -> Html Msg
 activeView model =
-    case model.route of
-        WelcomeRoute ->
-            welcomeView model
-
-        WizardRoute ->
-            wizardView model
-
-        SceneRoute ->
-            sceneView model
+    view model.route model
 
 
 slidingView : Model -> Html Msg
@@ -57,9 +49,32 @@ slidingView model =
                         [ width (pct 200) ]
                    ]
             )
-            [ welcomeView model |> page
-            , wizardView model |> page
+            [ view model.route model |> page
+            , maybeView model.nextRoute model |> page
             ]
+
+
+view : Route -> Model -> Html Msg
+view route model =
+    case route of
+        WelcomeRoute ->
+            welcomeView model
+
+        WizardRoute ->
+            wizardView model
+
+        SceneRoute ->
+            sceneView model
+
+
+maybeView : Maybe Route -> Model -> Html Msg
+maybeView maybeRoute model =
+    case maybeRoute of
+        Just route ->
+            view route model
+
+        Nothing ->
+            span [] []
 
 
 welcomeView model =
