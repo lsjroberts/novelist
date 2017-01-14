@@ -13,3 +13,4 @@ type alias Model =
 
 type Msg
     = InteractableMsg Interactable.Types.Msg
+    | StartWizard

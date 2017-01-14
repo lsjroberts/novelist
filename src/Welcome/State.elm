@@ -36,6 +36,9 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        StartWizard ->
+            ( model, Cmd.none )
+
         InteractableMsg msgTypesInteractable ->
             Interactable.State.update msgTypesInteractable model.startButton
                 |> mapModel (\x -> { model | startButton = x })

@@ -33,7 +33,7 @@ root model =
                 ]
             ]
             [ Html.text "Novelist" ]
-        , startButton model
+        , div [ onClick StartWizard ] [ startButton model ]
         ]
 
 

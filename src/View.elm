@@ -20,6 +20,20 @@ root model =
             , fontFamilies [ "Quicksand" ]
             ]
         ]
-        -- [ Scene.View.root model.scene |> Html.map SceneMsg ]
-        -- [ Welcome.View.root model.welcome |> Html.map WelcomeMsg ]
-        [ Wizard.View.root model.wizard |> Html.map WizardMsg ]
+        [ activeView model ]
+
+
+activeView : Model -> Html Msg
+activeView model =
+    case model.router.route of
+        "welcome" ->
+            Welcome.View.root model.welcome |> Html.map WelcomeMsg
+
+        "wizard" ->
+            Wizard.View.root model.wizard |> Html.map WizardMsg
+
+        "scene" ->
+            Scene.View.root model.scene |> Html.map SceneMsg
+
+        _ ->
+            div [] [ Html.text "An error occurred, please restart Novelist" ]
