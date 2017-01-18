@@ -1,6 +1,8 @@
 'use strict';
 const { app, Menu, BrowserWindow } = require('electron');
 
+require('electron-debug')({ showDevTools: false });
+
 let mainWindow;
 
 
@@ -12,8 +14,9 @@ app.on('ready', createWindow);
 
 function createWindow() {
     mainWindow = new BrowserWindow({
-        width: 1024,
-        height: 768,
+        // width: 1024,
+        // height: 768,
+        frame: true,
     });
 
     Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));

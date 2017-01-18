@@ -7,7 +7,7 @@ import Mocks.Austen exposing (prideAndPrejudice)
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "Chapter 1"
+    ( Model "Chapter One"
         prideAndPrejudice
         0
         []

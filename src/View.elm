@@ -4,8 +4,9 @@ import Animation
 import Css exposing (..)
 import Html exposing (Html, div, span)
 import Types exposing (..)
-import Scene.Types
-import Scene.View
+import Frame.View
+import Story.Types
+import Story.View
 import Welcome.Types
 import Welcome.View
 import Wizard.Types
@@ -15,14 +16,16 @@ import Styles exposing (..)
 
 root : Model -> Html Msg
 root model =
-    div
-        [ styles
-            [ padding (px 30)
-            , fontFamilies [ "Quicksand" ]
-            , overflowX hidden
+    Frame.View.root <|
+        div
+            [ styles
+                [ fontFamilies [ "Quicksand" ]
+                , color (hex "#333333")
+                , overflow hidden
+                , height (pct 100)
+                ]
             ]
-        ]
-        [ slidingView model ]
+            [ slidingView model ]
 
 
 activeView : Model -> Html Msg
@@ -39,6 +42,7 @@ slidingView model =
                     [ display inlineBlock
                     , verticalAlign top
                     , width (pct 50)
+                    , height (pct 100)
                     ]
                 ]
                 [ p ]
@@ -46,7 +50,9 @@ slidingView model =
         div
             (Animation.render model.routeTransition
                 ++ [ styles
-                        [ width (pct 200) ]
+                        [ width (pct 200)
+                        , height (pct 100)
+                        ]
                    ]
             )
             [ view model.route model |> page
@@ -63,8 +69,8 @@ view route model =
         WizardRoute ->
             wizardView model
 
-        SceneRoute ->
-            sceneView model
+        StoryRoute storyRoute ->
+            storyView model
 
 
 maybeView : Maybe Route -> Model -> Html Msg
@@ -85,5 +91,5 @@ wizardView model =
     Wizard.View.root model.wizard |> Html.map WizardMsg
 
 
-sceneView model =
-    Scene.View.root model.scene |> Html.map SceneMsg
+storyView model =
+    Story.View.root model.story |> Html.map StoryMsg

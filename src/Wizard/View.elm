@@ -18,6 +18,7 @@ root model =
               -- , flex3 0 1 auto
             , flexDirection column
             , alignItems center
+            , padding (px 30)
             ]
         ]
         [ h1
@@ -40,7 +41,7 @@ root model =
                 (getField "planningMethod" model.fields)
             )
         , formInput "What name are you writing under?" (textInput (SetField "author") (getField "author" model.fields))
-        , div [ onClick StartScene ] [ startButton model ]
+        , div [ onClick StartStory ] [ startButton model ]
         ]
 
 

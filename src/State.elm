@@ -5,8 +5,8 @@ import Animation.Messenger
 import Response exposing (..)
 import Set
 import Types exposing (..)
-import Scene.State
-import Scene.Types
+import Story.State
+import Story.Types
 import Welcome.State
 import Welcome.Types
 import Wizard.State
@@ -16,8 +16,8 @@ import Wizard.Types
 init : ( Model, Cmd Msg )
 init =
     let
-        ( scene, _ ) =
-            Scene.State.init
+        ( story, _ ) =
+            Story.State.init
 
         ( welcome, _ ) =
             Welcome.State.init
@@ -25,10 +25,12 @@ init =
         ( wizard, _ ) =
             Wizard.State.init
     in
-        ( { route = WelcomeRoute
+        ( { route =
+                -- WelcomeRoute
+                StoryRoute (Story.Types.SceneRoute "Chapter 1")
           , nextRoute = Nothing
           , routeTransition = (Animation.style [])
-          , scene = scene
+          , story = story
           , welcome = welcome
           , wizard = wizard
           }
@@ -63,10 +65,10 @@ update msg model =
             , Cmd.none
             )
 
-        SceneMsg sceneMsg ->
-            Scene.State.update sceneMsg model.scene
-                |> mapModel (\x -> { model | scene = x })
-                |> mapCmd SceneMsg
+        StoryMsg storyMsg ->
+            Story.State.update storyMsg model.story
+                |> mapModel (\x -> { model | story = x })
+                |> mapCmd StoryMsg
 
         WelcomeMsg welcomeMsg ->
             case welcomeMsg of
@@ -80,8 +82,8 @@ update msg model =
 
         WizardMsg wizardMsg ->
             case wizardMsg of
-                Wizard.Types.StartScene ->
-                    update (SetRoute SceneRoute) model
+                Wizard.Types.StartStory ->
+                    update (SetRoute (StoryRoute (Story.Types.SceneRoute "Chapter 1"))) model
 
                 _ ->
                     Wizard.State.update wizardMsg model.wizard
@@ -123,7 +125,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Animation.subscription RouteTransition [ model.routeTransition ]
-        , Sub.map SceneMsg (Scene.State.subscriptions model.scene)
+        , Sub.map StoryMsg (Story.State.subscriptions model.story)
         , Sub.map WelcomeMsg (Welcome.State.subscriptions model.welcome)
         , Sub.map WizardMsg (Wizard.State.subscriptions model.wizard)
         ]

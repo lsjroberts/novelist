@@ -21,6 +21,7 @@ root model =
               -- , flex3 0 1 auto
             , flexDirection column
             , alignItems center
+            , padding (px 30)
             ]
         ]
         [ h1

@@ -39,7 +39,7 @@ update msg model =
         SetField field value ->
             ( { model | fields = Dict.insert field value model.fields }, Cmd.none )
 
-        StartScene ->
+        StartStory ->
             ( model, Cmd.none )
 
         StartButtonInteraction msgTypesInteractable ->

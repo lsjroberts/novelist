@@ -9,7 +9,7 @@ init =
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update action model =
+update msg model =
     ( model, Cmd.none )
 
 

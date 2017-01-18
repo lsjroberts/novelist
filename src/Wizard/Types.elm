@@ -13,4 +13,4 @@ type alias Model =
 type Msg
     = SetField String String
     | StartButtonInteraction Interactable.Types.Msg
-    | StartScene
+    | StartStory

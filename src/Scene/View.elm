@@ -14,13 +14,7 @@ import Token.View
 
 root : Model -> Html Msg
 root model =
-    div
-        [ styles
-            [ margin2 (px 0) auto
-            , width (pct 80)
-            , maxWidth (em 44)
-            ]
-        ]
+    div [ styles [ height (pct 100) ] ]
         [ nameView model
         , contentView model
         , Html.text ""
@@ -35,11 +29,11 @@ nameView : Model -> Html Msg
 nameView model =
     h1
         [ styles
-            [ marginTop (px 0)
-            , marginBottom (px 40)
+            [ marginTop (em 0)
+            , marginBottom (em 1)
               -- , fontFamilies [ "'Slabo 27px"]
             , fontWeight normal
-            , fontSize (px 48)
+            , fontSize (em 3)
             , textAlign center
             ]
         ]
@@ -49,12 +43,14 @@ nameView model =
 contentView : Model -> Html Msg
 contentView model =
     Html.Keyed.node "div"
-        []
+        [ styles [ height (pct 100) ] ]
         [ ( toString model.commit
           , article
                 [ styles
-                    [ sceneFont
-                    , fontSize (px 24)
+                    [ height (pct 100)
+                    , sceneFont
+                    , fontSize (em 1.4)
+                    , property "line-height" "1.6"
                     , outline none
                     ]
                 , contenteditable True
