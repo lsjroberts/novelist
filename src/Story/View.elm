@@ -39,11 +39,10 @@ viewMenu : Html Msg
 viewMenu =
     div
         [ styles
-            [ -- property "background" "linear-gradient(top, #f2f2f2 0%, )"
-              backgroundColor (hex "f2f2f2")
-            , height (px 100)
+            [ height (px 100)
             , borderTop3 (px 1) solid (hex "999796")
             , borderBottom3 (px 1) solid (hex "999796")
+            , backgroundColor (hex "f2f2f2")
             ]
         ]
         [ Html.text "menu" ]
@@ -53,14 +52,16 @@ viewManuscript : Html Msg
 viewManuscript =
     div
         [ styles
-            [ backgroundColor (hex "f5f5f5")
-            , padding (px 32)
-            , position fixed
+            [ position fixed
             , top (px 0)
             , left (px 0)
+            , padding (px 32)
             , width (pct 20)
             , height (pct 100)
             , overflowY scroll
+              -- , backgroundColor (hex "f5f5f5")
+            , backgroundColor (hex "e2e7e9")
+            , color (hex "48809e")
             ]
         ]
         [ h1
@@ -122,6 +123,9 @@ viewScene scene =
             , overflowY scroll
               -- , boxShadow5 (px 0) (px 3) (px 2) (px 2) (rgba 0 0 0 0.1)
             , overflow scroll
+            , backgroundColor (hex "e8ebed")
+              -- , color (hex "6197b3")
+            , color (hex "04202e")
             ]
         ]
         [ div

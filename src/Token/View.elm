@@ -42,7 +42,11 @@ speech : Token.Types.Model -> Html Msg
 speech token =
     token
         |> wrap
-        |> span [ styles [ backgroundColor (rgba 0 189 156 0.2) ] ]
+        |> span
+            [ styles
+                -- [ backgroundColor (rgba 0 189 156 0.2) ]
+                [ color (hex "48809e") ]
+            ]
 
 
 emphasis : Token.Types.Model -> Html Msg

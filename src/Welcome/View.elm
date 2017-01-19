@@ -47,9 +47,28 @@ startButton model =
             )
             [ Html.text "Start writing your first story"
             , svg
-                [ Svg.Attributes.width "17", Svg.Attributes.height "32", styles [ verticalAlign middle, marginLeft (px 28) ] ]
-                [ line [ x1 "0", y1 "0", x2 "17", y2 "16.5", strokeWidth "2", stroke "white" ] []
-                , line [ x1 "0", y1 "32", x2 "17", y2 "15.5", strokeWidth "2", stroke "white" ] []
+                [ Svg.Attributes.width "17"
+                , Svg.Attributes.height "32"
+                , styles [ verticalAlign middle, marginLeft (px 28) ]
+                ]
+                [ line
+                    [ x1 "0"
+                    , y1 "0"
+                    , x2 "17"
+                    , y2 "16.5"
+                    , strokeWidth "2"
+                    , stroke "white"
+                    ]
+                    []
+                , line
+                    [ x1 "0"
+                    , y1 "32"
+                    , x2 "17"
+                    , y2 "15.5"
+                    , strokeWidth "2"
+                    , stroke "white"
+                    ]
+                    []
                 ]
             ]
 
