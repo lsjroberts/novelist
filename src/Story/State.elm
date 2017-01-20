@@ -8,10 +8,27 @@ import Scene.State
 init : ( Model, Cmd Msg )
 init =
     let
-        ( scene, _ ) =
-            Scene.State.init
+        sceneOne =
+            Scene.State.named "Prologue"
+
+        scenes =
+            [ Scene.State.namedWithChildren "Fellowship of the Ring"
+                [ "Prologue"
+                , "Chapter One"
+                , "Chapter Two"
+                , "Chapter Three"
+                ]
+            , Scene.State.namedWithChildren "The Two Towers"
+                [ "Chapter Four"
+                , "Chapter Five"
+                ]
+            , Scene.State.namedWithChildren "Return of the King"
+                [ "Chapter Six"
+                , "Chapter Seven"
+                ]
+            ]
     in
-        ( Model scene [ scene ], Cmd.none )
+        ( Model sceneOne scenes, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

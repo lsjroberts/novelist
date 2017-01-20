@@ -1,4 +1,4 @@
-module Scene.State exposing (init, update, subscriptions)
+module Scene.State exposing (init, named, namedWithChildren, update, subscriptions)
 
 import Scene.Types exposing (..)
 import Token.Factories exposing (markdownToTokens)
@@ -15,6 +15,20 @@ init =
         False
     , Cmd.none
     )
+
+
+named : String -> Model
+named name =
+    Model name [] 0 [] (Children []) False
+
+
+namedWithChildren : String -> List String -> Model
+namedWithChildren name childrenNames =
+    let
+        cs =
+            List.map named childrenNames
+    in
+        Model name [] 0 [] (Children cs) False
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

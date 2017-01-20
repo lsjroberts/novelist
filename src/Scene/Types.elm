@@ -22,3 +22,17 @@ type Msg
     | StartWriting
     | Write String
     | TokenMsg Token.Types.Msg
+
+
+children : Model -> List Model
+children model =
+    let
+        get (Children cs) =
+            cs
+    in
+        get model.children
+
+
+hasChildren : Model -> Bool
+hasChildren model =
+    List.length (children model) > 0

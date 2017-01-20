@@ -17,18 +17,7 @@ root model =
             [ styles
                 [ height (pct 100) ]
             ]
-            -- [ styles
-            --     [ displayFlex
-            --     , flexDirection row
-            --     , alignItems stretch
-            --     , property "align-content" "space-between"
-            --     , property "justify-content" "space-between"
-            --       -- , property "height" "calc(100% - 100px)"
-            --     , height (pct 100)
-            --       -- , backgroundColor (hex "c7ccd6")
-            --     ]
-            -- ]
-            [ viewManuscript
+            [ viewManuscript model
             , viewScene model.scene
             , viewInspector model.scene
             ]
@@ -48,8 +37,8 @@ viewMenu =
         [ Html.text "menu" ]
 
 
-viewManuscript : Html Msg
-viewManuscript =
+viewManuscript : Model -> Html Msg
+viewManuscript model =
     div
         [ styles
             [ position fixed
@@ -72,23 +61,8 @@ viewManuscript =
                 ]
             ]
             [ Html.text "Manuscript" ]
-        , div []
-            [ manuscriptFolder "Part One"
-                [ "Prologue"
-                , "Chapter One"
-                , "Chapter Two"
-                , "Chapter Three"
-                , "Chapter Four"
-                , "Chapter Five"
-                , "Chapter Six"
-                ]
-            , manuscriptFolder "Part Two" []
-            , manuscriptFolder "Part Three"
-                [ "Chapter Sixteen"
-                , "Chapter Seventeen"
-                , "Chapter Eighteen"
-                ]
-            ]
+        , div [] <|
+            List.map manuscriptScene model.scenes
         ]
 
 
@@ -138,20 +112,42 @@ viewScene scene =
         ]
 
 
-manuscriptFolder : String -> List String -> Html Msg
-manuscriptFolder label children =
-    div [ styles [ marginBottom (em 1), fontSize (px 14) ] ] <|
-        [ div [ styles [ padding2 (em 0.5) (em 0) ] ]
-            [ icon [ styles [ paddingRight (em 0.8) ] ] 14 "file-directory"
-            , Html.text label
+manuscriptScene : Scene.Types.Model -> Html Msg
+manuscriptScene scene =
+    if Scene.Types.hasChildren scene then
+        manuscriptFolder scene
+    else
+        manuscriptFile scene
+
+
+manuscriptFolder : Scene.Types.Model -> Html Msg
+manuscriptFolder scene =
+    div
+        [ styles
+            [ marginBottom (em 1)
+            , fontSize (px 14)
             ]
         ]
-            ++ (children |> List.map manuscriptFile)
+    <|
+        [ div
+            [ styles
+                [ padding2 (em 0.5) (em 0)
+                , cursor pointer
+                ]
+            ]
+            [ icon [ styles [ paddingRight (em 0.8) ] ] 14 "file-directory"
+            , Html.text scene.name
+            ]
+        ]
+            ++ (scene
+                    |> Scene.Types.children
+                    |> List.map manuscriptScene
+               )
 
 
-manuscriptFile : String -> Html Msg
-manuscriptFile label =
+manuscriptFile : Scene.Types.Model -> Html Msg
+manuscriptFile scene =
     div [ styles [ padding4 (em 0.5) (em 0) (em 0.5) (em 1) ] ]
         [ icon [ styles [ paddingRight (em 0.8) ] ] 14 "file"
-        , Html.text label
+        , Html.text scene.name
         ]
