@@ -1,8 +1,12 @@
 module View exposing (root)
 
 import Animation
-import Css exposing (..)
 import Html exposing (Html, div, span)
+import Style exposing (all)
+import StyleSheet.Types exposing (Class(..))
+import StyleSheet.Blue exposing (stylesheet)
+import Css exposing (..)
+import Styles exposing (styles)
 import Types exposing (..)
 import Frame.View
 import Story.Types
@@ -11,21 +15,21 @@ import Welcome.Types
 import Welcome.View
 import Wizard.Types
 import Wizard.View
-import Styles exposing (..)
+
+
+{ class, classList } =
+    StyleSheet.Blue.stylesheet
 
 
 root : Model -> Html Msg
 root model =
-    Frame.View.root <|
-        div
-            [ styles
-                [ fontFamilies [ "Quicksand" ]
-                , color (hex "#333333")
-                , overflow hidden
-                , height (pct 100)
-                ]
-            ]
-            [ slidingView model ]
+    -- Frame.View.root <|
+    div
+        []
+        [ Style.embed StyleSheet.Blue.stylesheet
+        , class Base
+        , slidingView model
+        ]
 
 
 activeView : Model -> Html Msg
