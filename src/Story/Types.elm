@@ -4,8 +4,7 @@ import Scene.Types
 
 
 type alias Model =
-    { scene : Scene.Types.Model
-    , scenes : List Scene.Types.Model
+    { scenes : List Scene.Types.Model
     }
 
 

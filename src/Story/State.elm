@@ -8,9 +8,6 @@ import Scene.State
 init : ( Model, Cmd Msg )
 init =
     let
-        sceneOne =
-            Scene.State.named "Prologue"
-
         scenes =
             [ Scene.State.namedWithChildren "Fellowship of the Ring"
                 [ "Prologue"
@@ -28,16 +25,12 @@ init =
                 ]
             ]
     in
-        ( Model sceneOne scenes, Cmd.none )
+        ( Model scenes, Cmd.none )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        SceneMsg sceneMsg ->
-            Scene.State.update sceneMsg model.scene
-                |> mapModel (\x -> { model | scene = x })
-                |> mapCmd SceneMsg
+    ( model, Cmd.none )
 
 
 subscriptions : Model -> Sub Msg

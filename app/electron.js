@@ -1,32 +1,60 @@
 'use strict';
-const { app, Menu, BrowserWindow } = require('electron');
+
+const {
+    Menu,
+    BrowserWindow,
+    app,
+    dialog
+} = require('electron');
+const fs = require('fs-extra');
+const path = require('path');
 
 require('electron-debug')({ showDevTools: false });
 
-let mainWindow;
+let windows = [];
 
 
 
 // -- GLOBAL
 
+app.setName('Novelist');
 
-app.on('ready', createWindow);
+app.on('ready', ready);
 
-function createWindow() {
-    mainWindow = new BrowserWindow({
-        // width: 1024,
-        // height: 768,
+function ready() {
+    Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+    createWindow();
+}
+
+function createWindow(projectPath) {
+    let newWindowIndex = windows.length;
+
+    if (windows.length === 1 && windows[0].projectPath === undefined) {
+        newWindowIndex = 0;
+        windows[0].window.close();
+        windows = [];
+    }
+
+    const [width, height] = windows.length ? windows[newWindowIndex-1].getSize() : [800, 600];
+
+    let window = new BrowserWindow({
+        title: 'Novelist',
+        width,
+        height,
         frame: true,
     });
 
-    Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate));
+    windows.push({
+        projectPath,
+        window,
+    });
 
-    mainWindow.loadURL(`file://${__dirname}/index.html`);
+    window.loadURL(`file://${__dirname}/index.html?projectPath=${projectPath}`);
 
-    // mainWindow.webContents.openDevTools();
+    window.webContents.openDevTools();
 
-    mainWindow.on('closed', () => {
-        mainWindow = null;
+    window.on('closed', () => {
+        window = null;
     });
 }
 
@@ -56,7 +84,23 @@ const menuTemplate = [
     {
         label: 'File',
         submenu: [
-            { label: 'New Story', click() { console.log('File.New Story'); } },
+            {
+                label: 'New Story',
+                accelerator: 'CmdOrCtrl+Shift+N',
+                click() { console.log('File.New Story'); }
+            },
+            {
+                label: 'New Scene',
+                accelerator: 'CmdOrCtrl+N',
+                click() { console.log('File.New Scene'); }
+            },
+            {
+                label: 'Open Story...',
+                accelerator: 'CmdOrCtrl+O',
+                click() {
+                    showOpenDialog();
+                }
+            },
         ],
     },
 ];
@@ -77,5 +121,30 @@ if (process.platform === 'darwin') {
                 },
             },
         ],
+    });
+}
+
+
+// -- Actions
+
+function showOpenDialog() {
+    dialog.showOpenDialog({
+        properties: ['openFile'],
+        filters: [{
+            name: 'Novelist Projects',
+            extensions: ['novl'],
+        }]
+    }, (files) => {
+        if (files === undefined) {
+
+        }
+
+        if (Array.isArray(files) && files.length === 1) {
+            const projectDir = files[0];
+            const projectName = path.basename(projectDir, '.novl');
+            const metaPath = path.join(projectDir, `${projectName}.novj`);
+
+            createWindow(metaPath);
+        }
     });
 }

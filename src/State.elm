@@ -5,8 +5,8 @@ import Animation.Messenger
 import Response exposing (..)
 import Set
 import Types exposing (..)
-import Story.State
-import Story.Types
+import Editor.State
+import Editor.Types
 import Welcome.State
 import Welcome.Types
 import Wizard.State
@@ -16,23 +16,21 @@ import Wizard.Types
 init : ( Model, Cmd Msg )
 init =
     let
-        ( story, _ ) =
-            Story.State.init
-
         ( welcome, _ ) =
             Welcome.State.init
 
         ( wizard, _ ) =
             Wizard.State.init
+
+        ( editor, _ ) =
+            Editor.State.init
     in
-        ( { route =
-                -- WelcomeRoute
-                StoryRoute (Story.Types.SceneRoute "Chapter 1")
+        ( { route = WelcomeRoute
           , nextRoute = Nothing
           , routeTransition = (Animation.style [])
-          , story = story
           , welcome = welcome
           , wizard = wizard
+          , editor = editor
           }
         , Cmd.none
         )
@@ -65,11 +63,6 @@ update msg model =
             , Cmd.none
             )
 
-        StoryMsg storyMsg ->
-            Story.State.update storyMsg model.story
-                |> mapModel (\x -> { model | story = x })
-                |> mapCmd StoryMsg
-
         WelcomeMsg welcomeMsg ->
             case welcomeMsg of
                 Welcome.Types.StartWizard ->
@@ -81,14 +74,25 @@ update msg model =
                         |> mapCmd WelcomeMsg
 
         WizardMsg wizardMsg ->
-            case wizardMsg of
-                Wizard.Types.StartStory ->
-                    update (SetRoute (StoryRoute (Story.Types.SceneRoute "Chapter 1"))) model
+            Wizard.State.update wizardMsg model.wizard
+                |> mapModel (\x -> { model | wizard = x })
+                |> mapCmd WizardMsg
+
+        EditorMsg editorMsg ->
+            case editorMsg of
+                Editor.Types.OpenProject metaData ->
+                    update (SetRoute EditorRoute)
+                        (let
+                            ( editor, _ ) =
+                                Editor.State.update editorMsg model.editor
+                         in
+                            { model | editor = editor }
+                        )
 
                 _ ->
-                    Wizard.State.update wizardMsg model.wizard
-                        |> mapModel (\x -> { model | wizard = x })
-                        |> mapCmd WizardMsg
+                    Editor.State.update editorMsg model.editor
+                        |> mapModel (\x -> { model | editor = x })
+                        |> mapCmd EditorMsg
 
         RouteTransition time ->
             let
@@ -125,7 +129,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Animation.subscription RouteTransition [ model.routeTransition ]
-        , Sub.map StoryMsg (Story.State.subscriptions model.story)
         , Sub.map WelcomeMsg (Welcome.State.subscriptions model.welcome)
         , Sub.map WizardMsg (Wizard.State.subscriptions model.wizard)
+        , Sub.map EditorMsg (Editor.State.subscriptions model.editor)
         ]

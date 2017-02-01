@@ -5,6 +5,8 @@ import Css exposing (..)
 import Html exposing (Html, div, span)
 import Types exposing (..)
 import Frame.View
+import Editor.Types
+import Editor.View
 import Story.Types
 import Story.View
 import Welcome.Types
@@ -69,8 +71,14 @@ view route model =
         WizardRoute ->
             wizardView model
 
-        StoryRoute storyRoute ->
-            storyView model
+        EditorRoute ->
+            editorView model
+
+
+
+--
+-- StoryRoute storyRoute ->
+--     storyView model
 
 
 maybeView : Maybe Route -> Model -> Html Msg
@@ -91,5 +99,10 @@ wizardView model =
     Wizard.View.root model.wizard |> Html.map WizardMsg
 
 
-storyView model =
-    Story.View.root model.story |> Html.map StoryMsg
+editorView model =
+    Editor.View.root model.editor |> Html.map EditorMsg
+
+
+
+-- storyView model =
+--     Story.View.root model.story |> Html.map StoryMsg
