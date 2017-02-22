@@ -4,3 +4,4 @@ dist
 app/elm.js
 elm-stuff
 node_modules
+*.log*

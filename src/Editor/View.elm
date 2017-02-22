@@ -2,7 +2,7 @@ module Editor.View exposing (root)
 
 import Css exposing (..)
 import Styles exposing (styles)
-import Html exposing (Html, div)
+import Html exposing (Html, div, h1)
 import Html.Events exposing (onClick)
 import Editor.Types exposing (..)
 
@@ -58,3 +58,30 @@ tabBar model =
 --             ]
 --         ]
 --         [ Html.text openFileId ]
+
+
+viewManuscript : Model -> Html Msg
+viewManuscript model =
+    div
+        [ styles
+            [ position fixed
+            , top (px 0)
+            , left (px 0)
+            , padding (px 32)
+            , width (pct 20)
+            , height (pct 100)
+            , overflowY scroll
+              -- , backgroundColor (hex "f5f5f5")
+            , backgroundColor (hex "e2e7e9")
+            , color (hex "48809e")
+            ]
+        ]
+        [ h1
+            [ styles
+                [ marginBottom (em 1)
+                , fontSize (px 18)
+                , fontWeight (int 400)
+                ]
+            ]
+            [ Html.text "Manuscript" ]
+        ]

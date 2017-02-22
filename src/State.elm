@@ -25,7 +25,7 @@ init =
         ( editor, _ ) =
             Editor.State.init
     in
-        ( { route = WelcomeRoute
+        ( { route = EditorRoute
           , nextRoute = Nothing
           , routeTransition = (Animation.style [])
           , welcome = welcome
