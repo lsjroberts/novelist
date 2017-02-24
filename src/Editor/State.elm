@@ -4,7 +4,6 @@ import Json.Encode
 import Json.Decode
 import Editor.Types exposing (..)
 import Editor.Decode
-import Scene.State
 import Debug
 
 

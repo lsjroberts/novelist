@@ -5,6 +5,11 @@ import Styles exposing (styles)
 import Html exposing (Html, div, h1)
 import Html.Events exposing (onClick)
 import Editor.Types exposing (..)
+import Menu.View
+import Binder.View
+import Inspector.View
+import Panel.View
+import Workspace.View
 
 
 root : Model -> Html Msg
@@ -12,76 +17,38 @@ root model =
     div [ styles [ height (pct 100) ] ]
         [ div
             [ styles
-                [ height (pct 100) ]
-            ]
-            [ header model
-              --tabBar model
-            ]
-        ]
-
-
-header : Model -> Html Msg
-header model =
-    let
-        name =
-            div [] [ Html.text model.name ]
-
-        author =
-            div [ styles [ textAlign right ] ] [ Html.text model.author ]
-    in
-        div
-            [ styles [ displayFlex, property "justify-content" "space-between" ] ]
-            [ name, author ]
-
-
-tabBar : Model -> Html Msg
-tabBar model =
-    div
-        [ styles
-            [ displayFlex
-            ]
-        ]
-        []
-
-
-
--- <|
--- List.map (tab model.files) model.open
--- tab : List File -> FileId -> Html Msg
--- tab files openFileId =
---     div
---         [ styles
---             [ padding2 (em 1.4) (em 1)
---             , backgroundColor (hex "e2e7e9")
---             , fontSize (em 0.8)
---             , color (hex "48809e")
---             ]
---         ]
---         [ Html.text openFileId ]
-
-
-viewManuscript : Model -> Html Msg
-viewManuscript model =
-    div
-        [ styles
-            [ position fixed
-            , top (px 0)
-            , left (px 0)
-            , padding (px 32)
-            , width (pct 20)
-            , height (pct 100)
-            , overflowY scroll
-              -- , backgroundColor (hex "f5f5f5")
-            , backgroundColor (hex "e2e7e9")
-            , color (hex "48809e")
-            ]
-        ]
-        [ h1
-            [ styles
-                [ marginBottom (em 1)
-                , fontSize (px 18)
-                , fontWeight (int 400)
+                [ height (pct 100)
                 ]
             ]
-            [ Html.text "Manuscript" ]
+            [ Menu.View.root
+            , div
+                [ styles
+                    [ displayFlex
+                    , property "justify-content" "space-between"
+                    , height (pct 100)
+                    ]
+                ]
+                [ binderPanel
+                , Workspace.View.root
+                , inspectorPanel
+                ]
+            ]
         ]
+
+
+binderPanel : Html msg
+binderPanel =
+    div
+        [ styles
+            [ width (pct 20) ]
+        ]
+        [ Panel.View.root [ Binder.View.root ] ]
+
+
+inspectorPanel : Html msg
+inspectorPanel =
+    div
+        [ styles
+            [ width (pct 20) ]
+        ]
+        [ Panel.View.root [ Inspector.View.root ] ]

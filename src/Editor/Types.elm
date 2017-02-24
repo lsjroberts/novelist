@@ -1,7 +1,6 @@
 module Editor.Types exposing (..)
 
 import Json.Encode
-import Scene.Types
 
 
 type alias Model =

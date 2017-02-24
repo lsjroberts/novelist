@@ -1,26 +1,59 @@
 # Novelist
 
-A writer's integrated story-telling environment
+The writer's story-telling environment.
 
 
 ## State
 
 ```
-welcome
-wizard
-editor
-    open
-    active
-    project
-        name
-        manuscript
-            scenes
-                tokens
-        plan ( StoryGrid | Snowflake | Free )
-        notes
-            files
-                files
+app : Novelist
+    editor : Editor
+
+Editor
+    project : Project
+
+Project
+    name : String
+    path : String
+    manuscript : Manuscript
+    notes : Notes
+    plans : List ( StoryGrid | Snowflake | Free )
+    history : List Actions
 ```
+
+
+## Views
+
+```
+Frame
+    Editor
+        Menu
+        Panel
+            Binder
+                Manuscript
+                Plan
+                Notes
+                Characters
+                Locations
+        Workspace
+            Header
+                Title
+                Author
+            Scene
+                Heading
+                Content
+        Panel
+            Scene Meta
+                Characters
+                Locations
+                Plan
+        Footer
+            Statistics
+            Targets
+```
+
+
+## Project File
 
 ```
 project.nvl/
