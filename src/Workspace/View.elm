@@ -4,7 +4,7 @@ import Css exposing (..)
 import Html exposing (Html, div)
 import Styles exposing (..)
 import Workspace.Header.View
-import Workspace.Scene.View
+import Scene.View
 
 
 root : Html msg
@@ -16,5 +16,5 @@ root =
             ]
         ]
         [ Workspace.Header.View.root
-        , Workspace.Scene.View.root
+        , Scene.View.root
         ]

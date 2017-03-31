@@ -7,6 +7,7 @@ import Html.Events exposing (onClick)
 import Editor.Types exposing (..)
 import Menu.View
 import Binder.View
+import Binder.Types
 import Inspector.View
 import Panel.View
 import Workspace.View
@@ -42,7 +43,15 @@ binderPanel =
         [ styles
             [ width (pct 20) ]
         ]
-        [ Panel.View.root [ Binder.View.root ] ]
+        [ Panel.View.root
+            [ Binder.View.root
+                [ (Binder.Types.File "Manuscript" (Binder.Types.FileChildren [ Binder.Types.File "Chapter" (Binder.Types.FileChildren []) ]))
+                , (Binder.Types.File "Notes" (Binder.Types.FileChildren []))
+                , (Binder.Types.File "Characters" (Binder.Types.FileChildren []))
+                , (Binder.Types.File "Locations" (Binder.Types.FileChildren []))
+                ]
+            ]
+        ]
 
 
 inspectorPanel : Html msg

@@ -1,26 +1,29 @@
 module Binder.View exposing (root)
 
 import Css exposing (..)
-import Html exposing (Html, div, h2)
+import Html exposing (Html, div, h2, h3)
 import Styles exposing (..)
+import Binder.Types exposing (..)
 
 
-root : Html msg
-root =
+root : List File -> Html msg
+root folders =
+    div [ styles [ height (pct 100) ] ] <|
+        List.map viewFolder folders
+
+
+viewFolder : File -> Html msg
+viewFolder folder =
+    div [ styles [ marginBottom (em 1) ] ] <|
+        [ h2 [] [ Html.text folder.name ] ]
+            ++ (List.map viewFile (fileChildren folder))
+
+
+viewFile : File -> Html msg
+viewFile file =
     div
         [ styles
-            [ height (pct 100) ]
+            [ padding (em 1)
+            ]
         ]
-        [ folder "Manuscript" []
-        , folder "Plans" []
-        , folder "Notes" []
-        , folder "Characters" []
-        , folder "Locations" []
-        ]
-
-
-folder : String -> List String -> Html msg
-folder title files =
-    div [] <|
-        [ h2 [] [ Html.text title ] ]
-            ++ (List.map (\fs -> folder fs []) files)
+        [ h3 [] [ Html.text file.name ] ]

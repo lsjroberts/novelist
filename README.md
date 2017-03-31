@@ -19,6 +19,13 @@ Project
     notes : Notes
     plans : List ( StoryGrid | Snowflake | Free )
     history : List Actions
+
+Manuscript : List File
+
+File
+    name : String
+    path : String
+    children : FileChildren -- List File
 ```
 
 

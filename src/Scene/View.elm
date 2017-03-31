@@ -1,4 +1,4 @@
-module Workspace.Scene.View exposing (root)
+module Scene.View exposing (root)
 
 import Css exposing (..)
 import Html exposing (Html, div, h1)
