@@ -2,9 +2,10 @@ port module Editor.State exposing (init, update, subscriptions)
 
 import Json.Encode
 import Json.Decode
+import Debug
 import Editor.Types exposing (..)
 import Editor.Decode
-import Debug
+import Workspace.Types
 
 
 init : ( Model, Cmd Msg )
@@ -62,6 +63,9 @@ update msg model =
 
         OpenProject metaData ->
             ( Editor.Decode.decodeMetaData metaData, Cmd.none )
+
+        WorkspaceMsg _ ->
+            ( model, Cmd.none )
 
 
 port openProject : (String -> msg) -> Sub msg

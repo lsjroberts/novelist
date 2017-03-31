@@ -45,7 +45,7 @@ speech token =
         |> span
             [ styles
                 -- [ backgroundColor (rgba 0 189 156 0.2) ]
-                [ color (hex "48809e") ]
+                [ color (hex "86b3e9") ]
             ]
 
 

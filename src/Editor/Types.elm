@@ -1,6 +1,7 @@
 module Editor.Types exposing (..)
 
 import Json.Encode
+import Workspace.Types
 
 
 type alias Model =
@@ -42,3 +43,4 @@ type FileChildren
 type Msg
     = ShowOpenDialog
     | OpenProject String
+    | WorkspaceMsg Workspace.Types.Msg

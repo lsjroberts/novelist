@@ -1,12 +1,18 @@
 module Scene.View exposing (root)
 
 import Css exposing (..)
-import Html exposing (Html, div, h1)
+import Html exposing (Html, div, h1, article)
+import Html.Keyed
+import Html.Attributes exposing (contenteditable, spellcheck)
+import Html.Events exposing (on, onFocus)
 import Styles exposing (..)
+import Scene.Types exposing (..)
+import Token.Types
+import Token.View
 
 
-root : Html msg
-root =
+root : Model -> Html Msg
+root model =
     div
         [ styles
             [ paddingTop (px 72)
@@ -14,11 +20,11 @@ root =
             ]
         ]
         [ heading
-        , content
+        , content model
         ]
 
 
-heading : Html msg
+heading : Html Msg
 heading =
     h1
         [ styles
@@ -30,8 +36,8 @@ heading =
         [ Html.text "Heading" ]
 
 
-content : Html msg
-content =
+content : Model -> Html Msg
+content model =
     div
         [ styles
             [ maxWidth (em 31)
@@ -40,12 +46,24 @@ content =
             , lineHeight (num 1.4)
             ]
         ]
-        [ Html.text
-            ("Sed posuere consectetur est at lobortis. Praesent commodo"
-                ++ "cursus magna, vel scelerisque nisl consectetur et. Integer posuere"
-                ++ "erat a ante venenatis dapibus posuere velit aliquet. Integer"
-                ++ "posuere erat a ante venenatis dapibus posuere velit aliquet. Cras"
-                ++ "justo odio, dapibus ac facilisis in, egestas eget quam. Donec"
-                ++ "ullamcorper nulla non metus auctor fringilla. Praesent commodo"
-            )
+        [ contentEditor model ]
+
+
+contentEditor : Model -> Html Msg
+contentEditor model =
+    Html.Keyed.node "div"
+        [ styles [ height (pct 100) ] ]
+        [ ( toString model.commit
+          , article
+                [ styles
+                    [ height (pct 100)
+                    , outline none
+                    ]
+                , contenteditable True
+                , spellcheck False
+                  -- , onFocus StartWriting
+                  -- , on "blur" (Json.map Write childrenContentDecoder)
+                ]
+                (List.map (\x -> Html.map TokenMsg (Token.View.root x)) model.content)
+          )
         ]

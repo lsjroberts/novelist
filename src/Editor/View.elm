@@ -27,10 +27,13 @@ root model =
                     [ displayFlex
                     , property "justify-content" "space-between"
                     , height (pct 100)
+                      -- temp
+                    , backgroundColor (rgb 29 38 47)
+                    , color (rgb 213 233 255)
                     ]
                 ]
                 [ binderPanel
-                , Workspace.View.root
+                , Workspace.View.root |> Html.map WorkspaceMsg
                 , inspectorPanel
                 ]
             ]
