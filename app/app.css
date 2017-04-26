@@ -5,6 +5,18 @@
     height: 100%;
 }
 
+.binderRoot {
+    height: 100%;
+}
+
+.binderFolder {
+    margin-bottom: 1em;
+}
+
+.binderFile {
+    padding: 1em;
+}
+
 .editorRoot {
     height: 100%;
 }

@@ -1,20 +1,19 @@
 module Binder.View exposing (root)
 
-import Css exposing (..)
 import Html exposing (Html, div, h2, h3)
-import Styles exposing (..)
+import Binder.Styles exposing (class)
 import Binder.Types exposing (..)
 
 
 root : List File -> Html msg
 root folders =
-    div [ styles [ height (pct 100) ] ] <|
+    div [ class [ Binder.Styles.Root ] ] <|
         List.map viewFolder folders
 
 
 viewFolder : File -> Html msg
 viewFolder folder =
-    div [ styles [ marginBottom (em 1) ] ] <|
+    div [ class [ Binder.Styles.Folder ] ] <|
         [ h2 [] [ Html.text folder.name ] ]
             ++ (List.map viewFile (fileChildren folder))
 
@@ -22,8 +21,5 @@ viewFolder folder =
 viewFile : File -> Html msg
 viewFile file =
     div
-        [ styles
-            [ padding (em 1)
-            ]
-        ]
+        [ class [ Binder.Styles.File ] ]
         [ h3 [] [ Html.text file.name ] ]

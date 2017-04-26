@@ -2,6 +2,7 @@ port module Stylesheets exposing (..)
 
 import Css.File exposing (CssFileStructure, CssCompilerProgram)
 import Styles
+import Binder.Styles
 import Editor.Styles
 import Panel.Styles
 
@@ -15,6 +16,7 @@ fileStructure =
         [ ( "app.css"
           , Css.File.compile
                 [ Styles.css
+                , Binder.Styles.css
                 , Editor.Styles.css
                 , Panel.Styles.css
                 ]
