@@ -4,3 +4,21 @@
     overflow: hidden;
     height: 100%;
 }
+
+.editorRoot {
+    height: 100%;
+}
+
+.editorView {
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.editorBinder {
+    width: 20%;
+}
+
+.editorInspector {
+    width: 20%;
+}

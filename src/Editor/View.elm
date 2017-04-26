@@ -1,10 +1,9 @@
 module Editor.View exposing (root)
 
-import Css exposing (..)
-import Styles exposing (styles)
 import Html exposing (Html, div, h1)
 import Html.Events exposing (onClick)
 import Editor.Types exposing (..)
+import Editor.Styles exposing (class)
 import Menu.View
 import Binder.View
 import Binder.Types
@@ -15,27 +14,13 @@ import Workspace.View
 
 root : Model -> Html Msg
 root model =
-    div [ styles [ height (pct 100) ] ]
-        [ div
-            [ styles
-                [ height (pct 100)
-                ]
-            ]
-            [ Menu.View.root
-            , div
-                [ styles
-                    [ displayFlex
-                    , property "justify-content" "space-between"
-                    , height (pct 100)
-                      -- temp
-                    , backgroundColor (rgb 29 38 47)
-                    , color (rgb 213 233 255)
-                    ]
-                ]
-                [ binderPanel
-                , Workspace.View.root |> Html.map WorkspaceMsg
-                , inspectorPanel
-                ]
+    div [ class [ Editor.Styles.Root ] ]
+        [ Menu.View.root
+        , div
+            [ class [ Editor.Styles.View ] ]
+            [ binderPanel
+            , Workspace.View.root |> Html.map WorkspaceMsg
+            , inspectorPanel
             ]
         ]
 
@@ -43,9 +28,7 @@ root model =
 binderPanel : Html msg
 binderPanel =
     div
-        [ styles
-            [ width (pct 20) ]
-        ]
+        [ class [ Editor.Styles.Binder ] ]
         [ Panel.View.root
             [ Binder.View.root
                 [ (Binder.Types.File "Manuscript" (Binder.Types.FileChildren [ Binder.Types.File "Chapter" (Binder.Types.FileChildren []) ]))
@@ -60,7 +43,5 @@ binderPanel =
 inspectorPanel : Html msg
 inspectorPanel =
     div
-        [ styles
-            [ width (pct 20) ]
-        ]
+        [ class [ Editor.Styles.Inspector ] ]
         [ Panel.View.root [ Inspector.View.root ] ]
