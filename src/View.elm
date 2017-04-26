@@ -1,28 +1,18 @@
 module View exposing (root)
 
 import Animation
-import Css exposing (..)
 import Html exposing (Html, div, span)
 import Types exposing (..)
 import Frame.View
 import Editor.Types
 import Editor.View
-import Styles exposing (..)
+import Styles exposing (class)
 
 
 root : Model -> Html Msg
 root model =
     Frame.View.root <|
-        div
-            [ styles
-                [ fontFamilies [ "Quicksand" ]
-                , color (hex "#333333")
-                , overflow hidden
-                , height (pct 100)
-                ]
-            ]
-            [ activeView model
-            ]
+        div [ class [ Styles.Root ] ] [ activeView model ]
 
 
 activeView : Model -> Html Msg

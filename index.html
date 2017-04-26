@@ -2,57 +2,8 @@
 <html style="height: 100%">
     <head>
         <title>Novelist</title>
-        <style>
-            /* http://meyerweb.com/eric/tools/css/reset/
-            v2.0 | 20110126
-            License: none (public domain)
-            */
-
-            html, body, div, span, applet, object, iframe,
-            h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-            a, abbr, acronym, address, big, cite, code,
-            del, dfn, em, img, ins, kbd, q, s, samp,
-            small, strike, strong, sub, sup, tt, var,
-            b, u, i, center,
-            dl, dt, dd, ol, ul, li,
-            fieldset, form, label, legend,
-            table, caption, tbody, tfoot, thead, tr, th, td,
-            article, aside, canvas, details, embed,
-            figure, figcaption, footer, header, hgroup,
-            menu, nav, output, ruby, section, summary,
-            time, mark, audio, video {
-                margin: 0;
-                padding: 0;
-                border: 0;
-                font-size: 100%;
-                font: inherit;
-                vertical-align: baseline;
-                box-sizing: border-box;
-            }
-            /* HTML5 display-role reset for older browsers */
-            article, aside, details, figcaption, figure,
-            footer, header, hgroup, menu, nav, section {
-                display: block;
-            }
-            body {
-                line-height: 1;
-            }
-            ol, ul {
-                list-style: none;
-            }
-            blockquote, q {
-                quotes: none;
-            }
-            blockquote:before, blockquote:after,
-            q:before, q:after {
-                content: '';
-                content: none;
-            }
-            table {
-                border-collapse: collapse;
-                border-spacing: 0;
-            }
-        </style>
+        <link rel="stylesheet" href="./app/reset.css">
+        <link rel="stylesheet" href="./app/app.css">
         <link rel="stylesheet" href="./node_modules/octicons/build/octicons.css" media="screen" title="no title">
     </head>
     <body style="height: 100%">
@@ -232,7 +183,7 @@
         <symbol viewBox="0 0 12 16" id="watch"><path fill-rule="evenodd" d="M6 8h2v1H5V5h1v3zm6 0c0 2.22-1.2 4.16-3 5.19V15c0 .55-.45 1-1 1H4c-.55 0-1-.45-1-1v-1.81C1.2 12.16 0 10.22 0 8s1.2-4.16 3-5.19V1c0-.55.45-1 1-1h4c.55 0 1 .45 1 1v1.81c1.8 1.03 3 2.97 3 5.19zm-1 0c0-2.77-2.23-5-5-5S1 5.23 1 8s2.23 5 5 5 5-2.23 5-5z"/></symbol>
         <symbol viewBox="0 0 12 16" id="x"><path fill-rule="evenodd" d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"/></symbol>
         <symbol viewBox="0 0 10 16" id="zap"><path fill-rule="evenodd" d="M10 7H6l3-7-9 9h4l-3 7z"/></symbol>
-</svg>
+        </svg>
         <div id="container" style="height: 100%" />
     </body>
     <script src="./app/elm.js"></script>
