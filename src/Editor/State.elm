@@ -10,46 +10,9 @@ import Workspace.Types
 
 init : ( Model, Cmd Msg )
 init =
-    -- Editor.Decode.decodeMetaData mockMetaData
     ( Editor.Types.empty
     , Cmd.none
     )
-
-
-mockMetaData =
-    """
-    {
-        "name": "The Adventures of Sherlock Holmes",
-        "author": "Sir Arthur Conan Doyle",
-        "manuscript": [
-            {
-                "path": "31e49e1",
-                "children": []
-            },
-            {
-                "path": "bcef7a0",
-                "children": []
-            }
-        ],
-        "plan": [],
-        "notes": [],
-        "open": [],
-        "active": null
-    }
-    """
-
-
-
--- ( { name = "A Scribe of Sol"
---   , author = "Laurence Roberts"
---   , manuscript = []
---   , plan = []
---   , notes = []
---   , open = []
---   , active = Nothing
---   }
--- , Cmd.none
--- )
 
 
 port showOpenDialog : () -> Cmd msg
@@ -64,7 +27,7 @@ update msg model =
         OpenProject metaData ->
             ( Editor.Decode.decodeMetaData metaData, Cmd.none )
 
-        WorkspaceMsg _ ->
+        WorkspaceMsg (Workspace.Types.SceneMsg msg) ->
             ( model, Cmd.none )
 
 

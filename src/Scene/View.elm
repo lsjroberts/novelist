@@ -1,12 +1,14 @@
 module Scene.View exposing (root)
 
 import Css exposing (..)
+import Json.Decode as Json
 import Html exposing (Html, div, h1, article)
 import Html.Keyed
 import Html.Attributes exposing (contenteditable, spellcheck)
 import Html.Events exposing (on, onFocus)
 import Styles exposing (..)
 import Scene.Types exposing (..)
+import Scene.Decoders exposing (..)
 import Token.Types
 import Token.View
 
@@ -61,8 +63,8 @@ contentEditor model =
                     ]
                 , contenteditable True
                 , spellcheck False
-                  -- , onFocus StartWriting
-                  -- , on "blur" (Json.map Write childrenContentDecoder)
+                , onFocus StartWriting
+                , on "blur" (Json.map Write childrenContentDecoder)
                 ]
                 (List.map (\x -> Html.map TokenMsg (Token.View.root x)) model.content)
           )

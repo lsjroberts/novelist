@@ -7,6 +7,11 @@ import Mocks.Austen exposing (prideAndPrejudice)
 
 init : ( Model, Cmd Msg )
 init =
+    ( initNamed "New Scene", Cmd.none )
+
+
+initMock : ( Model, Cmd Msg )
+initMock =
     ( Model "Chapter One"
         prideAndPrejudice
         0
