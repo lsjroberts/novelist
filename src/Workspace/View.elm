@@ -1,10 +1,9 @@
 module Workspace.View exposing (root)
 
-import Css exposing (..)
 import Html exposing (Html, div)
-import Styles exposing (..)
 import Workspace.Types exposing (..)
 import Workspace.Header.View
+import Workspace.Styles exposing (class)
 import Scene.State
 import Scene.View
 
@@ -16,11 +15,7 @@ root =
             Scene.State.init
     in
         div
-            [ styles
-                [ width (pct 60)
-                , padding (px 34)
-                ]
-            ]
+            [ class [ Workspace.Styles.Root ] ]
             [ Workspace.Header.View.root
             , Scene.View.root scene |> Html.map SceneMsg
             ]

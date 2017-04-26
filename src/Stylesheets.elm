@@ -6,6 +6,7 @@ import Binder.Styles
 import Editor.Styles
 import Inspector.Styles
 import Panel.Styles
+import Workspace.Styles
 
 
 port files : CssFileStructure -> Cmd msg
@@ -21,6 +22,7 @@ fileStructure =
                 , Editor.Styles.css
                 , Inspector.Styles.css
                 , Panel.Styles.css
+                , Workspace.Styles.css
                 ]
           )
         ]

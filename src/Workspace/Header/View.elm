@@ -1,18 +1,13 @@
 module Workspace.Header.View exposing (root)
 
-import Css exposing (..)
 import Html exposing (Html, div)
-import Styles exposing (..)
+import Workspace.Styles exposing (class)
 
 
 root : Html msg
 root =
     div
-        [ styles
-            [ displayFlex
-            , property "justify-content" "space-between"
-            ]
-        ]
+        [ class [ Workspace.Styles.Header ] ]
         [ div [] [ Html.text "Title" ]
-        , div [ styles [ textAlign right ] ] [ Html.text "Author" ]
+        , div [ class [ Workspace.Styles.HeaderAuthor ] ] [ Html.text "Author" ]
         ]

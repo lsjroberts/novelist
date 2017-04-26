@@ -44,3 +44,17 @@
     height: 100%;
     padding: 34px;
 }
+
+.workspaceRoot {
+    width: 60%;
+    padding: 34px;
+}
+
+.workspaceHeader {
+    display: flex;
+    justify-content: space-between;
+}
+
+.workspaceHeaderAuthor {
+    text-align: right;
+}
