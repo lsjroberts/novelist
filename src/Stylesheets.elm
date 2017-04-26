@@ -4,6 +4,7 @@ import Css.File exposing (CssFileStructure, CssCompilerProgram)
 import Styles
 import Binder.Styles
 import Editor.Styles
+import Inspector.Styles
 import Panel.Styles
 
 
@@ -18,6 +19,7 @@ fileStructure =
                 [ Styles.css
                 , Binder.Styles.css
                 , Editor.Styles.css
+                , Inspector.Styles.css
                 , Panel.Styles.css
                 ]
           )

@@ -1,14 +1,11 @@
 module Inspector.View exposing (root)
 
-import Css exposing (..)
 import Html exposing (Html, div)
-import Styles exposing (..)
+import Inspector.Styles exposing (class)
 
 
 root : Html msg
 root =
     div
-        [ styles
-            [ height (pct 100) ]
-        ]
+        [ class [ Inspector.Styles.Root ] ]
         []
