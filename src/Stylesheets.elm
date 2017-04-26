@@ -3,6 +3,7 @@ port module Stylesheets exposing (..)
 import Css.File exposing (CssFileStructure, CssCompilerProgram)
 import Styles
 import Editor.Styles
+import Panel.Styles
 
 
 port files : CssFileStructure -> Cmd msg
@@ -15,6 +16,7 @@ fileStructure =
           , Css.File.compile
                 [ Styles.css
                 , Editor.Styles.css
+                , Panel.Styles.css
                 ]
           )
         ]

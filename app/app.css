@@ -22,3 +22,9 @@
 .editorInspector {
     width: 20%;
 }
+
+.panelRoot {
+    background-color: rgba(245, 245, 245, 1);
+    height: 100%;
+    padding: 34px;
+}

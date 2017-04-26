@@ -27,9 +27,5 @@ css =
         ]
 
 
-fixHeight =
-    [ height (pct 100) ]
-
-
 { id, class, classList } =
     Html.CssHelpers.withNamespace "editor"
