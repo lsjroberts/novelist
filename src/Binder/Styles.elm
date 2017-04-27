@@ -8,14 +8,16 @@ import Html.CssHelpers
 type CssClasses
     = Root
     | Folder
+    | FolderName
     | File
+    | Nested
 
 
 css =
     (stylesheet << namespace "binder")
-        [ Css.class Root [ height (pct 100) ]
-        , Css.class Folder [ marginBottom (em 1) ]
-        , Css.class File [ padding (em 1) ]
+        [ Css.class Root [ height (pct 100), lineHeight (int 2) ]
+        , Css.class File []
+        , Css.class Nested [ marginBottom (em 1), paddingLeft (em 1) ]
         ]
 
 

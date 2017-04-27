@@ -1,6 +1,7 @@
 module View exposing (root)
 
 import Animation
+import Debug
 import Html exposing (Html, div, span)
 import Types exposing (..)
 import Frame.View
@@ -12,7 +13,7 @@ import Styles exposing (class)
 root : Model -> Html Msg
 root model =
     Frame.View.root <|
-        div [ class [ Styles.Root ] ] [ activeView model ]
+        div [ class [ Styles.Root ] ] [ activeView (Debug.log "model" model) ]
 
 
 activeView : Model -> Html Msg

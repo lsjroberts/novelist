@@ -2,6 +2,7 @@ module State exposing (init, update, subscriptions)
 
 import Animation
 import Animation.Messenger
+import Debug
 import Response exposing (..)
 import Set
 import Types exposing (..)
@@ -24,7 +25,7 @@ init =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
+    case (Debug.log "msg" msg) of
         SetRoute route ->
             ( { model | route = route }
             , Cmd.none

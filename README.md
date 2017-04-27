@@ -65,20 +65,20 @@ Frame
 ```
 project.nvl/
     .git/
-    project.nvlj
+    project.json
         {
             "name": "Project",
-            "manuscript": {
-                "sha10001": {
-                    "sha10003.txt": true,
-                },
-                "sha10002.txt": true,
-            },
+            "author": "Author",
+            "files": [
+                {
+                    id: "sha10001",
+                    parent: null,
+                    fileType: "scene",
+                    name: "Chapter One"
+                }
+            ],
         }
-    manuscript/
-        sha10001.txt
-        sha10002.txt
-        sha10003.txt
-    plan/
-    notes/
+    sha10001.txt
+    sha10002.txt
+    sha10003.txt
 ```

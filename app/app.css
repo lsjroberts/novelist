@@ -7,14 +7,12 @@
 
 .binderRoot {
     height: 100%;
+    line-height: 2;
 }
 
-.binderFolder {
+.binderNested {
     margin-bottom: 1em;
-}
-
-.binderFile {
-    padding: 1em;
+    padding-left: 1em;
 }
 
 .editorRoot {

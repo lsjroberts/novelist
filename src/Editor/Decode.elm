@@ -6,13 +6,16 @@ import Json.Decode
     exposing
         ( Decoder
         , decodeString
+        , andThen
+        , succeed
         , string
+        , int
         , list
         , nullable
         , lazy
         , map
-        , map2
-        , map7
+        , map4
+        , map6
         , field
         )
 import Editor.Types exposing (..)
@@ -28,32 +31,44 @@ decodeMetaData payload =
             Debug.crash message ()
 
 
-fileChildren : Decoder FileChildren
-fileChildren =
-    -- This definition must be above `metaData`
-    -- @see https://github.com/elm-lang/elm-compiler/issues/1560
-    lazy <| \_ -> map FileChildren (list file)
+
+-- fileChildren : Decoder FileChildren
+-- fileChildren =
+--     -- This definition must be above `metaData`
+--     -- @see https://github.com/elm-lang/elm-compiler/issues/1560
+--     lazy <| \_ -> map FileChildren (list file)
 
 
 metaData : Decoder Model
 metaData =
-    map7 Model
+    map6 Model
         (field "name" string)
         (field "author" string)
-        (field "manuscript" (list file))
-        (field "plan" (list file))
-        (field "notes" (list file))
+        (field "files" (list file))
         (field "open" (list file))
-        (field "active" (nullable filePath))
+        (field "active" (nullable int))
+        (field "lastFileId" int)
 
 
 file : Decoder File
 file =
-    map2 File
-        (field "path" filePath)
-        (field "children" fileChildren)
+    map4 File
+        (field "id" int)
+        (field "fileType" fileType)
+        (field "parentId" int)
+        (field "name" string)
 
 
-filePath : Decoder FilePath
-filePath =
-    string
+fileType : Decoder FileType
+fileType =
+    string |> andThen stringToFileType
+
+
+stringToFileType : String -> Decoder FileType
+stringToFileType ft =
+    case ft of
+        "scene" ->
+            succeed Scene
+
+        _ ->
+            succeed None

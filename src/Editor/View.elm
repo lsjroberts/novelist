@@ -18,26 +18,41 @@ root model =
         [ Menu.View.root
         , div
             [ class [ Editor.Styles.View ] ]
-            [ binderPanel
-            , Workspace.View.root |> Html.map WorkspaceMsg
+            [ binderPanel model
+            , workspace model
             , inspectorPanel
             ]
         ]
 
 
-binderPanel : Html msg
-binderPanel =
+binderPanel : Model -> Html Msg
+binderPanel model =
     div
         [ class [ Editor.Styles.Binder ] ]
         [ Panel.View.root
-            [ Binder.View.root
-                [ (Binder.Types.File "Manuscript" (Binder.Types.FileChildren [ Binder.Types.File "Chapter" (Binder.Types.FileChildren []) ]))
-                , (Binder.Types.File "Notes" (Binder.Types.FileChildren []))
-                , (Binder.Types.File "Characters" (Binder.Types.FileChildren []))
-                , (Binder.Types.File "Locations" (Binder.Types.FileChildren []))
-                ]
-            ]
+            [ Binder.View.root model.files |> Html.map BinderMsg ]
         ]
+
+
+workspace : Model -> Html Msg
+workspace model =
+    let
+        activeFile =
+            case model.active of
+                Just activePath ->
+                    model.files
+                        |> List.filter (\file -> file.id == activePath)
+                        |> List.head
+
+                Nothing ->
+                    Nothing
+    in
+        case activeFile of
+            Just file ->
+                Workspace.View.root file |> Html.map WorkspaceMsg
+
+            Nothing ->
+                div [] []
 
 
 inspectorPanel : Html msg

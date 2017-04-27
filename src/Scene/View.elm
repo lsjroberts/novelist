@@ -21,13 +21,13 @@ root model =
             , fontFamilies [ "Cochin" ]
             ]
         ]
-        [ heading
+        [ heading model
         , content model
         ]
 
 
-heading : Html Msg
-heading =
+heading : Model -> Html Msg
+heading model =
     h1
         [ styles
             [ marginBottom (em 1)
@@ -35,7 +35,7 @@ heading =
             , textAlign center
             ]
         ]
-        [ Html.text "Heading" ]
+        [ Html.text model.name ]
 
 
 content : Model -> Html Msg
