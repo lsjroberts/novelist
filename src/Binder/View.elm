@@ -37,9 +37,7 @@ viewFile files file =
                 [ viewAddFile file.id "Add"
                 ]
     in
-        div
-            []
-        <|
+        div [] <|
             [ h2
                 [ class [ Binder.Styles.File ]
                 , onClick

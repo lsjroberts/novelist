@@ -19,10 +19,10 @@ empty =
     { name = "Title"
     , author = "Author"
     , files =
-        [ File 0 None -1 "Manuscript"
-        , File 1 None -1 "Notes"
-        , File 2 None -1 "Characters"
-        , File 3 None -1 "Locations"
+        [ File 0 (Folder Manuscript) -1 "Manuscript"
+        , File 1 (Folder Notes) -1 "Notes"
+        , File 2 (Folder Characters) -1 "Characters"
+        , File 3 (Folder Locations) -1 "Locations"
         , File 4 Scene 0 "Chapter One"
         ]
     , open = []
@@ -36,11 +36,18 @@ type alias FilePath =
 
 
 type FileType
-    = None
+    = Folder FolderType
     | Scene
     | Note
     | Character
     | Location
+
+
+type FolderType
+    = Manuscript
+    | Notes
+    | Characters
+    | Locations
 
 
 type alias File =

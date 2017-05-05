@@ -71,4 +71,4 @@ stringToFileType ft =
             succeed Scene
 
         _ ->
-            succeed None
+            succeed Scene
