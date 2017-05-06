@@ -15,10 +15,12 @@ styles =
 type CssClasses
     = Root
     | Binder
-    | BinderIcon
+    | BinderDirectory
+    | BinderDirectoryIcon
+    | BinderEntries
     | BinderFile
-    | BinderFolder
-    | BinderFolderExpanded
+    | BinderHeader
+    | BinderIcon
     | BinderWrapper
     | Editor
     | EditorWrapper
@@ -42,17 +44,25 @@ css =
             ]
         , Css.class Binder
             [ height (pct 100), lineHeight (int 2) ]
-        , Css.class BinderIcon
+        , Css.class BinderDirectory
+            [ paddingLeft (em 1.05) ]
+        , Css.class BinderDirectoryIcon
             [ display inlineBlock
-            , width (em 1)
+            , marginRight (em 0.25)
+            , marginLeft (em -1.05)
+            , width (em 0.8)
             , verticalAlign middle
+            , textAlign center
             ]
+        , Css.class BinderEntries []
         , Css.class BinderFile
-            [ marginBottom (em 1), paddingLeft (em 1) ]
-        , Css.class BinderFolder
-            [ marginBottom (em 1), paddingLeft (em 1) ]
-        , Css.class BinderFolderExpanded
-            [ marginBottom (em 1), paddingLeft (em 1) ]
+            [ paddingLeft (em 1.05) ]
+        , Css.class BinderHeader []
+        , Css.class BinderIcon
+            [ marginRight (em 0.5)
+            , verticalAlign middle
+            , textAlign center
+            ]
         , Css.class BinderWrapper
             [ width (pct 20) ]
         , Css.class Editor

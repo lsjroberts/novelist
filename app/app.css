@@ -10,25 +10,27 @@
     line-height: 2;
 }
 
-.BinderIcon {
+.BinderDirectory {
+    padding-left: 1.05em;
+}
+
+.BinderDirectoryIcon {
     display: inline-block;
-    width: 1em;
+    margin-right: 0.25em;
+    margin-left: -1.05em;
+    width: 0.8em;
     vertical-align: middle;
+    text-align: center;
 }
 
 .BinderFile {
-    margin-bottom: 1em;
-    padding-left: 1em;
+    padding-left: 1.05em;
 }
 
-.BinderFolder {
-    margin-bottom: 1em;
-    padding-left: 1em;
-}
-
-.BinderFolderExpanded {
-    margin-bottom: 1em;
-    padding-left: 1em;
+.BinderIcon {
+    margin-right: 0.5em;
+    vertical-align: middle;
+    text-align: center;
 }
 
 .BinderWrapper {

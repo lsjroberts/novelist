@@ -131,6 +131,8 @@ mock =
                 [ File 0 Nothing SceneFile "Chapter One" False
                 , File 1 (Just 0) SceneFile "Scene One" False
                 , File 2 Nothing SceneFile "Chapter Two" False
+                , File 3 (Just 0) SceneFile "Scene Two" False
+                , File 4 (Just 0) SceneFile "Scene Three" False
                 ]
             , editingName = Nothing
             }
@@ -143,6 +145,8 @@ mock =
             [ Scene 0 Nothing "Chapter One" []
             , Scene 1 (Just 1) "Scene One" []
             , Scene 2 Nothing "Chapter Two" []
+            , Scene 3 Nothing "Scene Two" []
+            , Scene 4 Nothing "Scene Three" []
             ]
         }
 
@@ -257,28 +261,45 @@ viewBinderFile allFiles file =
             else
                 []
 
-        ( classes, icon ) =
+        onClickMsg =
+            if hasChildren then
+                ToggleFileExpanded file.id
+            else
+                SetActiveFile file.id
+
+        wrapperClass =
+            if hasChildren then
+                [ Styles.BinderDirectory ]
+            else
+                [ Styles.BinderFile ]
+
+        itemClass =
+            if hasChildren then
+                [ Styles.BinderHeader ]
+            else
+                []
+
+        wrapperIcon =
             if hasChildren then
                 if file.expanded then
-                    ( [ Styles.BinderFolder, Styles.BinderFolderExpanded ]
-                    , Icon.defaultChevrondown
-                    )
+                    span [ class [ Styles.BinderDirectoryIcon ] ] [ Icon.defaultChevrondown ]
                 else
-                    ( [ Styles.BinderFolder ]
-                    , Icon.defaultChevronright
-                    )
+                    span [ class [ Styles.BinderDirectoryIcon ] ] [ Icon.defaultChevronright ]
             else
-                ( [ Styles.BinderFile ], Icon.defaultFile )
+                span [] []
+
+        itemIcon =
+            if hasChildren then
+                span [ class [ Styles.BinderIcon ] ] [ Icon.defaultFiledirectory ]
+            else
+                span [ class [ Styles.BinderIcon ] ] [ Icon.defaultFile ]
     in
-        h3
-            [ class classes
-            , onClick (ToggleFileExpanded file.id)
+        div [ class wrapperClass ] <|
+            [ h3
+                [ class itemClass, onClick onClickMsg ]
+                [ wrapperIcon, itemIcon, Html.text file.name ]
+            , div [ class [ Styles.BinderEntries ] ] nested
             ]
-        <|
-            [ span [ class [ Styles.BinderIcon ] ] [ icon ]
-            , Html.text file.name
-            ]
-                ++ nested
 
 
 viewWorkspace : Model -> Html Msg
@@ -365,15 +386,16 @@ viewPanel children =
 
 
 type Msg
-    = SetSceneName Int String
+    = SetActiveFile Int
+    | SetSceneName Int String
     | ToggleFileExpanded Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (Debug.log "msg" msg) of
-        ToggleFileExpanded id ->
-            ( model |> toggleFileExpanded id
+        SetActiveFile id ->
+            ( model |> setActiveFile (Just id)
             , Cmd.none
             )
 
@@ -384,10 +406,24 @@ update msg model =
             , Cmd.none
             )
 
+        ToggleFileExpanded id ->
+            ( model |> toggleFileExpanded id
+            , Cmd.none
+            )
+
 
 setUi : Ui -> Model -> Model
 setUi ui model =
     { model | ui = ui }
+
+
+setActiveFile : Maybe Int -> Model -> Model
+setActiveFile activeFile model =
+    let
+        ui =
+            model.ui
+    in
+        model |> setUi { ui | activeFile = activeFile }
 
 
 setBinder : Binder -> Model -> Model
