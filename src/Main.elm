@@ -13,8 +13,9 @@ import Html
         , input
         )
 import Html.Attributes exposing (value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import Styles exposing (class)
+import Octicons as Icon
 
 
 -- PROGRAM
@@ -42,12 +43,13 @@ type alias Model =
 type alias Ui =
     { binder : Binder
     , workspace : Workspace
+    , activeFile : Maybe Int
     }
 
 
 type alias Binder =
     { files : List File
-    , activeFile : Maybe Int
+    , editingName : Maybe Int
     }
 
 
@@ -60,6 +62,7 @@ type alias File =
     , parent : Maybe Int
     , type_ : FileType
     , name : String
+    , expanded : Bool
     }
 
 
@@ -109,11 +112,12 @@ empty =
     Model
         { binder =
             { files = []
-            , activeFile = Nothing
+            , editingName = Nothing
             }
         , workspace =
             { editingName = Nothing
             }
+        , activeFile = Nothing
         }
         { scenes = []
         }
@@ -124,15 +128,16 @@ mock =
     Model
         { binder =
             { files =
-                [ File 0 Nothing SceneFile "Chapter One"
-                , File 1 (Just 0) SceneFile "Scene One"
-                , File 2 Nothing SceneFile "Chapter Two"
+                [ File 0 Nothing SceneFile "Chapter One" False
+                , File 1 (Just 0) SceneFile "Scene One" False
+                , File 2 Nothing SceneFile "Chapter Two" False
                 ]
-            , activeFile = Just 0
+            , editingName = Nothing
             }
         , workspace =
             { editingName = Nothing
             }
+        , activeFile = Just 0
         }
         { scenes =
             [ Scene 0 Nothing "Chapter One" []
@@ -247,10 +252,31 @@ viewBinderFile allFiles file =
             not <| List.isEmpty children
 
         nested =
-            children |> List.map (viewBinderFile allFiles)
+            if file.expanded then
+                children |> List.map (viewBinderFile allFiles)
+            else
+                []
+
+        ( classes, icon ) =
+            if hasChildren then
+                if file.expanded then
+                    ( [ Styles.BinderFolder, Styles.BinderFolderExpanded ]
+                    , Icon.defaultChevrondown
+                    )
+                else
+                    ( [ Styles.BinderFolder ]
+                    , Icon.defaultChevronright
+                    )
+            else
+                ( [ Styles.BinderFile ], Icon.defaultFile )
     in
-        h3 [ class [ Styles.BinderFile ] ] <|
-            [ Html.text file.name
+        h3
+            [ class classes
+            , onClick (ToggleFileExpanded file.id)
+            ]
+        <|
+            [ span [ class [ Styles.BinderIcon ] ] [ icon ]
+            , Html.text file.name
             ]
                 ++ nested
 
@@ -276,7 +302,7 @@ viewWorkspaceFile : Model -> Html Msg
 viewWorkspaceFile model =
     let
         file =
-            case model.ui.binder.activeFile of
+            case model.ui.activeFile of
                 Just id ->
                     getFileById model.ui.binder.files id
 
@@ -340,6 +366,23 @@ viewPanel children =
 
 type Msg
     = SetSceneName Int String
+    | ToggleFileExpanded Int
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case (Debug.log "msg" msg) of
+        ToggleFileExpanded id ->
+            ( model |> toggleFileExpanded id
+            , Cmd.none
+            )
+
+        SetSceneName id name ->
+            ( model
+                |> setSceneName id name
+                |> setFileName id name
+            , Cmd.none
+            )
 
 
 setUi : Ui -> Model -> Model
@@ -384,6 +427,20 @@ setFileName id name model =
         case maybeFile of
             Just file ->
                 model |> setFile { file | name = name }
+
+            Nothing ->
+                model
+
+
+toggleFileExpanded : Int -> Model -> Model
+toggleFileExpanded id model =
+    let
+        maybeFile =
+            getFileById model.ui.binder.files id
+    in
+        case maybeFile of
+            Just file ->
+                model |> setFile { file | expanded = not file.expanded }
 
             Nothing ->
                 model
@@ -443,17 +500,6 @@ setSceneName id name model =
 
             Nothing ->
                 model
-
-
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-    case (Debug.log "msg" msg) of
-        SetSceneName id name ->
-            ( model
-                |> setSceneName id name
-                |> setFileName id name
-            , Cmd.none
-            )
 
 
 

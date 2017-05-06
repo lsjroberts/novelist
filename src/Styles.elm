@@ -15,7 +15,10 @@ styles =
 type CssClasses
     = Root
     | Binder
+    | BinderIcon
     | BinderFile
+    | BinderFolder
+    | BinderFolderExpanded
     | BinderWrapper
     | Editor
     | EditorWrapper
@@ -39,7 +42,16 @@ css =
             ]
         , Css.class Binder
             [ height (pct 100), lineHeight (int 2) ]
+        , Css.class BinderIcon
+            [ display inlineBlock
+            , width (em 1)
+            , verticalAlign middle
+            ]
         , Css.class BinderFile
+            [ marginBottom (em 1), paddingLeft (em 1) ]
+        , Css.class BinderFolder
+            [ marginBottom (em 1), paddingLeft (em 1) ]
+        , Css.class BinderFolderExpanded
             [ marginBottom (em 1), paddingLeft (em 1) ]
         , Css.class BinderWrapper
             [ width (pct 20) ]

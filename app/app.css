@@ -10,7 +10,23 @@
     line-height: 2;
 }
 
+.BinderIcon {
+    display: inline-block;
+    width: 1em;
+    vertical-align: middle;
+}
+
 .BinderFile {
+    margin-bottom: 1em;
+    padding-left: 1em;
+}
+
+.BinderFolder {
+    margin-bottom: 1em;
+    padding-left: 1em;
+}
+
+.BinderFolderExpanded {
     margin-bottom: 1em;
     padding-left: 1em;
 }

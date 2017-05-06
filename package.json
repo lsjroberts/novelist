@@ -18,8 +18,5 @@
         "fs-extra": "^2.0.0",
         "octicons": "^5.0.1",
         "url": "^0.11.0"
-    },
-    "devDependencies": {
-        "chokidar": "^1.6.1"
     }
 }
