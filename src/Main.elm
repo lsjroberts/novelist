@@ -143,10 +143,10 @@ mock =
         }
         { scenes =
             [ Scene 0 Nothing "Chapter One" []
-            , Scene 1 (Just 1) "Scene One" []
+            , Scene 1 (Just 0) "Scene One" []
             , Scene 2 Nothing "Chapter Two" []
-            , Scene 3 Nothing "Scene Two" []
-            , Scene 4 Nothing "Scene Three" []
+            , Scene 3 (Just 0) "Scene Two" []
+            , Scene 4 (Just 0) "Scene Three" []
             ]
         }
 
@@ -337,7 +337,7 @@ viewWorkspaceFile model =
             in
                 case scene of
                     Just s ->
-                        viewScene model.ui.workspace s
+                        viewScene model s
 
                     Nothing ->
                         div [] []
@@ -352,19 +352,42 @@ viewWorkspaceFile model =
                 div [] []
 
 
-viewScene : Workspace -> Scene -> Html Msg
-viewScene workspace scene =
-    div [ class [ Styles.Scene ] ] [ viewSceneHeading workspace scene ]
+viewScene : Model -> Scene -> Html Msg
+viewScene model scene =
+    div [ class [ Styles.Scene ] ] [ viewSceneHeading model scene ]
 
 
-viewSceneHeading : Workspace -> Scene -> Html Msg
-viewSceneHeading workspace scene =
-    input
-        [ class [ Styles.SceneHeading ]
-        , onInput (SetSceneName scene.id)
-        , value scene.name
+viewSceneHeading : Model -> Scene -> Html Msg
+viewSceneHeading model scene =
+    div []
+        [ viewSceneParentHeading model scene
+        , input
+            [ class [ Styles.SceneHeading ]
+            , onInput (SetSceneName scene.id)
+            , value scene.name
+            ]
+            []
         ]
-        []
+
+
+viewSceneParentHeading : Model -> Scene -> Html Msg
+viewSceneParentHeading model scene =
+    case scene.parent of
+        Just parentId ->
+            case (getSceneById model.novel.scenes parentId) of
+                Just parent ->
+                    input
+                        [ class [ Styles.SceneParentHeading ]
+                        , onInput (SetSceneName parent.id)
+                        , value parent.name
+                        ]
+                        []
+
+                Nothing ->
+                    div [] []
+
+        Nothing ->
+            div [] []
 
 
 viewInspector : Model -> Html Msg

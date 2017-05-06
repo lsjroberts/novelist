@@ -29,6 +29,7 @@ type CssClasses
     | Panel
     | Scene
     | SceneHeading
+    | SceneParentHeading
     | Workspace
     | WorkspaceHeader
     | WorkspaceHeaderAuthor
@@ -43,7 +44,7 @@ css =
             , height (pct 100)
             ]
         , Css.class Binder
-            [ height (pct 100), lineHeight (int 2) ]
+            [ height (pct 100), lineHeight (num 1.75) ]
         , Css.class BinderDirectory
             [ paddingLeft (em 1.05) ]
         , Css.class BinderDirectoryIcon
@@ -89,12 +90,24 @@ css =
             ]
         , Css.class SceneHeading
             [ marginBottom (em 1)
+            , padding (px 0)
             , border (px 0)
             , outline none
             , width (pct 100)
             , fontFamilies [ "Cochin" ]
             , fontSize (em 3)
             , textAlign center
+            ]
+        , Css.class SceneParentHeading
+            [ marginBottom (em 0.5)
+            , padding (px 0)
+            , border (px 0)
+            , outline none
+            , width (pct 100)
+            , fontFamilies [ "Cochin" ]
+            , fontSize (em 2)
+            , textAlign center
+            , color (hex "#666666")
             ]
         , Css.class Workspace
             [ width (pct 60)
