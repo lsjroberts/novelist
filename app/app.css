@@ -1,58 +1,71 @@
-.appRoot {
+.Root {
     font-family: Quicksand;
     color: #333333;
     overflow: hidden;
     height: 100%;
 }
 
-.binderRoot {
+.Binder {
     height: 100%;
     line-height: 2;
 }
 
-.binderNested {
+.BinderFile {
     margin-bottom: 1em;
     padding-left: 1em;
 }
 
-.editorRoot {
-    height: 100%;
+.BinderWrapper {
+    width: 20%;
 }
 
-.editorView {
+.Editor {
     display: flex;
     justify-content: space-between;
     height: 100%;
 }
 
-.editorBinder {
-    width: 20%;
-}
-
-.editorInspector {
-    width: 20%;
-}
-
-.inspectorRoot {
+.EditorWrapper {
     height: 100%;
 }
 
-.panelRoot {
+.Inspector {
+    width: 20%;
+}
+
+.Menu {
+    background-color: rgba(235, 235, 235, 1);
+    height: 38px;
+}
+
+.Panel {
     background-color: rgba(245, 245, 245, 1);
     height: 100%;
     padding: 34px;
 }
 
-.workspaceRoot {
+.Scene {
+    padding-top: 72px;
+    font-family: Cochin;
+}
+
+.SceneHeading {
+    margin-bottom: 1em;
+    font-size: 3em;
+    text-align: center;
+}
+
+.Workspace {
     width: 60%;
     padding: 34px;
 }
 
-.workspaceHeader {
+.WorkspaceHeader {
     display: flex;
     justify-content: space-between;
+    line-height: 2;
 }
 
-.workspaceHeaderAuthor {
+.WorkspaceHeaderAuthor {
     text-align: right;
 }
