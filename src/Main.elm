@@ -1,7 +1,19 @@
 module Main exposing (..)
 
 import Debug
-import Html exposing (Html, program, div, span, h1, h2, h3)
+import Html
+    exposing
+        ( Html
+        , program
+        , div
+        , span
+        , h1
+        , h2
+        , h3
+        , input
+        )
+import Html.Attributes exposing (value)
+import Html.Events exposing (onInput)
 import Styles exposing (class)
 
 
@@ -28,13 +40,19 @@ type alias Model =
 
 
 type alias Ui =
-    { binder : Binder }
+    { binder : Binder
+    , workspace : Workspace
+    }
 
 
 type alias Binder =
     { files : List File
     , activeFile : Maybe Int
     }
+
+
+type alias Workspace =
+    { editingName : Maybe Int }
 
 
 type alias File =
@@ -79,7 +97,7 @@ type TokenChildren
     = TokenChildren (List Token)
 
 
-init : ( Model, Cmd msg )
+init : ( Model, Cmd Msg )
 init =
     ( mock
     , Cmd.none
@@ -92,6 +110,9 @@ empty =
         { binder =
             { files = []
             , activeFile = Nothing
+            }
+        , workspace =
+            { editingName = Nothing
             }
         }
         { scenes = []
@@ -108,6 +129,9 @@ mock =
                 , File 2 Nothing SceneFile "Chapter Two"
                 ]
             , activeFile = Just 0
+            }
+        , workspace =
+            { editingName = Nothing
             }
         }
         { scenes =
@@ -160,14 +184,14 @@ getSceneById scenes id =
 -- VIEW
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view model =
     div [ class [ Styles.Root ] ]
         [ viewEditor (Debug.log "model" model)
         ]
 
 
-viewEditor : Model -> Html msg
+viewEditor : Model -> Html Msg
 viewEditor model =
     div [ class [ Styles.EditorWrapper ] ]
         [ viewMenu model
@@ -180,14 +204,14 @@ viewEditor model =
         ]
 
 
-viewMenu : Model -> Html msg
+viewMenu : Model -> Html Msg
 viewMenu model =
     div
         [ class [ Styles.Menu ] ]
         []
 
 
-viewBinder : Model -> Html msg
+viewBinder : Model -> Html Msg
 viewBinder model =
     div
         [ class [ Styles.BinderWrapper ] ]
@@ -196,7 +220,7 @@ viewBinder model =
         ]
 
 
-viewBinderInner : Model -> Html msg
+viewBinderInner : Model -> Html Msg
 viewBinderInner model =
     let
         files =
@@ -213,7 +237,7 @@ viewBinderInner model =
                 ++ manuscript
 
 
-viewBinderFile : List File -> File -> Html msg
+viewBinderFile : List File -> File -> Html Msg
 viewBinderFile allFiles file =
     let
         children =
@@ -231,7 +255,7 @@ viewBinderFile allFiles file =
                 ++ nested
 
 
-viewWorkspace : Model -> Html msg
+viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     div [ class [ Styles.Workspace ] ]
         [ viewWorkspaceHeader
@@ -239,7 +263,7 @@ viewWorkspace model =
         ]
 
 
-viewWorkspaceHeader : Html msg
+viewWorkspaceHeader : Html Msg
 viewWorkspaceHeader =
     div
         [ class [ Styles.WorkspaceHeader ] ]
@@ -248,7 +272,7 @@ viewWorkspaceHeader =
         ]
 
 
-viewWorkspaceFile : Model -> Html msg
+viewWorkspaceFile : Model -> Html Msg
 viewWorkspaceFile model =
     let
         file =
@@ -266,7 +290,7 @@ viewWorkspaceFile model =
             in
                 case scene of
                     Just s ->
-                        viewScene s
+                        viewScene model.ui.workspace s
 
                     Nothing ->
                         div [] []
@@ -281,19 +305,22 @@ viewWorkspaceFile model =
                 div [] []
 
 
-viewScene : Scene -> Html msg
-viewScene scene =
-    div [ class [ Styles.Scene ] ] [ viewSceneHeading scene ]
+viewScene : Workspace -> Scene -> Html Msg
+viewScene workspace scene =
+    div [ class [ Styles.Scene ] ] [ viewSceneHeading workspace scene ]
 
 
-viewSceneHeading : Scene -> Html msg
-viewSceneHeading scene =
-    h1
-        [ class [ Styles.SceneHeading ] ]
-        [ Html.text scene.name ]
+viewSceneHeading : Workspace -> Scene -> Html Msg
+viewSceneHeading workspace scene =
+    input
+        [ class [ Styles.SceneHeading ]
+        , onInput (SetSceneName scene.id)
+        , value scene.name
+        ]
+        []
 
 
-viewInspector : Model -> Html msg
+viewInspector : Model -> Html Msg
 viewInspector model =
     div
         [ class [ Styles.Inspector ] ]
@@ -302,7 +329,7 @@ viewInspector model =
         ]
 
 
-viewPanel : List (Html msg) -> Html msg
+viewPanel : List (Html Msg) -> Html Msg
 viewPanel children =
     div [ class [ Styles.Panel ] ] children
 
@@ -311,15 +338,128 @@ viewPanel children =
 -- STATE
 
 
-update : msg -> Model -> ( Model, Cmd msg )
+type Msg
+    = SetSceneName Int String
+
+
+setUi : Ui -> Model -> Model
+setUi ui model =
+    { model | ui = ui }
+
+
+setBinder : Binder -> Model -> Model
+setBinder binder model =
+    let
+        ui =
+            model.ui
+    in
+        model |> setUi { ui | binder = binder }
+
+
+setFile : File -> Model -> Model
+setFile file model =
+    let
+        binder =
+            model.ui.binder
+
+        files =
+            binder.files
+                |> List.map
+                    (\f ->
+                        if f.id == file.id then
+                            file
+                        else
+                            f
+                    )
+    in
+        model |> setBinder { binder | files = files }
+
+
+setFileName : Int -> String -> Model -> Model
+setFileName id name model =
+    let
+        maybeFile =
+            getFileById model.ui.binder.files id
+    in
+        case maybeFile of
+            Just file ->
+                model |> setFile { file | name = name }
+
+            Nothing ->
+                model
+
+
+setWorkspace : Workspace -> Model -> Model
+setWorkspace workspace model =
+    let
+        ui =
+            model.ui
+    in
+        model |> setUi { ui | workspace = workspace }
+
+
+setWorkspaceEditingName : Maybe Int -> Model -> Model
+setWorkspaceEditingName maybeId model =
+    let
+        workspace =
+            model.ui.workspace
+    in
+        model |> setWorkspace { workspace | editingName = maybeId }
+
+
+setNovel : Novel -> Model -> Model
+setNovel novel model =
+    { model | novel = novel }
+
+
+setScene : Scene -> Model -> Model
+setScene scene model =
+    let
+        novel =
+            model.novel
+
+        scenes =
+            novel.scenes
+                |> List.map
+                    (\s ->
+                        if s.id == scene.id then
+                            scene
+                        else
+                            s
+                    )
+    in
+        model |> setNovel { novel | scenes = scenes }
+
+
+setSceneName : Int -> String -> Model -> Model
+setSceneName id name model =
+    let
+        maybeScene =
+            getSceneById model.novel.scenes id
+    in
+        case maybeScene of
+            Just scene ->
+                model |> setScene { scene | name = name }
+
+            Nothing ->
+                model
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    ( model, Cmd.none )
+    case (Debug.log "msg" msg) of
+        SetSceneName id name ->
+            ( model
+                |> setSceneName id name
+                |> setFileName id name
+            , Cmd.none
+            )
 
 
 
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub msg
+subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none

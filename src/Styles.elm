@@ -67,6 +67,10 @@ css =
             ]
         , Css.class SceneHeading
             [ marginBottom (em 1)
+            , border (px 0)
+            , outline none
+            , width (pct 100)
+            , fontFamilies [ "Cochin" ]
             , fontSize (em 3)
             , textAlign center
             ]

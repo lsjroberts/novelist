@@ -51,6 +51,10 @@
 
 .SceneHeading {
     margin-bottom: 1em;
+    border: 0px;
+    outline: none;
+    width: 100%;
+    font-family: Cochin;
     font-size: 3em;
     text-align: center;
 }
