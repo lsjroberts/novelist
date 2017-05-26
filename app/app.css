@@ -105,6 +105,20 @@
     color: #666666;
 }
 
+.TokenEmphasis {
+    font-style: italic;
+}
+
+.TokenParagraph {
+    margin-top: 0em;
+    margin-bottom: 0.5em;
+    text-indent: 1em;
+}
+
+.TokenSpeech {
+    color: #86b3e9;
+}
+
 .Workspace {
     width: 60%;
     padding: 34px;

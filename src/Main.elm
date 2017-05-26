@@ -11,6 +11,7 @@ import Html.Attributes
 import Html.Events exposing (..)
 import Html.Keyed
 import Json.Decode as Json
+import Regex
 import Styles exposing (class)
 import Octicons as Icon
 
@@ -77,6 +78,8 @@ type alias Scene =
     , parent : Maybe Int
     , name : String
     , content : List Token
+    , history : List (List Token)
+    , commit : Int
     }
 
 
@@ -139,11 +142,11 @@ mock =
         , activeFile = Just 0
         }
         { scenes =
-            [ Scene 0 Nothing "Chapter One" []
-            , Scene 1 (Just 0) "Scene One" []
-            , Scene 2 Nothing "Chapter Two" []
-            , Scene 3 (Just 0) "Scene Two" []
-            , Scene 4 (Just 0) "Scene Three" []
+            [ Scene 0 Nothing "Chapter One" [] [] 0
+            , Scene 1 (Just 0) "Scene One" [] [] 0
+            , Scene 2 Nothing "Chapter Two" [] [] 0
+            , Scene 3 (Just 0) "Scene Two" [] [] 0
+            , Scene 4 (Just 0) "Scene Three" [] [] 0
             ]
         }
 
@@ -434,8 +437,15 @@ viewScene : Model -> Scene -> Html Msg
 viewScene model scene =
     div [ class [ Styles.Scene ] ]
         [ viewSceneHeading model scene
+        , div [] [ Html.text (toString scene.commit) ]
         , viewSceneContent model scene
+        , viewSceneDebug model scene
         ]
+
+
+viewSceneDebug : Model -> Scene -> Html Msg
+viewSceneDebug model scene =
+    div [] [ Html.text (toString scene) ]
 
 
 viewSceneHeading : Model -> Scene -> Html Msg
@@ -480,7 +490,7 @@ viewSceneContentEditor : Model -> Scene -> Html Msg
 viewSceneContentEditor model scene =
     Html.Keyed.node "div"
         [ class [ Styles.SceneContentEditor ] ]
-        [ ( toString 1
+        [ ( toString scene.commit
           , article
                 [ class [ Styles.SceneContentEditorArticle ]
                 , contenteditable True
@@ -512,41 +522,21 @@ viewToken model =
 viewTokenParagraph : Token -> Html Msg
 viewTokenParagraph token =
     viewTokenInner token.children
-        |> p []
-
-
-
--- [ styles
---     [ marginTop (em 0)
---     , marginBottom (em 0.5)
---     , textIndent (em 1)
---     ]
--- ]
+        |> p [ class [ Styles.TokenParagraph ] ]
 
 
 viewTokenSpeech : Token -> Html Msg
 viewTokenSpeech token =
     token
         |> viewTokenWrap
-        |> span []
-
-
-
--- [ styles
---     -- [ backgroundColor (rgba 0 189 156 0.2) ]
---     [ color (hex "86b3e9") ]
--- ]
+        |> span [ class [ Styles.TokenSpeech ] ]
 
 
 viewTokenEmphasis : Token -> Html Msg
 viewTokenEmphasis token =
     token
         |> viewTokenWrap
-        |> span []
-
-
-
--- |> span [ styles [ fontStyle italic ] ]
+        |> span [ class [ Styles.TokenEmphasis ] ]
 
 
 viewTokenWrap : Token -> List (Html Msg)
@@ -640,7 +630,14 @@ update msg model =
             )
 
         Write content ->
-            ( model, Cmd.none )
+            case model.ui.activeFile of
+                Just id ->
+                    ( model |> setSceneContent id (markdownToTokens content)
+                    , Cmd.none
+                    )
+
+                Nothing ->
+                    ( model, Cmd.none )
 
 
 setUi : Ui -> Model -> Model
@@ -769,6 +766,26 @@ setSceneName id name model =
                 model
 
 
+setSceneContent : Int -> List Token -> Model -> Model
+setSceneContent id content model =
+    let
+        maybeScene =
+            getSceneById model.novel.scenes id
+    in
+        case maybeScene of
+            Just scene ->
+                model
+                    |> setScene
+                        { scene
+                            | content = content
+                            , history = scene.content :: scene.history
+                            , commit = scene.commit + 1
+                        }
+
+            Nothing ->
+                model
+
+
 
 -- SUBSCRIPTIONS
 
@@ -804,3 +821,140 @@ childrenContentDecoder =
 textContentDecoder : Json.Decoder String
 textContentDecoder =
     Json.oneOf [ Json.field "textContent" Json.string, Json.succeed "nope" ]
+
+
+
+-- FACTORIES
+
+
+markdownToTokens : String -> List Token
+markdownToTokens string =
+    let
+        cleanString =
+            Regex.replace Regex.All (Regex.regex "\n+$") (\_ -> "") string
+
+        tokens =
+            if String.contains "\n" cleanString then
+                cleanString
+                    |> String.split "\n"
+                    |> List.map paragraph
+            else if String.contains "“" cleanString then
+                tokenWrap2 "“" "”" speech text string
+            else if String.contains "\"" cleanString then
+                tokenWrap "\"" speech text string
+            else if String.contains "_" cleanString then
+                tokenWrap "_" emphasis text cleanString
+            else
+                [ text cleanString ]
+    in
+        tokens |> filterEmptyParagraphTokens
+
+
+paragraph : String -> Token
+paragraph string =
+    string
+        |> markdownToTokens
+        |> TokenChildren
+        |> Token Paragraph
+
+
+speech : String -> Token
+speech string =
+    string
+        |> Regex.replace Regex.All (Regex.regex "“|”|\"") (\_ -> "")
+        |> markdownToTokens
+        |> TokenChildren
+        |> Token Speech
+
+
+emphasis : String -> Token
+emphasis string =
+    string
+        |> Regex.replace Regex.All (Regex.regex "_") (\_ -> "")
+        |> markdownToTokens
+        |> TokenChildren
+        |> Token Emphasis
+
+
+text : String -> Token
+text string =
+    Token (Text string) (TokenChildren [])
+
+
+
+-- UTILS
+
+
+tokenWrap char =
+    tokenWrap2 char char
+
+
+
+-- tokenWrap2 : String -> String -> (String -> Model) -> (String -> Model) -> String -> List Model
+
+
+tokenWrap2 left right inside outside string =
+    let
+        exp =
+            Regex.regex (left ++ ".+?" ++ right)
+
+        insides =
+            Regex.find Regex.All exp string
+                |> List.map .match
+                |> List.map inside
+
+        outsides =
+            Regex.split Regex.All exp string
+                |> List.map outside
+                |> filterEmptyTextTokens
+    in
+        if String.startsWith left string then
+            zip insides outsides
+        else
+            zip outsides insides
+
+
+filterEmptyParagraphTokens : List Token -> List Token
+filterEmptyParagraphTokens =
+    List.filter
+        (\x ->
+            if x.token == Paragraph then
+                if List.length (filterEmptyTextTokens (getTokenChildren x)) == 0 then
+                    True
+                else
+                    True
+            else
+                True
+        )
+
+
+filterEmptyTextTokens : List Token -> List Token
+filterEmptyTextTokens =
+    List.filter
+        (\x ->
+            case x.token of
+                Text value ->
+                    if String.length value > 0 then
+                        True
+                    else
+                        False
+
+                _ ->
+                    False
+        )
+
+
+zip : List a -> List a -> List a
+zip xs ys =
+    case ( xs, ys ) of
+        ( x :: xBack, y :: yBack ) ->
+            [ x, y ] ++ zip xBack yBack
+
+        ( x :: xBack, _ ) ->
+            [ x ]
+
+        ( _, y :: yBack ) ->
+            [ y ]
+
+        ( _, _ ) ->
+            []

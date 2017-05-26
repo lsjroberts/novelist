@@ -33,6 +33,9 @@ type CssClasses
     | SceneContentEditorArticle
     | SceneHeading
     | SceneParentHeading
+    | TokenEmphasis
+    | TokenParagraph
+    | TokenSpeech
     | Workspace
     | WorkspaceHeader
     | WorkspaceHeaderAuthor
@@ -123,6 +126,18 @@ css =
             , fontSize (em 2)
             , textAlign center
             , color (hex "#666666")
+            ]
+        , Css.class TokenEmphasis
+            [ fontStyle italic
+            ]
+        , Css.class TokenParagraph
+            [ marginTop (em 0)
+            , marginBottom (em 0.5)
+            , textIndent (em 1)
+            ]
+        , Css.class TokenSpeech
+            [ -- [ backgroundColor (rgba 0 189 156 0.2) ]
+              color (hex "86b3e9")
             ]
         , Css.class Workspace
             [ width (pct 60)
