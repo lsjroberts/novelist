@@ -28,6 +28,9 @@ type CssClasses
     | Menu
     | Panel
     | Scene
+    | SceneContent
+    | SceneContentEditor
+    | SceneContentEditorArticle
     | SceneHeading
     | SceneParentHeading
     | Workspace
@@ -87,6 +90,18 @@ css =
         , Css.class Scene
             [ paddingTop (px 72)
             , fontFamilies [ "Cochin" ]
+            ]
+        , Css.class SceneContent
+            [ maxWidth (em 31)
+            , margin auto
+            , fontSize (em (18 / 16))
+            , lineHeight (num 1.4)
+            ]
+        , Css.class SceneContentEditor
+            [ height (pct 100)
+            ]
+        , Css.class SceneContentEditorArticle
+            [ outline none
             ]
         , Css.class SceneHeading
             [ marginBottom (em 1)

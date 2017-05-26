@@ -1,19 +1,16 @@
 module Main exposing (..)
 
 import Debug
-import Html
+import Html exposing (..)
+import Html.Attributes
     exposing
-        ( Html
-        , program
-        , div
-        , span
-        , h1
-        , h2
-        , h3
-        , input
+        ( contenteditable
+        , spellcheck
+        , value
         )
-import Html.Attributes exposing (value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (..)
+import Html.Keyed
+import Json.Decode as Json
 import Styles exposing (class)
 import Octicons as Icon
 
@@ -189,6 +186,87 @@ getSceneById scenes id =
         |> List.head
 
 
+getOpeningTag : Token -> Maybe String
+getOpeningTag { token } =
+    case token of
+        Speech ->
+            Just "“"
+
+        Emphasis ->
+            Just "_"
+
+        _ ->
+            Nothing
+
+
+getClosingTag : Token -> Maybe String
+getClosingTag { token } =
+    case token of
+        Speech ->
+            Just "”"
+
+        Emphasis ->
+            Just "_"
+
+        _ ->
+            Nothing
+
+
+getShowTags : Token -> Bool
+getShowTags { token } =
+    case token of
+        Speech ->
+            True
+
+        _ ->
+            False
+
+
+getOpeningTagMatches : Token -> Maybe (List String)
+getOpeningTagMatches { token } =
+    case token of
+        Speech ->
+            Just [ "“", "\"" ]
+
+        Emphasis ->
+            Just [ "_" ]
+
+        _ ->
+            Nothing
+
+
+getClosingTagMatches : Token -> Maybe (List String)
+getClosingTagMatches { token } =
+    case token of
+        Speech ->
+            Just [ "”", "\"" ]
+
+        Emphasis ->
+            Just [ "_" ]
+
+        _ ->
+            Nothing
+
+
+getTokenValue : Token -> Maybe String
+getTokenValue { token } =
+    case token of
+        Text v ->
+            Just v
+
+        _ ->
+            Nothing
+
+
+getTokenChildren : Token -> List Token
+getTokenChildren token =
+    let
+        get (TokenChildren cs) =
+            cs
+    in
+        get token.children
+
+
 
 -- VIEW
 
@@ -354,7 +432,10 @@ viewWorkspaceFile model =
 
 viewScene : Model -> Scene -> Html Msg
 viewScene model scene =
-    div [ class [ Styles.Scene ] ] [ viewSceneHeading model scene ]
+    div [ class [ Styles.Scene ] ]
+        [ viewSceneHeading model scene
+        , viewSceneContent model scene
+        ]
 
 
 viewSceneHeading : Model -> Scene -> Html Msg
@@ -390,6 +471,129 @@ viewSceneParentHeading model scene =
             div [] []
 
 
+viewSceneContent : Model -> Scene -> Html Msg
+viewSceneContent model scene =
+    div [ class [ Styles.SceneContent ] ] [ viewSceneContentEditor model scene ]
+
+
+viewSceneContentEditor : Model -> Scene -> Html Msg
+viewSceneContentEditor model scene =
+    Html.Keyed.node "div"
+        [ class [ Styles.SceneContentEditor ] ]
+        [ ( toString 1
+          , article
+                [ class [ Styles.SceneContentEditorArticle ]
+                , contenteditable True
+                , spellcheck False
+                  -- , onFocus StartWriting
+                , on "blur" (Json.map Write childrenContentDecoder)
+                ]
+                (List.map viewToken scene.content)
+          )
+        ]
+
+
+viewToken : Token -> Html Msg
+viewToken model =
+    case model.token of
+        Paragraph ->
+            viewTokenParagraph model
+
+        Speech ->
+            viewTokenSpeech model
+
+        Emphasis ->
+            viewTokenEmphasis model
+
+        Text a ->
+            viewTokenText model
+
+
+viewTokenParagraph : Token -> Html Msg
+viewTokenParagraph token =
+    viewTokenInner token.children
+        |> p []
+
+
+
+-- [ styles
+--     [ marginTop (em 0)
+--     , marginBottom (em 0.5)
+--     , textIndent (em 1)
+--     ]
+-- ]
+
+
+viewTokenSpeech : Token -> Html Msg
+viewTokenSpeech token =
+    token
+        |> viewTokenWrap
+        |> span []
+
+
+
+-- [ styles
+--     -- [ backgroundColor (rgba 0 189 156 0.2) ]
+--     [ color (hex "86b3e9") ]
+-- ]
+
+
+viewTokenEmphasis : Token -> Html Msg
+viewTokenEmphasis token =
+    token
+        |> viewTokenWrap
+        |> span []
+
+
+
+-- |> span [ styles [ fontStyle italic ] ]
+
+
+viewTokenWrap : Token -> List (Html Msg)
+viewTokenWrap token =
+    let
+        before =
+            case getOpeningTag token of
+                Just b ->
+                    if getShowTags token then
+                        [ Html.text b ]
+                    else
+                        [ span [] [ Html.text b ] ]
+
+                -- [ span [ styles [ display none ] ] [ Html.text b ] ]
+                Nothing ->
+                    []
+
+        after =
+            case getClosingTag token of
+                Just a ->
+                    if getShowTags token then
+                        [ Html.text a ]
+                    else
+                        [ span [] [ Html.text a ] ]
+
+                -- [ span [ styles [ display none ] ] [ Html.text a ] ]
+                Nothing ->
+                    []
+    in
+        before ++ viewTokenInner token.children ++ after
+
+
+viewTokenInner : TokenChildren -> List (Html Msg)
+viewTokenInner (TokenChildren children) =
+    List.map viewToken children
+
+
+viewTokenText : Token -> Html Msg
+viewTokenText token =
+    case token.token of
+        Text value ->
+            Html.text value
+
+        _ ->
+            Html.text ""
+
+
 viewInspector : Model -> Html Msg
 viewInspector model =
     div
@@ -412,6 +616,7 @@ type Msg
     = SetActiveFile Int
     | SetSceneName Int String
     | ToggleFileExpanded Int
+    | Write String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -433,6 +638,9 @@ update msg model =
             ( model |> toggleFileExpanded id
             , Cmd.none
             )
+
+        Write content ->
+            ( model, Cmd.none )
 
 
 setUi : Ui -> Model -> Model
@@ -568,3 +776,31 @@ setSceneName id name model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
+
+-- DECODERS
+
+
+childrenContentDecoder : Json.Decoder String
+childrenContentDecoder =
+    Json.at [ "target", "childNodes" ] (Json.keyValuePairs textContentDecoder)
+        |> Json.map
+            (\nodes ->
+                nodes
+                    |> List.filterMap
+                        (\( key, text ) ->
+                            case String.toInt key of
+                                Err msg ->
+                                    Nothing
+
+                                Ok value ->
+                                    Just text
+                        )
+                    |> List.foldl (\acc x -> acc ++ "\n" ++ x) ""
+            )
+
+
+textContentDecoder : Json.Decoder String
+textContentDecoder =
+    Json.oneOf [ Json.field "textContent" Json.string, Json.succeed "nope" ]
