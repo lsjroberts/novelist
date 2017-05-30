@@ -129,7 +129,13 @@ mock =
         , activeFile = Just 0
         }
         { scenes =
-            [ Scene 0 Nothing "Chapter One" [] [] 0
+            [ Scene 0
+                Nothing
+                "Chapter One"
+                [ Token Paragraph (TokenChildren [ Token (Text "New scene") (TokenChildren []) ])
+                ]
+                []
+                0
             , Scene 1 (Just 0) "Scene One" [] [] 0
             , Scene 2 Nothing "Chapter Two" [] [] 0
             , Scene 3 (Just 0) "Scene Two" [] [] 0
