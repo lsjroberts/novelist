@@ -6,26 +6,19 @@ The writer's story-telling environment.
 ## State
 
 ```
-app : Novelist
-    editor : Editor
-
-Editor
-    project : Project
-
-Project
-    name : String
-    path : String
-    manuscript : Manuscript
-    notes : Notes
-    plans : List ( StoryGrid | Snowflake | Free )
-    history : List Actions
-
-Manuscript : List File
-
-File
-    name : String
-    path : String
-    children : FileChildren -- List File
+Model
+    Ui
+        Binder
+            List File
+        Workspace
+        Maybe File
+    Novel
+        List Scene
+            Name
+            Content
+                List Token
+            History
+                List (List Token)
 ```
 
 
