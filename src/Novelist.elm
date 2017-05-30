@@ -432,11 +432,8 @@ viewScene model scene =
 
 viewSceneDebug : Model -> Scene -> Html Msg
 viewSceneDebug model scene =
-    div []
-        [ p [] [ Html.text (toString scene) ]
-        , p [] [ Html.text "---" ]
-        , p [] [ Html.text "asdf" ]
-        ]
+    div [ class [ Styles.SceneDebug ] ]
+        (List.map (\c -> div [] [ Html.text (toString c) ]) scene.content)
 
 
 viewSceneHeading : Model -> Scene -> Html Msg

@@ -82,6 +82,11 @@
     outline: none;
 }
 
+.SceneDebug {
+    font-family: Fira Code;
+    line-height: 1.6em;
+}
+
 .SceneHeading {
     margin-bottom: 1em;
     padding: 0px;

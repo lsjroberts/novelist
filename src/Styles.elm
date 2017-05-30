@@ -31,6 +31,7 @@ type CssClasses
     | SceneContent
     | SceneContentEditor
     | SceneContentEditorArticle
+    | SceneDebug
     | SceneHeading
     | SceneParentHeading
     | TokenEmphasis
@@ -106,6 +107,10 @@ css =
             ]
         , Css.class SceneContentEditorArticle
             [ outline none
+            ]
+        , Css.class SceneDebug
+            [ fontFamilies [ "Fira Code" ]
+            , lineHeight (em 1.6)
             ]
         , Css.class SceneHeading
             [ marginBottom (em 1)
