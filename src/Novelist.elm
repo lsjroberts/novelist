@@ -533,6 +533,16 @@ viewTokenEmphasis token =
         |> span [ class [ Styles.TokenEmphasis ] ]
 
 
+viewTokenText : Token -> Html Msg
+viewTokenText token =
+    case token.token of
+        Text value ->
+            Html.text value
+
+        _ ->
+            Html.text ""
+
+
 viewTokenWrap : Token -> List (Html Msg)
 viewTokenWrap token =
     let
@@ -564,16 +574,6 @@ viewTokenWrap token =
 viewTokenInner : TokenChildren -> List (Html Msg)
 viewTokenInner (TokenChildren children) =
     List.map viewToken children
-
-
-viewTokenText : Token -> Html Msg
-viewTokenText token =
-    case token.token of
-        Text value ->
-            Html.text value
-
-        _ ->
-            Html.text ""
 
 
 viewInspector : Model -> Html Msg
