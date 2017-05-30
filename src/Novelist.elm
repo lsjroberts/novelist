@@ -168,17 +168,10 @@ getFileChildren files file =
             )
 
 
-getFileById : List File -> Int -> Maybe File
-getFileById files id =
-    files
-        |> List.filter (\f -> f.id == id)
-        |> List.head
-
-
-getSceneById : List Scene -> Int -> Maybe Scene
-getSceneById scenes id =
-    scenes
-        |> List.filter (\s -> s.id == id)
+getById : List { a | id : Int } -> Int -> Maybe { a | id : Int }
+getById xs id =
+    xs
+        |> List.filter (\x -> x.id == id)
         |> List.head
 
 
@@ -399,7 +392,7 @@ viewWorkspaceFile model =
         file =
             case model.ui.activeFile of
                 Just id ->
-                    getFileById model.ui.binder.files id
+                    getById model.ui.binder.files id
 
                 Nothing ->
                     Nothing
@@ -407,7 +400,7 @@ viewWorkspaceFile model =
         sceneInner f =
             let
                 scene =
-                    getSceneById model.novel.scenes f.id
+                    getById model.novel.scenes f.id
             in
                 case scene of
                     Just s ->
@@ -459,7 +452,7 @@ viewSceneParentHeading : Model -> Scene -> Html Msg
 viewSceneParentHeading model scene =
     case scene.parent of
         Just parentId ->
-            case (getSceneById model.novel.scenes parentId) of
+            case (getById model.novel.scenes parentId) of
                 Just parent ->
                     input
                         [ class [ Styles.SceneParentHeading ]
@@ -678,7 +671,7 @@ setFileName : Int -> String -> Model -> Model
 setFileName id name model =
     let
         maybeFile =
-            getFileById model.ui.binder.files id
+            getById model.ui.binder.files id
     in
         case maybeFile of
             Just file ->
@@ -692,7 +685,7 @@ toggleFileExpanded : Int -> Model -> Model
 toggleFileExpanded id model =
     let
         maybeFile =
-            getFileById model.ui.binder.files id
+            getById model.ui.binder.files id
     in
         case maybeFile of
             Just file ->
@@ -748,7 +741,7 @@ setSceneName : Int -> String -> Model -> Model
 setSceneName id name model =
     let
         maybeScene =
-            getSceneById model.novel.scenes id
+            getById model.novel.scenes id
     in
         case maybeScene of
             Just scene ->
@@ -762,7 +755,7 @@ setSceneContent : Int -> List Token -> Model -> Model
 setSceneContent id content model =
     let
         maybeScene =
-            getSceneById model.novel.scenes id
+            getById model.novel.scenes id
     in
         case maybeScene of
             Just scene ->
