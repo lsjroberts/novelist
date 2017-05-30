@@ -820,7 +820,7 @@ markdownToTokens : String -> List Token
 markdownToTokens string =
     let
         cleanString =
-            Regex.replace Regex.All (Regex.regex "\n+$") (\_ -> "") string
+            Regex.replace Regex.All (Regex.regex "\n+$") (\_ -> "\n") string
 
         tokens =
             if String.contains "\n" cleanString then
@@ -906,7 +906,7 @@ filterEmptyParagraphTokens =
         (\x ->
             if x.token == Paragraph then
                 if List.length (filterEmptyTextTokens (getTokenChildren x)) == 0 then
-                    True
+                    False
                 else
                     True
             else
