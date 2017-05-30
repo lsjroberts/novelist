@@ -36,6 +36,7 @@ type CssClasses
     | TokenEmphasis
     | TokenParagraph
     | TokenSpeech
+    | TokenWrap
     | Workspace
     | WorkspaceHeader
     | WorkspaceHeaderAuthor
@@ -136,9 +137,10 @@ css =
             , textIndent (em 1)
             ]
         , Css.class TokenSpeech
-            [ -- [ backgroundColor (rgba 0 189 156 0.2) ]
-              color (hex "86b3e9")
+            [ color (hex "86b3e9")
             ]
+        , Css.class TokenWrap
+            [ display none ]
         , Css.class Workspace
             [ width (pct 60)
             , padding (px 34)

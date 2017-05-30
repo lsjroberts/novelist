@@ -32,7 +32,7 @@ string =
         generator =
             Random.frequency
                 [ ( 3, Random.int 1 10 )
-                , ( 0.2, Random.constant 0 )
+                  -- , ( 0.2, Random.constant 0 )
                 , ( 1, Random.int 11 50 )
                 , ( 1, Random.int 50 1000 )
                 ]

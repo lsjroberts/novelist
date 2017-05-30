@@ -119,6 +119,10 @@
     color: #86b3e9;
 }
 
+.TokenWrap {
+    display: none;
+}
+
 .Workspace {
     width: 60%;
     padding: 34px;
