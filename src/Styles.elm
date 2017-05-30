@@ -47,12 +47,15 @@ css =
     (stylesheet << namespace "")
         [ Css.class Root
             [ fontFamilies [ "Quicksand" ]
+            , backgroundColor (hex "#fdf6e3")
             , color (hex "#333333")
             , overflow hidden
             , height (pct 100)
             ]
         , Css.class Binder
-            [ height (pct 100), lineHeight (num 1.75) ]
+            [ height (pct 100)
+            , lineHeight (num 1.75)
+            ]
         , Css.class BinderDirectory
             [ paddingLeft (em 1.05) ]
         , Css.class BinderDirectoryIcon
@@ -84,11 +87,11 @@ css =
         , Css.class Inspector
             [ width (pct 20) ]
         , Css.class Menu
-            [ backgroundColor (rgba 235 235 235 1.0)
+            [ backgroundColor (rgba 235 235 235 0.3)
             , height (px 38)
             ]
         , Css.class Panel
-            [ backgroundColor (rgba 245 245 245 1.0)
+            [ backgroundColor (rgba 245 245 245 0.3)
             , height (pct 100)
             , padding (px 34)
             ]
@@ -104,6 +107,7 @@ css =
             ]
         , Css.class SceneContentEditor
             [ height (pct 100)
+            , minHeight (pct 100)
             ]
         , Css.class SceneContentEditorArticle
             [ outline none
@@ -113,7 +117,8 @@ css =
             , lineHeight (em 1.6)
             ]
         , Css.class SceneHeading
-            [ marginBottom (em 1)
+            [ backgroundColor transparent
+            , marginBottom (em 1)
             , padding (px 0)
             , border (px 0)
             , outline none
@@ -142,7 +147,7 @@ css =
             , textIndent (em 1)
             ]
         , Css.class TokenSpeech
-            [ color (hex "86b3e9")
+            [ color (hex "268bd2")
             ]
         , Css.class TokenWrap
             [ display none ]

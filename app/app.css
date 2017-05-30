@@ -1,5 +1,6 @@
 .Root {
     font-family: Quicksand;
+    background-color: #fdf6e3;
     color: #333333;
     overflow: hidden;
     height: 100%;
@@ -52,12 +53,12 @@
 }
 
 .Menu {
-    background-color: rgba(235, 235, 235, 1);
+    background-color: rgba(235, 235, 235, 0.3);
     height: 38px;
 }
 
 .Panel {
-    background-color: rgba(245, 245, 245, 1);
+    background-color: rgba(245, 245, 245, 0.3);
     height: 100%;
     padding: 34px;
 }
@@ -76,6 +77,7 @@
 
 .SceneContentEditor {
     height: 100%;
+    min-height: 100%;
 }
 
 .SceneContentEditorArticle {
@@ -88,6 +90,7 @@
 }
 
 .SceneHeading {
+    background-color: transparent;
     margin-bottom: 1em;
     padding: 0px;
     border: 0px;
@@ -121,7 +124,7 @@
 }
 
 .TokenSpeech {
-    color: #86b3e9;
+    color: #268bd2;
 }
 
 .TokenWrap {
