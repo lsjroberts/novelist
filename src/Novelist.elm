@@ -760,13 +760,16 @@ setSceneContent id content model =
     in
         case maybeScene of
             Just scene ->
-                model
-                    |> setScene
-                        { scene
-                            | content = content
-                            , history = scene.content :: scene.history
-                            , commit = scene.commit + 1
-                        }
+                if content == scene.content then
+                    model
+                else
+                    model
+                        |> setScene
+                            { scene
+                                | content = content
+                                , history = scene.content :: scene.history
+                                , commit = scene.commit + 1
+                            }
 
             Nothing ->
                 model
