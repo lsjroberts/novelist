@@ -207,6 +207,9 @@ getShowTags { token } =
         Speech ->
             True
 
+        Emphasis ->
+            True
+
         _ ->
             False
 
