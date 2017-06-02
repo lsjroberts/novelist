@@ -24,6 +24,9 @@ type CssClasses
     | BinderWrapper
     | Editor
     | EditorWrapper
+    | Footer
+    | FooterCommit
+    | FooterWordCount
     | Inspector
     | Menu
     | Panel
@@ -47,6 +50,7 @@ css =
     (stylesheet << namespace "")
         [ Css.class Root
             [ fontFamilies [ "Quicksand" ]
+            , fontWeight lighter
             , backgroundColor (hex "#fdf6e3")
             , color (hex "#333333")
             , overflow hidden
@@ -85,6 +89,18 @@ css =
             ]
         , Css.class EditorWrapper
             [ height (pct 100) ]
+        , Css.class Footer
+            [ backgroundColor (rgba 235 235 235 0.3)
+              -- , height (px 38)
+              -- , padding2 (em 0) ((pct 20) + (em 2))
+            , property "padding" "1em calc(20% + 2em)"
+            , displayFlex
+            , property "justify-content" "space-between"
+            ]
+        , Css.class FooterCommit
+            []
+        , Css.class FooterWordCount
+            []
         , Css.class Inspector
             [ width (pct 20) ]
         , Css.class Menu

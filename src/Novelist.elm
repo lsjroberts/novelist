@@ -144,6 +144,32 @@ mock =
         }
 
 
+getActiveScene : Model -> Maybe Scene
+getActiveScene model =
+    case model.ui.activeFile of
+        Just id ->
+            getById model.novel.scenes id
+
+        Nothing ->
+            Nothing
+
+
+getWordCount : Model -> Int
+getWordCount model =
+    case getActiveScene model of
+        Just scene ->
+            scene
+                |> .content
+                |> tokensToPlainText
+                -- then replace all non-alphanumeric and space characters
+                |>
+                    String.split " "
+                |> List.length
+
+        Nothing ->
+            0
+
+
 getRootFiles : List File -> List File
 getRootFiles files =
     files |> List.filter (\f -> f.parent == Nothing)
@@ -280,6 +306,7 @@ viewEditor model =
             , viewWorkspace model
             , viewInspector model
             ]
+        , viewFooter model
         ]
 
 
@@ -426,9 +453,8 @@ viewScene : Model -> Scene -> Html Msg
 viewScene model scene =
     div [ class [ Styles.Scene ] ]
         [ viewSceneHeading model scene
-        , div [] [ Html.text (toString scene.commit) ]
         , viewSceneContent model scene
-        , viewSceneDebug model scene
+          -- , viewSceneDebug model scene
         ]
 
 
@@ -579,6 +605,48 @@ viewInspector model =
         [ viewPanel
             []
         ]
+
+
+viewFooter : Model -> Html Msg
+viewFooter model =
+    div
+        [ class [ Styles.Footer ] ]
+        [ viewFooterCommit model
+        , viewFooterWordCount model
+        ]
+
+
+viewFooterCommit : Model -> Html Msg
+viewFooterCommit model =
+    let
+        commitCount =
+            case getActiveScene model of
+                Just scene ->
+                    scene.commit
+
+                Nothing ->
+                    0
+
+        commit =
+            commitCount
+                |> toString
+                |> Html.text
+    in
+        div [ class [ Styles.FooterCommit ] ]
+            [ commit ]
+
+
+viewFooterWordCount : Model -> Html Msg
+viewFooterWordCount model =
+    let
+        wordCount =
+            model
+                |> getWordCount
+                |> toString
+                |> Html.text
+    in
+        div [ class [ Styles.FooterWordCount ] ]
+            [ wordCount ]
 
 
 viewPanel : List (Html Msg) -> Html Msg
@@ -930,6 +998,30 @@ filterEmptyTextTokens =
                 _ ->
                     False
         )
+
+
+tokensToPlainText : List Token -> String
+tokensToPlainText tokens =
+    tokens
+        |> List.map tokenToPlainText
+        |> List.foldl (++) ""
+
+
+tokenToPlainText : Token -> String
+tokenToPlainText token =
+    let
+        children =
+            getTokenChildren token
+    in
+        case getTokenValue token of
+            Just value ->
+                String.trim value
+
+            Nothing ->
+                if List.isEmpty children then
+                    ""
+                else
+                    tokensToPlainText children
 
 
 zip : List a -> List a -> List a
