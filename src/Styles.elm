@@ -53,7 +53,8 @@ css =
             , height (pct 100)
             ]
         , Css.class Binder
-            [ height (pct 100)
+            [ position fixed
+            , height (pct 100)
             , lineHeight (num 1.75)
             ]
         , Css.class BinderDirectory
