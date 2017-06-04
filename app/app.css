@@ -44,10 +44,13 @@
     display: flex;
     justify-content: space-between;
     height: 100%;
+    overflow: scroll;
 }
 
 .EditorWrapper {
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .Footer {

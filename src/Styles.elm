@@ -87,9 +87,13 @@ css =
             [ displayFlex
             , property "justify-content" "space-between"
             , height (pct 100)
+            , overflow scroll
             ]
         , Css.class EditorWrapper
-            [ height (pct 100) ]
+            [ height (pct 100)
+            , displayFlex
+            , flexDirection column
+            ]
         , Css.class Footer
             [ backgroundColor (rgba 235 235 235 0.3)
               -- , height (px 38)
