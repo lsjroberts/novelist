@@ -57,6 +57,17 @@
     justify-content: space-between;
 }
 
+.FooterWordTarget {
+    background-color: transparent;
+    padding: 0px;
+    border: 0px;
+    border-bottom: 1px dotted rgba(0, 0, 0, 0.3);
+    outline: none;
+    font-family: Quicksand;
+    font-size: 1em;
+    font-weight: 300;
+}
+
 .Inspector {
     width: 20%;
 }

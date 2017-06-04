@@ -27,6 +27,7 @@ type CssClasses
     | Footer
     | FooterCommit
     | FooterWordCount
+    | FooterWordTarget
     | Inspector
     | Menu
     | Panel
@@ -101,6 +102,16 @@ css =
             []
         , Css.class FooterWordCount
             []
+        , Css.class FooterWordTarget
+            [ backgroundColor transparent
+            , padding (px 0)
+            , border (px 0)
+            , borderBottom3 (px 1) dotted (rgba 0 0 0 0.3)
+            , outline none
+            , fontFamilies [ "Quicksand" ]
+            , fontSize (em 1)
+            , fontWeight (int 300)
+            ]
         , Css.class Inspector
             [ width (pct 20) ]
         , Css.class Menu

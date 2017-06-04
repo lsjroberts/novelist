@@ -67,6 +67,7 @@ type alias Scene =
     , content : List Token
     , history : List (List Token)
     , commit : Int
+    , wordTarget : Int
     }
 
 
@@ -136,10 +137,11 @@ mock =
                 ]
                 []
                 0
-            , Scene 1 (Just 0) "Scene One" [] [] 0
-            , Scene 2 Nothing "Chapter Two" [] [] 0
-            , Scene 3 (Just 0) "Scene Two" [] [] 0
-            , Scene 4 (Just 0) "Scene Three" [] [] 0
+                2000
+            , Scene 1 (Just 0) "Scene One" [] [] 0 0
+            , Scene 2 Nothing "Chapter Two" [] [] 0 0
+            , Scene 3 (Just 0) "Scene Two" [] [] 0 0
+            , Scene 4 (Just 0) "Scene Three" [] [] 0 0
             ]
         }
 
@@ -646,7 +648,45 @@ viewFooterWordCount model =
                 |> Html.text
     in
         div [ class [ Styles.FooterWordCount ] ]
-            [ wordCount ]
+            [ wordCount
+            , viewFooterWordTarget model
+            ]
+
+
+viewFooterWordTarget : Model -> Html Msg
+viewFooterWordTarget model =
+    let
+        maybeScene =
+            getActiveScene model
+
+        wordTarget =
+            case maybeScene of
+                Just scene ->
+                    scene.wordTarget
+
+                Nothing ->
+                    0
+
+        wordTargetInput =
+            case maybeScene of
+                Just scene ->
+                    input
+                        [ class [ Styles.FooterWordTarget ]
+                        , onInput (SetSceneWordTarget scene.id)
+                        , value (toString wordTarget)
+                        ]
+                        []
+
+                Nothing ->
+                    span [] []
+    in
+        if wordTarget > 0 then
+            span []
+                [ Html.text " of "
+                , wordTargetInput
+                ]
+        else
+            span [] []
 
 
 viewPanel : List (Html Msg) -> Html Msg
@@ -661,6 +701,7 @@ viewPanel children =
 type Msg
     = SetActiveFile Int
     | SetSceneName Int String
+    | SetSceneWordTarget Int String
     | ToggleFileExpanded Int
     | Write String
 
@@ -679,6 +720,23 @@ update msg model =
                 |> setFileName id name
             , Cmd.none
             )
+
+        SetSceneWordTarget id targetString ->
+            let
+                targetInt =
+                    String.toInt targetString
+
+                target =
+                    case targetInt of
+                        Ok int ->
+                            int
+
+                        Err errorMsg ->
+                            0
+            in
+                ( model |> setSceneWordTarget id target
+                , Cmd.none
+                )
 
         ToggleFileExpanded id ->
             ( model |> toggleFileExpanded id
@@ -840,6 +898,20 @@ setSceneContent id content model =
                                 , history = scene.content :: scene.history
                                 , commit = scene.commit + 1
                             }
+
+            Nothing ->
+                model
+
+
+setSceneWordTarget : Int -> Int -> Model -> Model
+setSceneWordTarget id wordTarget model =
+    let
+        maybeScene =
+            getById model.novel.scenes id
+    in
+        case maybeScene of
+            Just scene ->
+                model |> setScene { scene | wordTarget = wordTarget }
 
             Nothing ->
                 model
