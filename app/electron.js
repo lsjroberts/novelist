@@ -51,7 +51,7 @@ function createWindow(projectPath) {
 
     window.loadURL(`file://${__dirname}/index.html?projectPath=${projectPath}`);
 
-    window.webContents.openDevTools();
+    // window.webContents.openDevTools();
 
     window.on('closed', () => {
         window = null;
@@ -85,9 +85,9 @@ const menuTemplate = [
         label: 'File',
         submenu: [
             {
-                label: 'New Story',
+                label: 'New Project',
                 accelerator: 'CmdOrCtrl+Shift+N',
-                click() { console.log('File.New Story'); }
+                click() { console.log('File.New Project'); }
             },
             {
                 label: 'New Scene',
@@ -95,12 +95,19 @@ const menuTemplate = [
                 click() { console.log('File.New Scene'); }
             },
             {
-                label: 'Open Story...',
+                label: 'Open Project...',
                 accelerator: 'CmdOrCtrl+O',
                 click() {
                     showOpenDialog();
                 }
             },
+            {
+              label: 'Save Project',
+              accelerator: 'CmdOrCtrl+S',
+              click() {
+                saveProject();
+              }
+            }
         ],
     },
 ];
@@ -142,9 +149,30 @@ function showOpenDialog() {
         if (Array.isArray(files) && files.length === 1) {
             const projectDir = files[0];
             const projectName = path.basename(projectDir, '.novl');
-            const metaPath = path.join(projectDir, `${projectName}.novj`);
+            // const metaPath = path.join(projectDir, `${projectName}.novj`);
 
-            createWindow(metaPath);
+            createWindow(projectDir);
         }
+    });
+}
+
+function saveProject() {
+  windows[0].window.webContents.executeJavaScript((
+    `localStorage.getItem("model")`
+  ), true)
+    .then((model) => {
+      console.log('save', model);
+      dialog.showSaveDialog(windows[0].window, {
+        title: 'my-story.novl',
+        filters: [{
+            name: 'Novelist Projects',
+            extensions: ['novl'],
+        }],
+      }, (path) => {
+        fs.outputFile(path, JSON.stringify(JSON.parse(model), null, 4));
+      });
+    })
+    .catch((e) => {
+      console.error(e);
     });
 }

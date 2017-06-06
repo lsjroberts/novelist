@@ -8,6 +8,10 @@ const Elm = require('./elm.js');
 const container = document.getElementById('container');
 const novelist = Elm.Main.embed(container);
 
+novelist.ports.setStorage.subscribe((state) => {
+  localStorage.setItem('model', JSON.stringify(state));
+});
+
 const query = querystring.parse(window.location.search.replace('?', ''));
 
 if (query && query.projectPath && query.projectPath !== 'undefined') {

@@ -1,4 +1,4 @@
-module Novelist exposing (..)
+port module Novelist exposing (..)
 
 import Debug
 import Html exposing (..)
@@ -10,6 +10,7 @@ import Html.Attributes
         )
 import Html.Events exposing (..)
 import Html.Keyed
+import Json.Encode as Encode
 import Json.Decode as Json
 import Regex
 import Styles exposing (class)
@@ -501,7 +502,8 @@ viewSceneParentHeading model scene =
 
 viewSceneContent : Model -> Scene -> Html Msg
 viewSceneContent model scene =
-    div [ class [ Styles.SceneContent ] ] [ viewSceneContentEditor model scene ]
+    div [ class [ Styles.SceneContent ] ]
+        [ viewSceneContentEditor model scene ]
 
 
 viewSceneContentEditor : Model -> Scene -> Html Msg
@@ -699,16 +701,31 @@ viewPanel children =
 
 
 type Msg
-    = SetActiveFile Int
+    = OpenProject String
+    | SetActiveFile Int
     | SetSceneName Int String
     | SetSceneWordTarget Int String
     | ToggleFileExpanded Int
     | Write String
 
 
+updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
+updateWithStorage msg model =
+    let
+        ( newModel, cmds ) =
+            update msg model
+    in
+        ( newModel
+        , Cmd.batch [ setStorage (modelEncoder newModel), cmds ]
+        )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (Debug.log "msg" msg) of
+        OpenProject metaData ->
+            ( decodeMetaData metaData, Cmd.none )
+
         SetActiveFile id ->
             ( model |> setActiveFile (Just id)
             , Cmd.none
@@ -923,7 +940,17 @@ setSceneWordTarget id wordTarget model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    openProject OpenProject
+
+
+
+-- PORTS
+
+
+port openProject : (String -> msg) -> Sub msg
+
+
+port setStorage : Encode.Value -> Cmd msg
 
 
 
@@ -952,6 +979,242 @@ childrenContentDecoder =
 textContentDecoder : Json.Decoder String
 textContentDecoder =
     Json.oneOf [ Json.field "textContent" Json.string, Json.succeed "nope" ]
+
+
+decodeMetaData : String -> Model
+decodeMetaData payload =
+    case Json.decodeString modelDecoder payload of
+        Ok model ->
+            Debug.log "decodedModel" model
+
+        Err message ->
+            Debug.crash message ()
+
+
+modelDecoder : Json.Decoder Model
+modelDecoder =
+    Json.map2 Model
+        (Json.field "ui" uiDecoder)
+        (Json.field "novel" novelDecoder)
+
+
+uiDecoder : Json.Decoder Ui
+uiDecoder =
+    Json.map3 Ui
+        (Json.field "binder" binderDecoder)
+        (Json.field "workspace" workspaceDecoder)
+        (Json.field "activeFile" activeFileDecoder)
+
+
+binderDecoder : Json.Decoder Binder
+binderDecoder =
+    Json.map2 Binder
+        (Json.field "files" (Json.list fileDecoder))
+        (Json.field "editingName" editingNameDecoder)
+
+
+workspaceDecoder : Json.Decoder Workspace
+workspaceDecoder =
+    Json.map Workspace
+        (Json.field "editingName" editingNameDecoder)
+
+
+activeFileDecoder : Json.Decoder (Maybe Int)
+activeFileDecoder =
+    Json.maybe Json.int
+
+
+editingNameDecoder : Json.Decoder (Maybe Int)
+editingNameDecoder =
+    Json.maybe Json.int
+
+
+fileDecoder : Json.Decoder File
+fileDecoder =
+    Json.map5 File
+        (Json.field "id" Json.int)
+        (Json.field "parent" (Json.maybe Json.int))
+        (Json.field "type_" fileTypeDecoder)
+        (Json.field "name" Json.string)
+        (Json.field "expanded" Json.bool)
+
+
+fileTypeDecoder : Json.Decoder FileType
+fileTypeDecoder =
+    let
+        stringToFileType : String -> Json.Decoder FileType
+        stringToFileType ft =
+            case ft of
+                "scene" ->
+                    Json.succeed SceneFile
+
+                _ ->
+                    Json.succeed SceneFile
+    in
+        Json.string |> Json.andThen stringToFileType
+
+
+novelDecoder : Json.Decoder Novel
+novelDecoder =
+    Json.map Novel
+        (Json.field "scenes" (Json.list sceneDecoder))
+
+
+sceneDecoder : Json.Decoder Scene
+sceneDecoder =
+    Json.map7 Scene
+        (Json.field "id" Json.int)
+        (Json.field "parent" (Json.maybe Json.int))
+        (Json.field "name" Json.string)
+        (Json.field "content" (Json.list tokenDecoder))
+        (Json.field "history" (Json.list (Json.list tokenDecoder)))
+        (Json.field "commit" Json.int)
+        (Json.field "wordTarget" Json.int)
+
+
+tokenDecoder : Json.Decoder Token
+tokenDecoder =
+    Json.map2 Token
+        (Json.field "token" tokenTypeDecoder)
+        (Json.field "children" tokenChildrenDecoder)
+
+
+tokenTypeDecoder : Json.Decoder TokenType
+tokenTypeDecoder =
+    let
+        stringToTokenType : String -> Json.Decoder TokenType
+        stringToTokenType tokenType =
+            case tokenType of
+                "paragraph" ->
+                    Json.succeed Paragraph
+
+                "speech" ->
+                    Json.succeed Speech
+
+                "emphasis" ->
+                    Json.succeed Emphasis
+
+                _ ->
+                    let
+                        value =
+                            String.dropLeft 5 tokenType
+                    in
+                        Json.succeed (Text value)
+    in
+        Json.string |> Json.andThen stringToTokenType
+
+
+tokenChildrenDecoder : Json.Decoder TokenChildren
+tokenChildrenDecoder =
+    -- This definition must be above `metaData`
+    -- @see https://github.com/elm-lang/elm-compiler/issues/1560
+    Json.lazy <| \_ -> Json.map TokenChildren (Json.list tokenDecoder)
+
+
+
+-- ENCODERS
+
+
+modelEncoder : Model -> Encode.Value
+modelEncoder model =
+    Encode.object
+        [ ( "ui", uiEncoder model.ui )
+        , ( "novel", novelEncoder model.novel )
+        ]
+
+
+uiEncoder : Ui -> Encode.Value
+uiEncoder ui =
+    Encode.object
+        [ ( "binder", binderEncoder ui.binder )
+        , ( "workspace", workspaceEncoder ui.workspace )
+        , ( "activeFile", maybeIntEncoder ui.activeFile )
+        ]
+
+
+binderEncoder : Binder -> Encode.Value
+binderEncoder binder =
+    Encode.object
+        [ ( "files", Encode.list (List.map fileEncoder binder.files) )
+        , ( "editingName", maybeIntEncoder binder.editingName )
+        ]
+
+
+fileEncoder : File -> Encode.Value
+fileEncoder file =
+    Encode.object
+        [ ( "id", Encode.int file.id )
+        , ( "parent", maybeIntEncoder file.parent )
+        , ( "type_", fileTypeEncoder file.type_ )
+        , ( "name", Encode.string file.name )
+        , ( "expanded", Encode.bool file.expanded )
+        ]
+
+
+fileTypeEncoder : FileType -> Encode.Value
+fileTypeEncoder fileType =
+    case fileType of
+        SceneFile ->
+            Encode.string "scene"
+
+
+workspaceEncoder : Workspace -> Encode.Value
+workspaceEncoder workspace =
+    Encode.object
+        [ ( "editingName", maybeIntEncoder workspace.editingName ) ]
+
+
+maybeIntEncoder : Maybe Int -> Encode.Value
+maybeIntEncoder maybeInt =
+    case maybeInt of
+        Just i ->
+            Encode.int i
+
+        Nothing ->
+            Encode.null
+
+
+novelEncoder : Novel -> Encode.Value
+novelEncoder novel =
+    Encode.object
+        [ ( "scenes", Encode.list (List.map sceneEncoder novel.scenes) ) ]
+
+
+sceneEncoder : Scene -> Encode.Value
+sceneEncoder scene =
+    Encode.object
+        [ ( "id", Encode.int scene.id )
+        , ( "parent", maybeIntEncoder scene.parent )
+        , ( "name", Encode.string scene.name )
+        , ( "content", Encode.list (List.map tokenEncoder scene.content) )
+        , ( "history", Encode.list (List.map (\h -> Encode.list (List.map tokenEncoder h)) scene.history) )
+        , ( "commit", Encode.int scene.commit )
+        , ( "wordTarget", Encode.int scene.wordTarget )
+        ]
+
+
+tokenEncoder : Token -> Encode.Value
+tokenEncoder token =
+    Encode.object
+        [ ( "token", tokenTypeEncoder token.token )
+        , ( "children", Encode.list (List.map tokenEncoder (getTokenChildren token)) )
+        ]
+
+
+tokenTypeEncoder : TokenType -> Encode.Value
+tokenTypeEncoder tokenType =
+    case tokenType of
+        Paragraph ->
+            Encode.string "paragraph"
+
+        Speech ->
+            Encode.string "speech"
+
+        Emphasis ->
+            Encode.string "emphasis"
+
+        Text value ->
+            Encode.string ("text|" ++ value)
 
 
 

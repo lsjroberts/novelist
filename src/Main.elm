@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (program)
-import Novelist exposing (init, view, update, subscriptions)
+import Novelist exposing (init, view, updateWithStorage, subscriptions)
 
 
 -- PROGRAM
@@ -11,6 +11,6 @@ main =
     program
         { init = init
         , view = view
-        , update = update
+        , update = updateWithStorage
         , subscriptions = subscriptions
         }

@@ -1,0 +1,43 @@
+{
+    "ui": {
+        "binder": {
+            "files": [
+                {
+                    "id": 0,
+                    "parent": null,
+                    "type_": "scene",
+                    "name": "Chapter One",
+                    "expanded": false
+                }
+            ],
+            "editingName": null
+        },
+        "workspace": {
+            "editingName": null
+        },
+        "activeFile": 0
+    },
+    "novel": {
+        "scenes": [
+            {
+                "id": 0,
+                "parent": null,
+                "name": "Chapter One",
+                "content": [
+                    {
+                        "token": "paragraph",
+                        "children": [
+                            {
+                                "token": "text|This is the first scene",
+                                "children": []
+                            }
+                        ]
+                    }
+                ],
+                "history": [],
+                "commit": 0,
+                "wordTarget": 2000
+            }
+        ]
+    }
+}
