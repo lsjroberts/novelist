@@ -29,8 +29,13 @@ type CssClasses
     | FooterWordCount
     | FooterWordTarget
     | FormInput
+    | FormInputCheckbox
+    | FormInputCheckboxChecked
+    | FormInputCheckboxDisabled
     | FormInputDescription
     | FormInputLabel
+    | FormInputOption
+    | FormInputOptionInput
     | FormInputText
     | Inspector
     | Menu
@@ -127,6 +132,19 @@ css =
             ]
         , Css.class FormInput
             [ margin2 (em 3) (em 0) ]
+        , Css.class FormInputCheckbox
+            [ border3 (px 1) solid (rgba 96 125 139 1)
+            , borderRadius (px 2)
+            , backgroundColor transparent
+            , width (em 1)
+            , height (em 1)
+            ]
+        , Css.class FormInputCheckboxChecked
+            [ backgroundColor (rgba 96 125 139 1) ]
+        , Css.class FormInputCheckboxDisabled
+            [ backgroundColor (rgba 0 0 0 0.1)
+            , borderColor (rgba 0 0 0 0.1)
+            ]
         , Css.class FormInputDescription
             [ margin2 (em 0.3) (em 0)
             , fontSize (em 0.8)
@@ -135,6 +153,15 @@ css =
         , Css.class FormInputLabel
             [ fontWeight bold
             , fontSize (em 0.9)
+            ]
+        , Css.class FormInputOption
+            [ margin2 (em 3) (em 0)
+            , cursor pointer
+            ]
+        , Css.class FormInputOptionInput
+            [ float left
+            , paddingRight (em 2)
+            , height (em 2)
             ]
         , Css.class FormInputText
             [ padding2 (em 0.8) (em 2)

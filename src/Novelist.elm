@@ -30,6 +30,7 @@ type alias Ui =
     { binder : Binder
     , workspace : Workspace
     , activeFile : Maybe Int
+    , activeView : ViewType
     }
 
 
@@ -54,6 +55,11 @@ type alias File =
 
 type FileType
     = SceneFile
+
+
+type ViewType
+    = EditorView
+    | SettingsView
 
 
 type alias Novel =
@@ -107,6 +113,7 @@ empty =
             { editingName = Nothing
             }
         , activeFile = Nothing
+        , activeView = EditorView
         }
         { scenes = []
         }
@@ -129,6 +136,7 @@ mock =
             { editingName = Nothing
             }
         , activeFile = Just 0
+        , activeView = SettingsView
         }
         { scenes =
             [ Scene 0
@@ -294,9 +302,17 @@ getTokenChildren token =
 
 view : Model -> Html Msg
 view model =
-    div [ class [ Styles.Root ] ]
-        -- [ viewEditor (Debug.log "model" model) ]
-        [ viewSettings (Debug.log "model" model) ]
+    let
+        activeView =
+            case model.ui.activeView of
+                EditorView ->
+                    viewEditor
+
+                SettingsView ->
+                    viewSettings
+    in
+        div [ class [ Styles.Root ] ]
+            [ activeView (Debug.log "model" model) ]
 
 
 viewEditor : Model -> Html Msg
@@ -315,9 +331,20 @@ viewEditor model =
 
 viewMenu : Model -> Html Msg
 viewMenu model =
-    div
-        [ class [ Styles.Menu ] ]
-        []
+    let
+        viewToggle =
+            case model.ui.activeView of
+                EditorView ->
+                    div [ onClick (SetActiveView SettingsView) ]
+                        [ Html.text "Settings" ]
+
+                SettingsView ->
+                    div [ onClick (SetActiveView EditorView) ]
+                        [ Html.text "Editor" ]
+    in
+        div
+            [ class [ Styles.Menu ] ]
+            [ viewToggle ]
 
 
 viewBinder : Model -> Html Msg
@@ -705,6 +732,7 @@ viewSettings model =
             [ h1 [ class [ Styles.SettingsHeader ] ] [ Html.text "Settings" ]
             , viewProjectMeta model
             , viewEditorSettings model
+            , viewCompileSettings model
             ]
         ]
 
@@ -723,7 +751,7 @@ viewProjectMeta model =
             (input
                 [ class [ Styles.FormInputText ]
                 , Html.Attributes.type_ "number"
-                , Html.Attributes.placeholder "Default: 80,000"
+                , Html.Attributes.placeholder "Default: 80000"
                 ]
                 []
             )
@@ -752,7 +780,48 @@ viewEditorSettings model =
             (Just "The base font size for the editor, this does not affect the font size in your compiled book")
             (input
                 [ class [ Styles.FormInputText ]
+                , Html.Attributes.type_ "number"
                 , Html.Attributes.placeholder "Default: 16"
+                ]
+                []
+            )
+        ]
+
+
+viewCompileSettings : Model -> Html Msg
+viewCompileSettings model =
+    div [ class [ Styles.SettingsSection ] ]
+        [ h2 [ class [ Styles.SettingsSectionHeader ] ] [ Html.text "Compile" ]
+        , viewFormInputOption
+            ".pdf"
+            (Just "Create a .pdf when you click the 'compile' button")
+            (div
+                [ class
+                    [ Styles.FormInputCheckbox
+                    , Styles.FormInputCheckboxChecked
+                    ]
+                ]
+                []
+            )
+        , viewFormInputOption
+            ".epub"
+            (Just "Coming soon!")
+            (div
+                [ class
+                    [ Styles.FormInputCheckbox
+                    , Styles.FormInputCheckboxDisabled
+                    ]
+                ]
+                []
+            )
+        , viewFormInputOption
+            ".mobi"
+            (Just "Coming soon!")
+            (div
+                [ class
+                    [ Styles.FormInputCheckbox
+                    , Styles.FormInputCheckboxDisabled
+                    ]
                 ]
                 []
             )
@@ -773,6 +842,20 @@ viewFormInput label maybeDesc formInput =
         ]
 
 
+viewFormInputOption : String -> Maybe String -> Html Msg -> Html Msg
+viewFormInputOption label maybeDesc formInput =
+    div [ class [ Styles.FormInputOption ] ]
+        [ div [ class [ Styles.FormInputOptionInput ] ] [ formInput ]
+        , div [ class [ Styles.FormInputLabel ] ] [ Html.text label ]
+        , case maybeDesc of
+            Just desc ->
+                div [ class [ Styles.FormInputDescription ] ] [ Html.text desc ]
+
+            Nothing ->
+                span [] []
+        ]
+
+
 
 -- STATE
 
@@ -780,6 +863,7 @@ viewFormInput label maybeDesc formInput =
 type Msg
     = OpenProject String
     | SetActiveFile Int
+    | SetActiveView ViewType
     | SetSceneName Int String
     | SetSceneWordTarget Int String
     | ToggleFileExpanded Int
@@ -805,6 +889,11 @@ update msg model =
 
         SetActiveFile id ->
             ( model |> setActiveFile (Just id)
+            , Cmd.none
+            )
+
+        SetActiveView viewType ->
+            ( model |> setActiveView viewType
             , Cmd.none
             )
 
@@ -860,6 +949,15 @@ setActiveFile activeFile model =
             model.ui
     in
         model |> setUi { ui | activeFile = activeFile }
+
+
+setActiveView : ViewType -> Model -> Model
+setActiveView activeView model =
+    let
+        ui =
+            model.ui
+    in
+        model |> setUi { ui | activeView = activeView }
 
 
 setBinder : Binder -> Model -> Model
@@ -1077,10 +1175,11 @@ modelDecoder =
 
 uiDecoder : Json.Decoder Ui
 uiDecoder =
-    Json.map3 Ui
+    Json.map4 Ui
         (Json.field "binder" binderDecoder)
         (Json.field "workspace" workspaceDecoder)
         (Json.field "activeFile" activeFileDecoder)
+        (Json.field "activeView" activeViewDecoder)
 
 
 binderDecoder : Json.Decoder Binder
@@ -1099,6 +1198,24 @@ workspaceDecoder =
 activeFileDecoder : Json.Decoder (Maybe Int)
 activeFileDecoder =
     Json.maybe Json.int
+
+
+activeViewDecoder : Json.Decoder ViewType
+activeViewDecoder =
+    let
+        stringToViewType : String -> Json.Decoder ViewType
+        stringToViewType viewType =
+            case viewType of
+                "editor" ->
+                    Json.succeed EditorView
+
+                "settings" ->
+                    Json.succeed SettingsView
+
+                _ ->
+                    Json.succeed EditorView
+    in
+        Json.string |> Json.andThen stringToViewType
 
 
 editingNameDecoder : Json.Decoder (Maybe Int)
@@ -1206,6 +1323,7 @@ uiEncoder ui =
         [ ( "binder", binderEncoder ui.binder )
         , ( "workspace", workspaceEncoder ui.workspace )
         , ( "activeFile", maybeIntEncoder ui.activeFile )
+        , ( "activeView", viewTypeEncoder ui.activeView )
         ]
 
 
@@ -1239,6 +1357,16 @@ workspaceEncoder : Workspace -> Encode.Value
 workspaceEncoder workspace =
     Encode.object
         [ ( "editingName", maybeIntEncoder workspace.editingName ) ]
+
+
+viewTypeEncoder : ViewType -> Encode.Value
+viewTypeEncoder viewType =
+    case viewType of
+        EditorView ->
+            Encode.string "editor"
+
+        SettingsView ->
+            Encode.string "settings"
 
 
 maybeIntEncoder : Maybe Int -> Encode.Value

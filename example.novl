@@ -15,7 +15,8 @@
         "workspace": {
             "editingName": null
         },
-        "activeFile": 0
+        "activeFile": 0,
+        "activeView": "editor"
     },
     "novel": {
         "scenes": [

@@ -75,6 +75,23 @@
     margin: 3em 0em;
 }
 
+.FormInputCheckbox {
+    border: 1px solid rgba(96, 125, 139, 1);
+    border-radius: 2px;
+    background-color: transparent;
+    width: 1em;
+    height: 1em;
+}
+
+.FormInputCheckboxChecked {
+    background-color: rgba(96, 125, 139, 1);
+}
+
+.FormInputCheckboxDisabled {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
 .FormInputDescription {
     margin: 0.3em 0em;
     font-size: 0.8em;
@@ -84,6 +101,17 @@
 .FormInputLabel {
     font-weight: bold;
     font-size: 0.9em;
+}
+
+.FormInputOption {
+    margin: 3em 0em;
+    cursor: pointer;
+}
+
+.FormInputOptionInput {
+    float: left;
+    padding-right: 2em;
+    height: 2em;
 }
 
 .FormInputText {
