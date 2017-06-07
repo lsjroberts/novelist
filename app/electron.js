@@ -29,13 +29,14 @@ function ready() {
 function createWindow(projectPath) {
     let newWindowIndex = windows.length;
 
-    if (windows.length === 1 && windows[0].projectPath === undefined) {
-        newWindowIndex = 0;
-        windows[0].window.close();
-        windows = [];
-    }
+    // TODO: put this back if I introduce an initial wizard view or similar
+    // if (windows.length === 1 && windows[0].projectPath === undefined) {
+    //     newWindowIndex = 0;
+    //     windows[0].window.close();
+    //     windows = [];
+    // }
 
-    const [width, height] = windows.length ? windows[newWindowIndex-1].getSize() : [800, 600];
+    const [width, height] = windows.length ? windows[newWindowIndex-1].window.getSize() : [800, 600];
 
     let window = new BrowserWindow({
         title: 'Novelist',
@@ -108,8 +109,6 @@ const menuTemplate = [
                 saveProject();
               }
             },
-            { type: "separator" },
-            { label: "Quit", accelerator: "Command+Q", click: function() { app.quit(); }}
         ],
     },
     {
@@ -123,6 +122,17 @@ const menuTemplate = [
         { label: "Paste", accelerator: "CmdOrCtrl+V", selector: "paste:" },
         { label: "Select All", accelerator: "CmdOrCtrl+A", selector: "selectAll:" }
       ]
+    },
+    {
+      label: 'Compile',
+      submenu: [
+        {
+          label: 'Compile',
+          click() {
+            compile();
+          }
+        }
+      ]
     }
 ];
 
@@ -134,6 +144,15 @@ if (process.platform === 'darwin') {
                 label: `About ${app.getName()}`,
                 role: 'about',
             },
+            { type: 'separator' },
+            {
+              label: 'Preferences...',
+              accelerator: 'Command+,',
+              click() {
+                gotoPreferences();
+              }
+            },
+            { type: 'separator' },
             {
                 label: 'Quit',
                 accelerator: 'Command+Q',
@@ -189,4 +208,14 @@ function saveProject() {
     .catch((e) => {
       console.error(e);
     });
+}
+
+function compile() {
+  console.log('compile');
+}
+
+function gotoPreferences() {
+  windows[0].window.webContents.executeJavaScript((
+    `novelist.ports.gotoSettings.send("")`
+  ), true);
 }

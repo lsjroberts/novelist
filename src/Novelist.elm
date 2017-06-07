@@ -136,7 +136,7 @@ mock =
             { editingName = Nothing
             }
         , activeFile = Just 0
-        , activeView = SettingsView
+        , activeView = EditorView
         }
         { scenes =
             [ Scene 0
@@ -861,7 +861,8 @@ viewFormInputOption label maybeDesc formInput =
 
 
 type Msg
-    = OpenProject String
+    = GoToSettings String
+    | OpenProject String
     | SetActiveFile Int
     | SetActiveView ViewType
     | SetSceneName Int String
@@ -884,6 +885,9 @@ updateWithStorage msg model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case (Debug.log "msg" msg) of
+        GoToSettings _ ->
+            update (SetActiveView SettingsView) model
+
         OpenProject metaData ->
             ( decodeMetaData metaData, Cmd.none )
 
@@ -1115,7 +1119,10 @@ setSceneWordTarget id wordTarget model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    openProject OpenProject
+    Sub.batch
+        [ openProject OpenProject
+        , gotoSettings GoToSettings
+        ]
 
 
 
@@ -1123,6 +1130,9 @@ subscriptions model =
 
 
 port openProject : (String -> msg) -> Sub msg
+
+
+port gotoSettings : (String -> msg) -> Sub msg
 
 
 port setStorage : Encode.Value -> Cmd msg
