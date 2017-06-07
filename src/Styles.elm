@@ -28,6 +28,10 @@ type CssClasses
     | FooterCommit
     | FooterWordCount
     | FooterWordTarget
+    | FormInput
+    | FormInputDescription
+    | FormInputLabel
+    | FormInputText
     | Inspector
     | Menu
     | Panel
@@ -38,6 +42,11 @@ type CssClasses
     | SceneDebug
     | SceneHeading
     | SceneParentHeading
+    | Settings
+    | SettingsHeader
+    | SettingsSection
+    | SettingsSectionHeader
+    | SettingsWrapper
     | TokenEmphasis
     | TokenParagraph
     | TokenSpeech
@@ -116,6 +125,27 @@ css =
             , fontSize (em 1)
             , fontWeight (int 300)
             ]
+        , Css.class FormInput
+            [ margin2 (em 3) (em 0) ]
+        , Css.class FormInputDescription
+            [ margin2 (em 0.3) (em 0)
+            , fontSize (em 0.8)
+            , opacity (num 0.5)
+            ]
+        , Css.class FormInputLabel
+            [ fontWeight bold
+            , fontSize (em 0.9)
+            ]
+        , Css.class FormInputText
+            [ padding2 (em 0.8) (em 2)
+            , border (px 0)
+            , borderBottom3 (px 1) solid (rgba 96 125 139 0.2)
+            , outline none
+            , width (pct 100)
+            , backgroundColor transparent
+            , fontFamilies [ "Quicksand" ]
+            , fontSize (em 1)
+            ]
         , Css.class Inspector
             [ width (pct 20) ]
         , Css.class Menu
@@ -169,6 +199,24 @@ css =
             , fontSize (em 2)
             , textAlign center
             , color (hex "#666666")
+            ]
+        , Css.class Settings
+            [ margin auto
+            , padding2 (em 2) (em 0)
+            , height (pct 100)
+            , width (pct 60)
+            , overflow scroll
+            ]
+        , Css.class SettingsHeader
+            [ fontSize (em 2) ]
+        , Css.class SettingsSection
+            [ margin2 (em 4) (em 0)
+            ]
+        , Css.class SettingsSectionHeader
+            [ fontSize (em 1.4)
+            ]
+        , Css.class SettingsWrapper
+            [ height (pct 100)
             ]
         , Css.class TokenEmphasis
             [ fontStyle italic

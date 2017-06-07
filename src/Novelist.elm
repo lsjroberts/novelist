@@ -295,8 +295,8 @@ getTokenChildren token =
 view : Model -> Html Msg
 view model =
     div [ class [ Styles.Root ] ]
-        [ viewEditor (Debug.log "model" model)
-        ]
+        -- [ viewEditor (Debug.log "model" model) ]
+        [ viewSettings (Debug.log "model" model) ]
 
 
 viewEditor : Model -> Html Msg
@@ -694,6 +694,83 @@ viewFooterWordTarget model =
 viewPanel : List (Html Msg) -> Html Msg
 viewPanel children =
     div [ class [ Styles.Panel ] ] children
+
+
+viewSettings : Model -> Html Msg
+viewSettings model =
+    div [ class [ Styles.SettingsWrapper ] ]
+        [ viewMenu model
+        , div
+            [ class [ Styles.Settings ] ]
+            [ h1 [ class [ Styles.SettingsHeader ] ] [ Html.text "Settings" ]
+            , viewProjectMeta model
+            , viewEditorSettings model
+            ]
+        ]
+
+
+viewProjectMeta : Model -> Html Msg
+viewProjectMeta model =
+    div [ class [ Styles.SettingsSection ] ]
+        [ h2 [ class [ Styles.SettingsSectionHeader ] ] [ Html.text "Project" ]
+        , viewFormInput
+            "Title"
+            (Just "The title of your story, displayed on the blah blah")
+            (input [ class [ Styles.FormInputText ] ] [])
+        , viewFormInput
+            "Total Word Target"
+            (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
+            (input
+                [ class [ Styles.FormInputText ]
+                , Html.Attributes.type_ "number"
+                , Html.Attributes.placeholder "Default: 80,000"
+                ]
+                []
+            )
+        , viewFormInput
+            "Deadline"
+            (Just "Cras mattis consectetur purus sit amet fermentum.")
+            (input [ class [ Styles.FormInputText ] ] [])
+        ]
+
+
+viewEditorSettings : Model -> Html Msg
+viewEditorSettings model =
+    div [ class [ Styles.SettingsSection ] ]
+        [ h2 [ class [ Styles.SettingsSectionHeader ] ] [ Html.text "Editor" ]
+        , viewFormInput
+            "Theme"
+            (Just "Sed posuere consectetur est at lobortis.")
+            (input
+                [ class [ Styles.FormInputText ]
+                , Html.Attributes.placeholder "Default: Solarized Light"
+                ]
+                []
+            )
+        , viewFormInput
+            "Font Size"
+            (Just "The base font size for the editor, this does not affect the font size in your compiled book")
+            (input
+                [ class [ Styles.FormInputText ]
+                , Html.Attributes.placeholder "Default: 16"
+                ]
+                []
+            )
+        ]
+
+
+viewFormInput : String -> Maybe String -> Html Msg -> Html Msg
+viewFormInput label maybeDesc formInput =
+    div [ class [ Styles.FormInput ] ]
+        [ div [ class [ Styles.FormInputLabel ] ] [ Html.text label ]
+        , case maybeDesc of
+            Just desc ->
+                div [ class [ Styles.FormInputDescription ] ] [ Html.text desc ]
+
+            Nothing ->
+                span [] []
+        , formInput
+        ]
 
 
 

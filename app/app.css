@@ -71,6 +71,32 @@
     font-weight: 300;
 }
 
+.FormInput {
+    margin: 3em 0em;
+}
+
+.FormInputDescription {
+    margin: 0.3em 0em;
+    font-size: 0.8em;
+    opacity: 0.5;
+}
+
+.FormInputLabel {
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.FormInputText {
+    padding: 0.8em 2em;
+    border: 0px;
+    border-bottom: 1px solid rgba(96, 125, 139, 0.2);
+    outline: none;
+    width: 100%;
+    background-color: transparent;
+    font-family: Quicksand;
+    font-size: 1em;
+}
+
 .Inspector {
     width: 20%;
 }
@@ -134,6 +160,30 @@
     font-size: 2em;
     text-align: center;
     color: #666666;
+}
+
+.Settings {
+    margin: auto;
+    padding: 2em 0em;
+    height: 100%;
+    width: 60%;
+    overflow: scroll;
+}
+
+.SettingsHeader {
+    font-size: 2em;
+}
+
+.SettingsSection {
+    margin: 4em 0em;
+}
+
+.SettingsSectionHeader {
+    font-size: 1.4em;
+}
+
+.SettingsWrapper {
+    height: 100%;
 }
 
 .TokenEmphasis {
