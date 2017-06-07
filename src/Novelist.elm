@@ -801,7 +801,7 @@ viewCompileSettings model =
                     , Styles.FormInputCheckboxChecked
                     ]
                 ]
-                []
+                [ Html.text "Y" ]
             )
         , viewFormInputOption
             ".epub"

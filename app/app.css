@@ -81,6 +81,8 @@
     background-color: transparent;
     width: 1em;
     height: 1em;
+    color: #ffffff;
+    text-align: center;
 }
 
 .FormInputCheckboxChecked {

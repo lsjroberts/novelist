@@ -138,6 +138,8 @@ css =
             , backgroundColor transparent
             , width (em 1)
             , height (em 1)
+            , color (hex "#ffffff")
+            , textAlign center
             ]
         , Css.class FormInputCheckboxChecked
             [ backgroundColor (rgba 96 125 139 1) ]
