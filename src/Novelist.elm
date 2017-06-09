@@ -194,22 +194,22 @@ view model =
 viewEditor : Model -> Html Msg
 viewEditor model =
     div [ class [ Styles.EditorWrapper ] ]
-        [ viewMenu model
+        [ viewMenu model.activeView
         , div
             [ class [ Styles.Editor ] ]
-            [ viewBinder model
+            [ viewBinder model.files
             , viewWorkspace model
-            , viewInspector model
+            , viewInspector
             ]
         , viewFooter model
         ]
 
 
-viewMenu : Model -> Html Msg
-viewMenu model =
+viewMenu : ViewType -> Html Msg
+viewMenu activeView =
     let
         viewToggle =
-            case model.activeView of
+            case activeView of
                 EditorView ->
                     div [ onClick (SetActiveView SettingsView) ]
                         [ Html.text "Settings" ]
@@ -223,21 +223,18 @@ viewMenu model =
             [ viewToggle ]
 
 
-viewBinder : Model -> Html Msg
-viewBinder model =
+viewBinder : List File -> Html Msg
+viewBinder files =
     div
         [ class [ Styles.BinderWrapper ] ]
         [ viewPanel
-            [ viewBinderInner model ]
+            [ viewBinderInner files ]
         ]
 
 
-viewBinderInner : Model -> Html Msg
-viewBinderInner model =
+viewBinderInner : List File -> Html Msg
+viewBinderInner files =
     let
-        files =
-            model.files
-
         manuscript =
             files
                 |> getRootFiles
@@ -308,27 +305,27 @@ viewBinderFile allFiles file =
 viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     div [ class [ Styles.Workspace ] ]
-        [ viewWorkspaceHeader model
-        , viewWorkspaceFile model
+        [ viewWorkspaceHeader model.title model.author
+        , viewWorkspaceFile model.activeFile model.files model.scenes
         ]
 
 
-viewWorkspaceHeader : Model -> Html Msg
-viewWorkspaceHeader model =
+viewWorkspaceHeader : String -> String -> Html Msg
+viewWorkspaceHeader title author =
     div
         [ class [ Styles.WorkspaceHeader ] ]
-        [ div [] [ Html.text model.title ]
-        , div [ class [ Styles.WorkspaceHeaderAuthor ] ] [ Html.text "Author" ]
+        [ div [] [ Html.text title ]
+        , div [ class [ Styles.WorkspaceHeaderAuthor ] ] [ Html.text author ]
         ]
 
 
-viewWorkspaceFile : Model -> Html Msg
-viewWorkspaceFile model =
+viewWorkspaceFile : Maybe Int -> List File -> List Scene -> Html Msg
+viewWorkspaceFile activeFile files scenes =
     let
         file =
-            case model.activeFile of
+            case activeFile of
                 Just id ->
-                    getById model.files id
+                    getById files id
 
                 Nothing ->
                     Nothing
@@ -336,11 +333,11 @@ viewWorkspaceFile model =
         sceneInner f =
             let
                 scene =
-                    getById model.scenes f.id
+                    getById scenes f.id
             in
                 case scene of
                     Just s ->
-                        viewScene model s
+                        viewScene scenes s
 
                     Nothing ->
                         div [] []
@@ -355,25 +352,26 @@ viewWorkspaceFile model =
                 div [] []
 
 
-viewScene : Model -> Scene -> Html Msg
-viewScene model scene =
+viewScene : List Scene -> Scene -> Html Msg
+viewScene scenes scene =
     div [ class [ Styles.Scene ] ]
-        [ viewSceneHeading model scene
-        , viewSceneContent model scene
+        [ viewSceneHeading scenes scene
+        , viewSceneContent scene
           -- , viewSceneDebug model scene
         ]
 
 
-viewSceneDebug : Model -> Scene -> Html Msg
-viewSceneDebug model scene =
-    div [ class [ Styles.SceneDebug ] ]
-        (List.map (\c -> div [] [ Html.text (toString c) ]) scene.content)
+
+-- viewSceneDebug : Model -> Scene -> Html Msg
+-- viewSceneDebug model scene =
+--     div [ class [ Styles.SceneDebug ] ]
+--         (List.map (\c -> div [] [ Html.text (toString c) ]) scene.content)
 
 
-viewSceneHeading : Model -> Scene -> Html Msg
-viewSceneHeading model scene =
+viewSceneHeading : List Scene -> Scene -> Html Msg
+viewSceneHeading scenes scene =
     div []
-        [ viewSceneParentHeading model scene
+        [ viewSceneParentHeading scenes scene
         , input
             [ class [ Styles.SceneHeading ]
             , onInput (SetSceneName scene.id)
@@ -383,11 +381,11 @@ viewSceneHeading model scene =
         ]
 
 
-viewSceneParentHeading : Model -> Scene -> Html Msg
-viewSceneParentHeading model scene =
+viewSceneParentHeading : List Scene -> Scene -> Html Msg
+viewSceneParentHeading scenes scene =
     case scene.parent of
         Just parentId ->
-            case (getById model.scenes parentId) of
+            case (getById scenes parentId) of
                 Just parent ->
                     input
                         [ class [ Styles.SceneParentHeading ]
@@ -403,14 +401,14 @@ viewSceneParentHeading model scene =
             div [] []
 
 
-viewSceneContent : Model -> Scene -> Html Msg
-viewSceneContent model scene =
+viewSceneContent : Scene -> Html Msg
+viewSceneContent scene =
     div [ class [ Styles.SceneContent ] ]
-        [ viewSceneContentEditor model scene ]
+        [ viewSceneContentEditor scene ]
 
 
-viewSceneContentEditor : Model -> Scene -> Html Msg
-viewSceneContentEditor model scene =
+viewSceneContentEditor : Scene -> Html Msg
+viewSceneContentEditor scene =
     Html.Keyed.node "div"
         [ class [ Styles.SceneContentEditor ] ]
         [ ( toString scene.commit
@@ -505,8 +503,8 @@ viewTokenInner (TokenChildren children) =
     List.map viewToken children
 
 
-viewInspector : Model -> Html Msg
-viewInspector model =
+viewInspector : Html Msg
+viewInspector =
     div
         [ class [ Styles.Inspector ] ]
         [ viewPanel
@@ -602,7 +600,7 @@ viewPanel children =
 viewSettings : Model -> Html Msg
 viewSettings model =
     div [ class [ Styles.SettingsWrapper ] ]
-        [ viewMenu model
+        [ viewMenu model.activeView
         , div
             [ class [ Styles.Settings ] ]
             [ h1 [ class [ Styles.SettingsHeader ] ] [ Html.text "Settings" ]
