@@ -1,5 +1,6 @@
 port module Novelist exposing (..)
 
+import Date exposing (Date)
 import Debug
 import Html exposing (..)
 import Html.Attributes
@@ -64,6 +65,7 @@ type ViewType
 
 type alias Novel =
     { scenes : List Scene
+    , meta : Meta
     }
 
 
@@ -75,6 +77,14 @@ type alias Scene =
     , history : List (List Token)
     , commit : Int
     , wordTarget : Int
+    }
+
+
+type alias Meta =
+    { title : String
+    , author : String
+    , targetWordCount : Maybe Int
+    , deadline : Maybe Date
     }
 
 
@@ -116,6 +126,12 @@ empty =
         , activeView = EditorView
         }
         { scenes = []
+        , meta =
+            { title = "Title"
+            , author = "Author"
+            , targetWordCount = Nothing
+            , deadline = Nothing
+            }
         }
 
 
@@ -152,6 +168,12 @@ mock =
             , Scene 3 (Just 0) "Scene Two" [] [] 0 0
             , Scene 4 (Just 0) "Scene Three" [] [] 0 0
             ]
+        , meta =
+            { title = "Title"
+            , author = "Author"
+            , targetWordCount = Nothing
+            , deadline = Nothing
+            }
         }
 
 
@@ -432,16 +454,16 @@ viewBinderFile allFiles file =
 viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     div [ class [ Styles.Workspace ] ]
-        [ viewWorkspaceHeader
+        [ viewWorkspaceHeader model
         , viewWorkspaceFile model
         ]
 
 
-viewWorkspaceHeader : Html Msg
-viewWorkspaceHeader =
+viewWorkspaceHeader : Model -> Html Msg
+viewWorkspaceHeader model =
     div
         [ class [ Styles.WorkspaceHeader ] ]
-        [ div [] [ Html.text "Title" ]
+        [ div [] [ Html.text model.novel.meta.title ]
         , div [ class [ Styles.WorkspaceHeaderAuthor ] ] [ Html.text "Author" ]
         ]
 
@@ -739,27 +761,35 @@ viewSettings model =
 
 viewProjectMeta : Model -> Html Msg
 viewProjectMeta model =
-    div [ class [ Styles.SettingsSection ] ]
-        [ h2 [ class [ Styles.SettingsSectionHeader ] ] [ Html.text "Project" ]
-        , viewFormInput
-            "Title"
-            (Just "The title of your story, displayed on the blah blah")
-            (input [ class [ Styles.FormInputText ] ] [])
-        , viewFormInput
-            "Total Word Target"
-            (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
-            (input
-                [ class [ Styles.FormInputText ]
-                , Html.Attributes.type_ "number"
-                , Html.Attributes.placeholder "Default: 80000"
-                ]
-                []
-            )
-        , viewFormInput
-            "Deadline"
-            (Just "Cras mattis consectetur purus sit amet fermentum.")
-            (input [ class [ Styles.FormInputText ] ] [])
-        ]
+    let
+        meta =
+            model.novel.meta
+    in
+        div [ class [ Styles.SettingsSection ] ]
+            [ h2 [ class [ Styles.SettingsSectionHeader ] ] [ Html.text "Project" ]
+            , viewFormInput
+                "Title"
+                (Just "The title of your story, displayed on the blah blah")
+                (input [ class [ Styles.FormInputText ], value meta.title ] [])
+            , viewFormInput
+                "Author"
+                (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
+                (input [ class [ Styles.FormInputText ], value meta.author ] [])
+            , viewFormInput
+                "Total Word Target"
+                (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
+                (input
+                    [ class [ Styles.FormInputText ]
+                    , Html.Attributes.type_ "number"
+                    , Html.Attributes.placeholder "Default: 80000"
+                    ]
+                    []
+                )
+            , viewFormInput
+                "Deadline"
+                (Just "Cras mattis consectetur purus sit amet fermentum.")
+                (input [ class [ Styles.FormInputText ] ] [])
+            ]
 
 
 viewEditorSettings : Model -> Html Msg
@@ -888,8 +918,8 @@ update msg model =
         GoToSettings _ ->
             update (SetActiveView SettingsView) model
 
-        OpenProject metaData ->
-            ( decodeMetaData metaData, Cmd.none )
+        OpenProject project ->
+            ( decodeProject project, Cmd.none )
 
         SetActiveFile id ->
             ( model |> setActiveFile (Just id)
@@ -1166,8 +1196,8 @@ textContentDecoder =
     Json.oneOf [ Json.field "textContent" Json.string, Json.succeed "nope" ]
 
 
-decodeMetaData : String -> Model
-decodeMetaData payload =
+decodeProject : String -> Model
+decodeProject payload =
     case Json.decodeString modelDecoder payload of
         Ok model ->
             Debug.log "decodedModel" model
@@ -1260,8 +1290,9 @@ fileTypeDecoder =
 
 novelDecoder : Json.Decoder Novel
 novelDecoder =
-    Json.map Novel
+    Json.map2 Novel
         (Json.field "scenes" (Json.list sceneDecoder))
+        (Json.field "meta" metaDecoder)
 
 
 sceneDecoder : Json.Decoder Scene
@@ -1274,6 +1305,15 @@ sceneDecoder =
         (Json.field "history" (Json.list (Json.list tokenDecoder)))
         (Json.field "commit" Json.int)
         (Json.field "wordTarget" Json.int)
+
+
+metaDecoder : Json.Decoder Meta
+metaDecoder =
+    Json.map4 Meta
+        (Json.field "title" Json.string)
+        (Json.field "author" Json.string)
+        (Json.field "targetWordCount" (Json.maybe Json.int))
+        (Json.field "deadline" (Json.maybe dateDecoder))
 
 
 tokenDecoder : Json.Decoder Token
@@ -1310,9 +1350,23 @@ tokenTypeDecoder =
 
 tokenChildrenDecoder : Json.Decoder TokenChildren
 tokenChildrenDecoder =
-    -- This definition must be above `metaData`
+    -- This definition must be above `decodeProject`
     -- @see https://github.com/elm-lang/elm-compiler/issues/1560
     Json.lazy <| \_ -> Json.map TokenChildren (Json.list tokenDecoder)
+
+
+dateDecoder : Json.Decoder Date
+dateDecoder =
+    Json.string
+        |> Json.andThen
+            (\timeString ->
+                case String.toFloat timeString of
+                    Ok time ->
+                        Json.succeed <| Date.fromTime time
+
+                    Err err ->
+                        Json.fail err
+            )
 
 
 
@@ -1389,10 +1443,22 @@ maybeIntEncoder maybeInt =
             Encode.null
 
 
+maybeDateEncoder : Maybe Date -> Encode.Value
+maybeDateEncoder maybeDate =
+    case maybeDate of
+        Just date ->
+            Encode.float (Date.toTime date)
+
+        Nothing ->
+            Encode.null
+
+
 novelEncoder : Novel -> Encode.Value
 novelEncoder novel =
     Encode.object
-        [ ( "scenes", Encode.list (List.map sceneEncoder novel.scenes) ) ]
+        [ ( "scenes", Encode.list (List.map sceneEncoder novel.scenes) )
+        , ( "meta", metaEncoder novel.meta )
+        ]
 
 
 sceneEncoder : Scene -> Encode.Value
@@ -1405,6 +1471,16 @@ sceneEncoder scene =
         , ( "history", Encode.list (List.map (\h -> Encode.list (List.map tokenEncoder h)) scene.history) )
         , ( "commit", Encode.int scene.commit )
         , ( "wordTarget", Encode.int scene.wordTarget )
+        ]
+
+
+metaEncoder : Meta -> Encode.Value
+metaEncoder meta =
+    Encode.object
+        [ ( "title", Encode.string meta.title )
+        , ( "author", Encode.string meta.author )
+        , ( "targetWordCount", maybeIntEncoder meta.targetWordCount )
+        , ( "deadline", maybeDateEncoder meta.deadline )
         ]
 
 

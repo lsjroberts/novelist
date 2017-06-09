@@ -637,6 +637,11 @@
                 "commit": 4,
                 "wordTarget": 2500
             }
-        ]
+        ],
+        "meta": {
+            "title": "Example",
+            "targetWordCount": 80000,
+            "deadline": null
+        }
     }
 }
