@@ -618,11 +618,23 @@ viewProjectMeta model =
         , viewFormInput
             "Title"
             (Just "The title of your story, displayed on the blah blah")
-            (input [ class [ Styles.FormInputText ], value model.title ] [])
+            (input
+                [ class [ Styles.FormInputText ]
+                , onInput SetTitle
+                , value model.title
+                ]
+                []
+            )
         , viewFormInput
             "Author"
             (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
-            (input [ class [ Styles.FormInputText ], value model.author ] [])
+            (input
+                [ class [ Styles.FormInputText ]
+                , onInput SetAuthor
+                , value model.author
+                ]
+                []
+            )
         , viewFormInput
             "Total Word Target"
             (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
@@ -745,6 +757,8 @@ type Msg
     | SetActiveView ViewType
     | SetSceneName Int String
     | SetSceneWordTarget Int String
+    | SetAuthor String
+    | SetTitle String
     | ToggleFileExpanded Int
     | Write String
 
@@ -799,6 +813,12 @@ update msg model =
                             0
             in
                 model |> setSceneWordTarget id target
+
+        SetAuthor author ->
+            { model | author = author }
+
+        SetTitle title ->
+            { model | title = title }
 
         ToggleFileExpanded id ->
             model |> toggleFileExpanded id
