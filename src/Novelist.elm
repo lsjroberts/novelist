@@ -13,96 +13,38 @@ import Html.Events exposing (..)
 import Html.Keyed
 import Json.Encode as Encode
 import Json.Decode as Json
+import Json.Decode.Extra exposing ((|:))
 import Regex
 import Styles exposing (class)
 import Octicons as Icon
+import Data.File exposing (File, FileType(..))
+import Data.Novel exposing (Novel)
+import Data.Scene exposing (Scene)
+import Data.Token
+    exposing
+        ( Token
+        , TokenChildren(..)
+        , TokenType(..)
+        , getClosingTag
+        , getOpeningTag
+        , getShowTags
+        , getTokenChildren
+        , getTokenValue
+        , markdownToTokens
+        , tokensToPlainText
+        )
+import Data.Ui
+    exposing
+        ( Ui
+        , ViewType(..)
+        )
 
 
 -- MODEL
 
 
 type alias Model =
-    { ui : Ui
-    , novel : Novel
-    }
-
-
-type alias Ui =
-    { binder : Binder
-    , workspace : Workspace
-    , activeFile : Maybe Int
-    , activeView : ViewType
-    }
-
-
-type alias Binder =
-    { files : List File
-    , editingName : Maybe Int
-    }
-
-
-type alias Workspace =
-    { editingName : Maybe Int }
-
-
-type alias File =
-    { id : Int
-    , parent : Maybe Int
-    , type_ : FileType
-    , name : String
-    , expanded : Bool
-    }
-
-
-type FileType
-    = SceneFile
-
-
-type ViewType
-    = EditorView
-    | SettingsView
-
-
-type alias Novel =
-    { scenes : List Scene
-    , meta : Meta
-    }
-
-
-type alias Scene =
-    { id : Int
-    , parent : Maybe Int
-    , name : String
-    , content : List Token
-    , history : List (List Token)
-    , commit : Int
-    , wordTarget : Int
-    }
-
-
-type alias Meta =
-    { title : String
-    , author : String
-    , targetWordCount : Maybe Int
-    , deadline : Maybe Date
-    }
-
-
-type alias Token =
-    { token : TokenType
-    , children : TokenChildren
-    }
-
-
-type TokenType
-    = Paragraph
-    | Speech
-    | Emphasis
-    | Text String
-
-
-type TokenChildren
-    = TokenChildren (List Token)
+    Novel (Ui {})
 
 
 init : ( Model, Cmd Msg )
@@ -112,76 +54,72 @@ init =
     )
 
 
+createModel : List File -> Maybe Int -> Maybe Int -> ViewType -> List Scene -> String -> String -> Maybe Int -> Maybe Date -> Model
+createModel files editingFileName activeFile activeView scenes title author targetWordCount deadline =
+    { files = files
+    , editingFileName = editingFileName
+    , activeFile = activeFile
+    , activeView = activeView
+    , scenes = scenes
+    , title = title
+    , author = author
+    , targetWordCount = targetWordCount
+    , deadline = deadline
+    }
+
+
 empty : Model
 empty =
-    Model
-        { binder =
-            { files = []
-            , editingName = Nothing
-            }
-        , workspace =
-            { editingName = Nothing
-            }
-        , activeFile = Nothing
-        , activeView = EditorView
-        }
-        { scenes = []
-        , meta =
-            { title = "Title"
-            , author = "Author"
-            , targetWordCount = Nothing
-            , deadline = Nothing
-            }
-        }
+    { files = []
+    , editingFileName = Nothing
+    , activeFile = Nothing
+    , activeView = EditorView
+    , scenes = []
+    , title = "Title"
+    , author = "Author"
+    , targetWordCount = Nothing
+    , deadline = Nothing
+    }
 
 
 mock : Model
 mock =
-    Model
-        { binder =
-            { files =
-                [ File 0 Nothing SceneFile "Chapter One" False
-                , File 1 (Just 0) SceneFile "Scene One" False
-                , File 2 Nothing SceneFile "Chapter Two" False
-                , File 3 (Just 0) SceneFile "Scene Two" False
-                , File 4 (Just 0) SceneFile "Scene Three" False
-                ]
-            , editingName = Nothing
-            }
-        , workspace =
-            { editingName = Nothing
-            }
-        , activeFile = Just 0
-        , activeView = EditorView
-        }
-        { scenes =
-            [ Scene 0
-                Nothing
-                "Chapter One"
-                [ Token Paragraph (TokenChildren [ Token (Text "New scene") (TokenChildren []) ])
-                ]
-                []
-                0
-                2000
-            , Scene 1 (Just 0) "Scene One" [] [] 0 0
-            , Scene 2 Nothing "Chapter Two" [] [] 0 0
-            , Scene 3 (Just 0) "Scene Two" [] [] 0 0
-            , Scene 4 (Just 0) "Scene Three" [] [] 0 0
+    { files =
+        [ File 0 Nothing SceneFile "Chapter One" False
+        , File 1 (Just 0) SceneFile "Scene One" False
+        , File 2 Nothing SceneFile "Chapter Two" False
+        , File 3 (Just 0) SceneFile "Scene Two" False
+        , File 4 (Just 0) SceneFile "Scene Three" False
+        ]
+    , editingFileName = Nothing
+    , activeFile = Just 0
+    , activeView = EditorView
+    , scenes =
+        [ Scene 0
+            Nothing
+            "Chapter One"
+            [ Token Paragraph (TokenChildren [ Token (Text "New scene") (TokenChildren []) ])
             ]
-        , meta =
-            { title = "Title"
-            , author = "Author"
-            , targetWordCount = Nothing
-            , deadline = Nothing
-            }
-        }
+            []
+            0
+            2000
+        , Scene 1 (Just 0) "Scene One" [] [] 0 0
+        , Scene 2 Nothing "Chapter Two" [] [] 0 0
+        , Scene 3 (Just 0) "Scene Two" [] [] 0 0
+        , Scene 4 (Just 0) "Scene Three" [] [] 0 0
+        ]
+    , title = "Title"
+    , author = "Author"
+    , targetWordCount = Nothing
+    , deadline = Nothing
+    }
 
 
 getActiveScene : Model -> Maybe Scene
 getActiveScene model =
-    case model.ui.activeFile of
+    case model.activeFile of
         Just id ->
-            getById model.novel.scenes id
+            getById model.scenes id
 
         Nothing ->
             Nothing
@@ -234,90 +172,6 @@ getById xs id =
         |> List.head
 
 
-getOpeningTag : Token -> Maybe String
-getOpeningTag { token } =
-    case token of
-        Speech ->
-            Just "“"
-
-        Emphasis ->
-            Just "_"
-
-        _ ->
-            Nothing
-
-
-getClosingTag : Token -> Maybe String
-getClosingTag { token } =
-    case token of
-        Speech ->
-            Just "”"
-
-        Emphasis ->
-            Just "_"
-
-        _ ->
-            Nothing
-
-
-getShowTags : Token -> Bool
-getShowTags { token } =
-    case token of
-        Speech ->
-            True
-
-        Emphasis ->
-            True
-
-        _ ->
-            False
-
-
-getOpeningTagMatches : Token -> Maybe (List String)
-getOpeningTagMatches { token } =
-    case token of
-        Speech ->
-            Just [ "“", "\"" ]
-
-        Emphasis ->
-            Just [ "_" ]
-
-        _ ->
-            Nothing
-
-
-getClosingTagMatches : Token -> Maybe (List String)
-getClosingTagMatches { token } =
-    case token of
-        Speech ->
-            Just [ "”", "\"" ]
-
-        Emphasis ->
-            Just [ "_" ]
-
-        _ ->
-            Nothing
-
-
-getTokenValue : Token -> Maybe String
-getTokenValue { token } =
-    case token of
-        Text v ->
-            Just v
-
-        _ ->
-            Nothing
-
-
-getTokenChildren : Token -> List Token
-getTokenChildren token =
-    let
-        get (TokenChildren cs) =
-            cs
-    in
-        get token.children
-
-
 
 -- VIEW
 
@@ -326,7 +180,7 @@ view : Model -> Html Msg
 view model =
     let
         activeView =
-            case model.ui.activeView of
+            case model.activeView of
                 EditorView ->
                     viewEditor
 
@@ -355,7 +209,7 @@ viewMenu : Model -> Html Msg
 viewMenu model =
     let
         viewToggle =
-            case model.ui.activeView of
+            case model.activeView of
                 EditorView ->
                     div [ onClick (SetActiveView SettingsView) ]
                         [ Html.text "Settings" ]
@@ -382,7 +236,7 @@ viewBinderInner : Model -> Html Msg
 viewBinderInner model =
     let
         files =
-            model.ui.binder.files
+            model.files
 
         manuscript =
             files
@@ -463,7 +317,7 @@ viewWorkspaceHeader : Model -> Html Msg
 viewWorkspaceHeader model =
     div
         [ class [ Styles.WorkspaceHeader ] ]
-        [ div [] [ Html.text model.novel.meta.title ]
+        [ div [] [ Html.text model.title ]
         , div [ class [ Styles.WorkspaceHeaderAuthor ] ] [ Html.text "Author" ]
         ]
 
@@ -472,9 +326,9 @@ viewWorkspaceFile : Model -> Html Msg
 viewWorkspaceFile model =
     let
         file =
-            case model.ui.activeFile of
+            case model.activeFile of
                 Just id ->
-                    getById model.ui.binder.files id
+                    getById model.files id
 
                 Nothing ->
                     Nothing
@@ -482,7 +336,7 @@ viewWorkspaceFile model =
         sceneInner f =
             let
                 scene =
-                    getById model.novel.scenes f.id
+                    getById model.scenes f.id
             in
                 case scene of
                     Just s ->
@@ -533,7 +387,7 @@ viewSceneParentHeading : Model -> Scene -> Html Msg
 viewSceneParentHeading model scene =
     case scene.parent of
         Just parentId ->
-            case (getById model.novel.scenes parentId) of
+            case (getById model.scenes parentId) of
                 Just parent ->
                     input
                         [ class [ Styles.SceneParentHeading ]
@@ -573,19 +427,19 @@ viewSceneContentEditor model scene =
 
 
 viewToken : Token -> Html Msg
-viewToken model =
-    case model.token of
+viewToken token =
+    case token.type_ of
         Paragraph ->
-            viewTokenParagraph model
+            viewTokenParagraph token
 
         Speech ->
-            viewTokenSpeech model
+            viewTokenSpeech token
 
         Emphasis ->
-            viewTokenEmphasis model
+            viewTokenEmphasis token
 
         Text a ->
-            viewTokenText model
+            viewTokenText token
 
 
 viewTokenParagraph : Token -> Html Msg
@@ -610,7 +464,7 @@ viewTokenEmphasis token =
 
 viewTokenText : Token -> Html Msg
 viewTokenText token =
-    case token.token of
+    case token.type_ of
         Text value ->
             Html.text value
 
@@ -761,35 +615,31 @@ viewSettings model =
 
 viewProjectMeta : Model -> Html Msg
 viewProjectMeta model =
-    let
-        meta =
-            model.novel.meta
-    in
-        div [ class [ Styles.SettingsSection ] ]
-            [ h2 [ class [ Styles.SettingsSectionHeader ] ] [ Html.text "Project" ]
-            , viewFormInput
-                "Title"
-                (Just "The title of your story, displayed on the blah blah")
-                (input [ class [ Styles.FormInputText ], value meta.title ] [])
-            , viewFormInput
-                "Author"
-                (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
-                (input [ class [ Styles.FormInputText ], value meta.author ] [])
-            , viewFormInput
-                "Total Word Target"
-                (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
-                (input
-                    [ class [ Styles.FormInputText ]
-                    , Html.Attributes.type_ "number"
-                    , Html.Attributes.placeholder "Default: 80000"
-                    ]
-                    []
-                )
-            , viewFormInput
-                "Deadline"
-                (Just "Cras mattis consectetur purus sit amet fermentum.")
-                (input [ class [ Styles.FormInputText ] ] [])
-            ]
+    div [ class [ Styles.SettingsSection ] ]
+        [ h2 [ class [ Styles.SettingsSectionHeader ] ] [ Html.text "Project" ]
+        , viewFormInput
+            "Title"
+            (Just "The title of your story, displayed on the blah blah")
+            (input [ class [ Styles.FormInputText ], value model.title ] [])
+        , viewFormInput
+            "Author"
+            (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
+            (input [ class [ Styles.FormInputText ], value model.author ] [])
+        , viewFormInput
+            "Total Word Target"
+            (Just "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.")
+            (input
+                [ class [ Styles.FormInputText ]
+                , Html.Attributes.type_ "number"
+                , Html.Attributes.placeholder "Default: 80000"
+                ]
+                []
+            )
+        , viewFormInput
+            "Deadline"
+            (Just "Cras mattis consectetur purus sit amet fermentum.")
+            (input [ class [ Styles.FormInputText ] ] [])
+        ]
 
 
 viewEditorSettings : Model -> Html Msg
@@ -904,39 +754,38 @@ type Msg
 updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
 updateWithStorage msg model =
     let
-        ( newModel, cmds ) =
+        newModel =
             update msg model
     in
         ( newModel
-        , Cmd.batch [ setStorage (modelEncoder newModel), cmds ]
+        , setStorage (modelEncoder newModel)
         )
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+
+-- TODO: Review how I approach the update now the model is not nested
+
+
+update : Msg -> Model -> Model
 update msg model =
     case (Debug.log "msg" msg) of
+        -- MAYBE DONT DO THIS
         GoToSettings _ ->
-            update (SetActiveView SettingsView) model
+            model |> update (SetActiveView SettingsView)
 
         OpenProject project ->
-            ( decodeProject project, Cmd.none )
+            decodeProject project
 
         SetActiveFile id ->
-            ( model |> setActiveFile (Just id)
-            , Cmd.none
-            )
+            { model | activeFile = Just id }
 
-        SetActiveView viewType ->
-            ( model |> setActiveView viewType
-            , Cmd.none
-            )
+        SetActiveView activeView ->
+            { model | activeView = activeView }
 
         SetSceneName id name ->
-            ( model
+            model
                 |> setSceneName id name
                 |> setFileName id name
-            , Cmd.none
-            )
 
         SetSceneWordTarget id targetString ->
             let
@@ -951,66 +800,25 @@ update msg model =
                         Err errorMsg ->
                             0
             in
-                ( model |> setSceneWordTarget id target
-                , Cmd.none
-                )
+                model |> setSceneWordTarget id target
 
         ToggleFileExpanded id ->
-            ( model |> toggleFileExpanded id
-            , Cmd.none
-            )
+            model |> toggleFileExpanded id
 
         Write content ->
-            case model.ui.activeFile of
+            case model.activeFile of
                 Just id ->
-                    ( model |> setSceneContent id (markdownToTokens content)
-                    , Cmd.none
-                    )
+                    model |> setSceneContent id (markdownToTokens content)
 
                 Nothing ->
-                    ( model, Cmd.none )
-
-
-setUi : Ui -> Model -> Model
-setUi ui model =
-    { model | ui = ui }
-
-
-setActiveFile : Maybe Int -> Model -> Model
-setActiveFile activeFile model =
-    let
-        ui =
-            model.ui
-    in
-        model |> setUi { ui | activeFile = activeFile }
-
-
-setActiveView : ViewType -> Model -> Model
-setActiveView activeView model =
-    let
-        ui =
-            model.ui
-    in
-        model |> setUi { ui | activeView = activeView }
-
-
-setBinder : Binder -> Model -> Model
-setBinder binder model =
-    let
-        ui =
-            model.ui
-    in
-        model |> setUi { ui | binder = binder }
+                    model
 
 
 setFile : File -> Model -> Model
 setFile file model =
     let
-        binder =
-            model.ui.binder
-
         files =
-            binder.files
+            model.files
                 |> List.map
                     (\f ->
                         if f.id == file.id then
@@ -1019,14 +827,14 @@ setFile file model =
                             f
                     )
     in
-        model |> setBinder { binder | files = files }
+        { model | files = files }
 
 
 setFileName : Int -> String -> Model -> Model
 setFileName id name model =
     let
         maybeFile =
-            getById model.ui.binder.files id
+            getById model.files id
     in
         case maybeFile of
             Just file ->
@@ -1040,7 +848,7 @@ toggleFileExpanded : Int -> Model -> Model
 toggleFileExpanded id model =
     let
         maybeFile =
-            getById model.ui.binder.files id
+            getById model.files id
     in
         case maybeFile of
             Just file ->
@@ -1050,37 +858,11 @@ toggleFileExpanded id model =
                 model
 
 
-setWorkspace : Workspace -> Model -> Model
-setWorkspace workspace model =
-    let
-        ui =
-            model.ui
-    in
-        model |> setUi { ui | workspace = workspace }
-
-
-setWorkspaceEditingName : Maybe Int -> Model -> Model
-setWorkspaceEditingName maybeId model =
-    let
-        workspace =
-            model.ui.workspace
-    in
-        model |> setWorkspace { workspace | editingName = maybeId }
-
-
-setNovel : Novel -> Model -> Model
-setNovel novel model =
-    { model | novel = novel }
-
-
 setScene : Scene -> Model -> Model
 setScene scene model =
     let
-        novel =
-            model.novel
-
         scenes =
-            novel.scenes
+            model.scenes
                 |> List.map
                     (\s ->
                         if s.id == scene.id then
@@ -1089,14 +871,14 @@ setScene scene model =
                             s
                     )
     in
-        model |> setNovel { novel | scenes = scenes }
+        { model | scenes = scenes }
 
 
 setSceneName : Int -> String -> Model -> Model
 setSceneName id name model =
     let
         maybeScene =
-            getById model.novel.scenes id
+            getById model.scenes id
     in
         case maybeScene of
             Just scene ->
@@ -1110,7 +892,7 @@ setSceneContent : Int -> List Token -> Model -> Model
 setSceneContent id content model =
     let
         maybeScene =
-            getById model.novel.scenes id
+            getById model.scenes id
     in
         case maybeScene of
             Just scene ->
@@ -1133,7 +915,7 @@ setSceneWordTarget : Int -> Int -> Model -> Model
 setSceneWordTarget id wordTarget model =
     let
         maybeScene =
-            getById model.novel.scenes id
+            getById model.scenes id
     in
         case maybeScene of
             Just scene ->
@@ -1208,31 +990,16 @@ decodeProject payload =
 
 modelDecoder : Json.Decoder Model
 modelDecoder =
-    Json.map2 Model
-        (Json.field "ui" uiDecoder)
-        (Json.field "novel" novelDecoder)
-
-
-uiDecoder : Json.Decoder Ui
-uiDecoder =
-    Json.map4 Ui
-        (Json.field "binder" binderDecoder)
-        (Json.field "workspace" workspaceDecoder)
-        (Json.field "activeFile" activeFileDecoder)
-        (Json.field "activeView" activeViewDecoder)
-
-
-binderDecoder : Json.Decoder Binder
-binderDecoder =
-    Json.map2 Binder
-        (Json.field "files" (Json.list fileDecoder))
-        (Json.field "editingName" editingNameDecoder)
-
-
-workspaceDecoder : Json.Decoder Workspace
-workspaceDecoder =
-    Json.map Workspace
-        (Json.field "editingName" editingNameDecoder)
+    Json.succeed createModel
+        |: (Json.field "files" (Json.list fileDecoder))
+        |: (Json.field "editingFileName" editingNameDecoder)
+        |: (Json.field "activeFile" activeFileDecoder)
+        |: (Json.field "activeView" activeViewDecoder)
+        |: (Json.field "scenes" (Json.list sceneDecoder))
+        |: (Json.field "title" Json.string)
+        |: (Json.field "author" Json.string)
+        |: (Json.field "targetWordCount" (Json.maybe Json.int))
+        |: (Json.field "deadline" (Json.maybe dateDecoder))
 
 
 activeFileDecoder : Json.Decoder (Maybe Int)
@@ -1288,13 +1055,6 @@ fileTypeDecoder =
         Json.string |> Json.andThen stringToFileType
 
 
-novelDecoder : Json.Decoder Novel
-novelDecoder =
-    Json.map2 Novel
-        (Json.field "scenes" (Json.list sceneDecoder))
-        (Json.field "meta" metaDecoder)
-
-
 sceneDecoder : Json.Decoder Scene
 sceneDecoder =
     Json.map7 Scene
@@ -1305,15 +1065,6 @@ sceneDecoder =
         (Json.field "history" (Json.list (Json.list tokenDecoder)))
         (Json.field "commit" Json.int)
         (Json.field "wordTarget" Json.int)
-
-
-metaDecoder : Json.Decoder Meta
-metaDecoder =
-    Json.map4 Meta
-        (Json.field "title" Json.string)
-        (Json.field "author" Json.string)
-        (Json.field "targetWordCount" (Json.maybe Json.int))
-        (Json.field "deadline" (Json.maybe dateDecoder))
 
 
 tokenDecoder : Json.Decoder Token
@@ -1369,33 +1120,18 @@ dateDecoder =
             )
 
 
-
--- ENCODERS
-
-
 modelEncoder : Model -> Encode.Value
 modelEncoder model =
     Encode.object
-        [ ( "ui", uiEncoder model.ui )
-        , ( "novel", novelEncoder model.novel )
-        ]
-
-
-uiEncoder : Ui -> Encode.Value
-uiEncoder ui =
-    Encode.object
-        [ ( "binder", binderEncoder ui.binder )
-        , ( "workspace", workspaceEncoder ui.workspace )
-        , ( "activeFile", maybeIntEncoder ui.activeFile )
-        , ( "activeView", viewTypeEncoder ui.activeView )
-        ]
-
-
-binderEncoder : Binder -> Encode.Value
-binderEncoder binder =
-    Encode.object
-        [ ( "files", Encode.list (List.map fileEncoder binder.files) )
-        , ( "editingName", maybeIntEncoder binder.editingName )
+        [ ( "files", Encode.list (List.map fileEncoder model.files) )
+        , ( "editingFileName", maybeIntEncoder model.editingFileName )
+        , ( "activeFile", maybeIntEncoder model.activeFile )
+        , ( "activeView", viewTypeEncoder model.activeView )
+        , ( "scenes", Encode.list (List.map sceneEncoder model.scenes) )
+        , ( "title", Encode.string model.title )
+        , ( "author", Encode.string model.author )
+        , ( "targetWordCount", maybeIntEncoder model.targetWordCount )
+        , ( "deadline", maybeDateEncoder model.deadline )
         ]
 
 
@@ -1415,12 +1151,6 @@ fileTypeEncoder fileType =
     case fileType of
         SceneFile ->
             Encode.string "scene"
-
-
-workspaceEncoder : Workspace -> Encode.Value
-workspaceEncoder workspace =
-    Encode.object
-        [ ( "editingName", maybeIntEncoder workspace.editingName ) ]
 
 
 viewTypeEncoder : ViewType -> Encode.Value
@@ -1453,14 +1183,6 @@ maybeDateEncoder maybeDate =
             Encode.null
 
 
-novelEncoder : Novel -> Encode.Value
-novelEncoder novel =
-    Encode.object
-        [ ( "scenes", Encode.list (List.map sceneEncoder novel.scenes) )
-        , ( "meta", metaEncoder novel.meta )
-        ]
-
-
 sceneEncoder : Scene -> Encode.Value
 sceneEncoder scene =
     Encode.object
@@ -1474,20 +1196,10 @@ sceneEncoder scene =
         ]
 
 
-metaEncoder : Meta -> Encode.Value
-metaEncoder meta =
-    Encode.object
-        [ ( "title", Encode.string meta.title )
-        , ( "author", Encode.string meta.author )
-        , ( "targetWordCount", maybeIntEncoder meta.targetWordCount )
-        , ( "deadline", maybeDateEncoder meta.deadline )
-        ]
-
-
 tokenEncoder : Token -> Encode.Value
 tokenEncoder token =
     Encode.object
-        [ ( "token", tokenTypeEncoder token.token )
+        [ ( "token", tokenTypeEncoder token.type_ )
         , ( "children", Encode.list (List.map tokenEncoder (getTokenChildren token)) )
         ]
 
@@ -1506,161 +1218,3 @@ tokenTypeEncoder tokenType =
 
         Text value ->
             Encode.string ("text|" ++ value)
-
-
-
--- FACTORIES
-
-
-markdownToTokens : String -> List Token
-markdownToTokens string =
-    let
-        cleanString =
-            Regex.replace Regex.All (Regex.regex "\n+$") (\_ -> "\n") string
-
-        tokens =
-            if String.contains "\n" cleanString then
-                cleanString
-                    |> String.split "\n"
-                    |> List.map paragraph
-            else if String.contains "“" cleanString then
-                tokenWrap2 "“" "”" speech text string
-            else if String.contains "\"" cleanString then
-                tokenWrap "\"" speech text string
-            else if String.contains "_" cleanString then
-                tokenWrap "_" emphasis text cleanString
-            else
-                [ text cleanString ]
-    in
-        tokens |> filterEmptyParagraphTokens
-
-
-paragraph : String -> Token
-paragraph string =
-    string
-        |> markdownToTokens
-        |> TokenChildren
-        |> Token Paragraph
-
-
-speech : String -> Token
-speech string =
-    string
-        |> Regex.replace Regex.All (Regex.regex "“|”|\"") (\_ -> "")
-        |> markdownToTokens
-        |> TokenChildren
-        |> Token Speech
-
-
-emphasis : String -> Token
-emphasis string =
-    string
-        |> Regex.replace Regex.All (Regex.regex "_") (\_ -> "")
-        |> markdownToTokens
-        |> TokenChildren
-        |> Token Emphasis
-
-
-text : String -> Token
-text string =
-    Token (Text string) (TokenChildren [])
-
-
-
--- UTILS
-
-
-tokenWrap char =
-    tokenWrap2 char char
-
-
-tokenWrap2 : String -> String -> (String -> Token) -> (String -> Token) -> String -> List Token
-tokenWrap2 left right inside outside string =
-    let
-        exp =
-            Regex.regex (left ++ ".+?" ++ right)
-
-        insides =
-            Regex.find Regex.All exp string
-                |> List.map .match
-                |> List.map inside
-
-        outsides =
-            Regex.split Regex.All exp string
-                |> List.map outside
-                |> filterEmptyTextTokens
-    in
-        if String.startsWith left string then
-            zip insides outsides
-        else
-            zip outsides insides
-
-
-filterEmptyParagraphTokens : List Token -> List Token
-filterEmptyParagraphTokens =
-    List.filter
-        (\x ->
-            if x.token == Paragraph then
-                if List.length (filterEmptyTextTokens (getTokenChildren x)) == 0 then
-                    False
-                else
-                    True
-            else
-                True
-        )
-
-
-filterEmptyTextTokens : List Token -> List Token
-filterEmptyTextTokens =
-    List.filter
-        (\x ->
-            case x.token of
-                Text value ->
-                    if String.length value > 0 then
-                        True
-                    else
-                        False
-
-                _ ->
-                    False
-        )
-
-
-tokensToPlainText : List Token -> String
-tokensToPlainText tokens =
-    tokens
-        |> List.map tokenToPlainText
-        |> List.foldl (++) ""
-
-
-tokenToPlainText : Token -> String
-tokenToPlainText token =
-    let
-        children =
-            getTokenChildren token
-    in
-        case getTokenValue token of
-            Just value ->
-                String.trim value
-
-            Nothing ->
-                if List.isEmpty children then
-                    ""
-                else
-                    tokensToPlainText children
-
-
-zip : List a -> List a -> List a
-zip xs ys =
-    case ( xs, ys ) of
-        ( x :: xBack, y :: yBack ) ->
-            [ x, y ] ++ zip xBack yBack
-
-        ( x :: xBack, _ ) ->
-            [ x ]
-
-        ( _, y :: yBack ) ->
-            [ y ]
-
-        ( _, _ ) ->
-            []
