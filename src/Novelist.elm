@@ -1138,6 +1138,10 @@ dateDecoder =
             )
 
 
+
+-- ENCODERS
+
+
 modelEncoder : Model -> Encode.Value
 modelEncoder model =
     Encode.object
