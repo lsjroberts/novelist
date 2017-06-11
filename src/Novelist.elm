@@ -16,6 +16,8 @@ import Json.Decode as Json
 import Json.Decode.Extra exposing ((|:))
 import Regex
 import Styles exposing (class)
+import Task
+import Time exposing (Time)
 import Octicons as Icon
 import Data.File exposing (File, FileType(..))
 import Data.Novel exposing (Novel)
@@ -65,6 +67,7 @@ createModel files editingFileName activeFile activeView scenes title author targ
     , author = author
     , targetWordCount = targetWordCount
     , deadline = deadline
+    , time = 0
     }
 
 
@@ -79,6 +82,7 @@ empty =
     , author = "Author"
     , targetWordCount = Nothing
     , deadline = Nothing
+    , time = 0
     }
 
 
@@ -93,7 +97,7 @@ mock =
         ]
     , editingFileName = Nothing
     , activeFile = Just 0
-    , activeView = EditorView
+    , activeView = SettingsView
     , scenes =
         [ Scene 0
             Nothing
@@ -112,6 +116,7 @@ mock =
     , author = "Author"
     , targetWordCount = Nothing
     , deadline = Nothing
+    , time = 0
     }
 
 
@@ -646,9 +651,20 @@ viewProjectMeta model =
                 []
             )
         , viewFormInput
-            "Deadline"
-            (Just "Cras mattis consectetur purus sit amet fermentum.")
-            (input [ class [ Styles.FormInputText ] ] [])
+            ("Deadline ("
+                ++ (timeUntilDeadline model.time model.deadline)
+                ++ ")"
+            )
+            (Just
+                ("Cras mattis consectetur purus sit amet fermentum.")
+            )
+            (input
+                [ class [ Styles.FormInputText ]
+                , onInput SetDeadline
+                , Html.Attributes.type_ "date"
+                ]
+                []
+            )
         ]
 
 
@@ -752,6 +768,7 @@ viewFormInputOption label maybeDesc formInput =
 
 type Msg
     = GoToSettings String
+    | NewTime Time
     | OpenProject String
     | SetActiveFile Int
     | SetActiveView ViewType
@@ -759,6 +776,7 @@ type Msg
     | SetSceneWordTarget Int String
     | SetAuthor String
     | SetTitle String
+    | SetDeadline String
     | ToggleFileExpanded Int
     | Write String
 
@@ -784,6 +802,9 @@ update msg model =
         -- MAYBE DONT DO THIS
         GoToSettings _ ->
             model |> update (SetActiveView SettingsView)
+
+        NewTime time ->
+            { model | time = time }
 
         OpenProject project ->
             decodeProject project
@@ -819,6 +840,18 @@ update msg model =
 
         SetTitle title ->
             { model | title = title }
+
+        SetDeadline deadlineString ->
+            let
+                deadlineResult =
+                    Date.fromString (deadlineString ++ " 00:00:00")
+            in
+                case deadlineResult of
+                    Ok deadline ->
+                        { model | deadline = Just deadline }
+
+                    Err err ->
+                        Debug.log err model
 
         ToggleFileExpanded id ->
             model |> toggleFileExpanded id
@@ -952,6 +985,7 @@ subscriptions model =
     Sub.batch
         [ openProject OpenProject
         , gotoSettings GoToSettings
+        , Time.every Time.second NewTime
         ]
 
 
@@ -1240,3 +1274,71 @@ tokenTypeEncoder tokenType =
 
         Text value ->
             Encode.string ("text|" ++ value)
+
+
+
+-- UTILS
+
+
+timeUntilDeadline : Time -> Maybe Date -> String
+timeUntilDeadline time deadline =
+    case deadline of
+        Just deadlineDate ->
+            deadlineDate
+                |> Date.toTime
+                |> timeUntil time
+
+        Nothing ->
+            ""
+
+
+timeUntil : Time -> Time -> String
+timeUntil timeFrom timeTo =
+    let
+        timeDiff =
+            timeTo - timeFrom
+
+        timeSeconds =
+            Time.inSeconds timeDiff
+
+        timeMinutes =
+            Time.inMinutes timeDiff
+
+        timeHours =
+            Time.inHours timeDiff
+
+        timeDays =
+            timeHours / 24.0
+
+        timeWeeks =
+            timeDays / 7.0
+
+        format time unit =
+            let
+                floorTime =
+                    floor time
+
+                withUnit =
+                    (toString floorTime) ++ " " ++ unit
+            in
+                if floorTime /= 1 then
+                    withUnit ++ "s"
+                else
+                    withUnit
+    in
+        if timeWeeks < 4.0 then
+            if timeDays < 1.0 then
+                if timeHours < 1.0 then
+                    if timeMinutes < 1.0 then
+                        if timeSeconds < 1.0 then
+                            "now"
+                        else
+                            format timeSeconds "second"
+                    else
+                        format timeMinutes "minute"
+                else
+                    format timeHours "hour"
+            else
+                format timeDays "day"
+        else
+            format timeWeeks "week"
