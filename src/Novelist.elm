@@ -647,6 +647,12 @@ viewProjectMeta model =
                 [ class [ Styles.FormInputText ]
                 , Html.Attributes.type_ "number"
                 , Html.Attributes.placeholder "Default: 80000"
+                , onInput SetTargetWordCount
+                  -- use Maybe.Extra.mapDefault "" toString
+                , model.targetWordCount
+                    |> Maybe.withDefault 0
+                    |> toString
+                    |> value
                 ]
                 []
             )
@@ -660,8 +666,8 @@ viewProjectMeta model =
             )
             (input
                 [ class [ Styles.FormInputText ]
-                , onInput SetDeadline
                 , Html.Attributes.type_ "date"
+                , onInput SetDeadline
                 ]
                 []
             )
@@ -775,8 +781,9 @@ type Msg
     | SetSceneName Int String
     | SetSceneWordTarget Int String
     | SetAuthor String
-    | SetTitle String
     | SetDeadline String
+    | SetTargetWordCount String
+    | SetTitle String
     | ToggleFileExpanded Int
     | Write String
 
@@ -821,25 +828,10 @@ update msg model =
                 |> setFileName id name
 
         SetSceneWordTarget id targetString ->
-            let
-                targetInt =
-                    String.toInt targetString
-
-                target =
-                    case targetInt of
-                        Ok int ->
-                            int
-
-                        Err errorMsg ->
-                            0
-            in
-                model |> setSceneWordTarget id target
+            model |> setSceneWordTarget id (Result.withDefault 0 (String.toInt targetString))
 
         SetAuthor author ->
             { model | author = author }
-
-        SetTitle title ->
-            { model | title = title }
 
         SetDeadline deadlineString ->
             let
@@ -852,6 +844,18 @@ update msg model =
 
                     Err err ->
                         Debug.log err model
+
+        SetTitle title ->
+            { model | title = title }
+
+        SetTargetWordCount targetString ->
+            { model
+                | targetWordCount =
+                    targetString
+                        |> String.toInt
+                        |> Result.withDefault 0
+                        |> Just
+            }
 
         ToggleFileExpanded id ->
             model |> toggleFileExpanded id
@@ -985,7 +989,7 @@ subscriptions model =
     Sub.batch
         [ openProject OpenProject
         , gotoSettings GoToSettings
-        , Time.every Time.second NewTime
+        , Time.every Time.minute NewTime
         ]
 
 
