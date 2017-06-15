@@ -799,10 +799,6 @@ updateWithStorage msg model =
         )
 
 
-
--- TODO: Review how I approach the update now the model is not nested
-
-
 update : Msg -> Model -> Model
 update msg model =
     case (Debug.log "msg" msg) of
