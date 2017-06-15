@@ -1215,19 +1215,15 @@ timeUntil timeFrom timeTo =
                 else
                     withUnit
     in
-        if timeWeeks < 4.0 then
-            if timeDays < 1.0 then
-                if timeHours < 1.0 then
-                    if timeMinutes < 1.0 then
-                        if timeSeconds < 1.0 then
-                            "now"
-                        else
-                            format timeSeconds "second"
-                    else
-                        format timeMinutes "minute"
-                else
-                    format timeHours "hour"
-            else
-                format timeDays "day"
+        if timeSeconds < 1.0 then
+            "now"
+        else if timeMinutes < 1.0 then
+            format timeSeconds "second"
+        else if timeHours < 1.0 then
+            format timeMinutes "minute"
+        else if timeDays < 1.0 then
+            format timeHours "hour"
+        else if timeWeeks < 4.0 then
+            format timeDays "day"
         else
             format timeWeeks "week"
