@@ -56,12 +56,12 @@ init =
     )
 
 
-createModel : List File -> Maybe Int -> Maybe Int -> ViewType -> List Scene -> String -> String -> Maybe Int -> Maybe Date -> Model
-createModel files editingFileName activeFile activeView scenes title author targetWordCount deadline =
+createModel : List File -> Maybe Int -> List Scene -> String -> String -> Maybe Int -> Maybe Date -> Model
+createModel files activeFile scenes title author targetWordCount deadline =
     { files = files
-    , editingFileName = editingFileName
+    , editingFileName = Nothing
     , activeFile = activeFile
-    , activeView = activeView
+    , activeView = EditorView
     , scenes = scenes
     , title = title
     , author = author
@@ -97,7 +97,7 @@ mock =
         ]
     , editingFileName = Nothing
     , activeFile = Just 0
-    , activeView = SettingsView
+    , activeView = EditorView
     , scenes =
         [ Scene 0
             Nothing
@@ -1048,9 +1048,7 @@ modelDecoder : Json.Decoder Model
 modelDecoder =
     Json.succeed createModel
         |: (Json.field "files" (Json.list fileDecoder))
-        |: (Json.field "editingFileName" editingNameDecoder)
         |: (Json.field "activeFile" activeFileDecoder)
-        |: (Json.field "activeView" activeViewDecoder)
         |: (Json.field "scenes" (Json.list sceneDecoder))
         |: (Json.field "title" Json.string)
         |: (Json.field "author" Json.string)
@@ -1060,29 +1058,6 @@ modelDecoder =
 
 activeFileDecoder : Json.Decoder (Maybe Int)
 activeFileDecoder =
-    Json.maybe Json.int
-
-
-activeViewDecoder : Json.Decoder ViewType
-activeViewDecoder =
-    let
-        stringToViewType : String -> Json.Decoder ViewType
-        stringToViewType viewType =
-            case viewType of
-                "editor" ->
-                    Json.succeed EditorView
-
-                "settings" ->
-                    Json.succeed SettingsView
-
-                _ ->
-                    Json.succeed EditorView
-    in
-        Json.string |> Json.andThen stringToViewType
-
-
-editingNameDecoder : Json.Decoder (Maybe Int)
-editingNameDecoder =
     Json.maybe Json.int
 
 

@@ -9,7 +9,7 @@ const {
 const fs = require('fs-extra');
 const path = require('path');
 
-require('electron-debug')({ showDevTools: false });
+require('electron-debug')({ showDevTools: true });
 
 let windows = [];
 
