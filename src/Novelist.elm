@@ -422,7 +422,7 @@ viewSceneContentEditor scene =
                 , contenteditable True
                 , spellcheck False
                   -- , onFocus StartWriting
-                , on "blur" (Json.map Write childrenContentDecoder)
+                , on "blur" (Json.map (Write scene.id) childrenContentDecoder)
                 ]
                 (List.map viewToken scene.content)
           )
@@ -785,7 +785,7 @@ type Msg
     | SetTargetWordCount String
     | SetTitle String
     | ToggleFileExpanded Int
-    | Write String
+    | Write Int String
 
 
 updateWithStorage : Msg -> Model -> ( Model, Cmd Msg )
@@ -824,11 +824,16 @@ update msg model =
 
         SetSceneName id name ->
             model
-                |> setSceneName id name
-                |> setFileName id name
+                |> Data.Novel.updateScene id (\scene -> { scene | name = name })
+                |> Data.Ui.updateFile id (\file -> { file | name = name })
 
         SetSceneWordTarget id targetString ->
-            model |> setSceneWordTarget id (Result.withDefault 0 (String.toInt targetString))
+            let
+                wordTarget =
+                    Result.withDefault 0 (String.toInt targetString)
+            in
+                model
+                    |> Data.Novel.updateScene id (\scene -> { scene | wordTarget = wordTarget })
 
         SetAuthor author ->
             { model | author = author }
@@ -858,126 +863,31 @@ update msg model =
             }
 
         ToggleFileExpanded id ->
-            model |> toggleFileExpanded id
-
-        Write content ->
-            case model.activeFile of
-                Just id ->
-                    model |> setSceneContent id (markdownToTokens content)
-
-                Nothing ->
-                    model
-
-
-setFile : File -> Model -> Model
-setFile file model =
-    let
-        files =
-            model.files
-                |> List.map
-                    (\f ->
-                        if f.id == file.id then
-                            file
-                        else
-                            f
+            model
+                |> Data.Ui.updateFile id
+                    (\file ->
+                        { file
+                            | expanded = not file.expanded
+                        }
                     )
-    in
-        { model | files = files }
 
-
-setFileName : Int -> String -> Model -> Model
-setFileName id name model =
-    let
-        maybeFile =
-            getById model.files id
-    in
-        case maybeFile of
-            Just file ->
-                model |> setFile { file | name = name }
-
-            Nothing ->
+        Write id content ->
+            let
+                tokens =
+                    markdownToTokens content
+            in
                 model
-
-
-toggleFileExpanded : Int -> Model -> Model
-toggleFileExpanded id model =
-    let
-        maybeFile =
-            getById model.files id
-    in
-        case maybeFile of
-            Just file ->
-                model |> setFile { file | expanded = not file.expanded }
-
-            Nothing ->
-                model
-
-
-setScene : Scene -> Model -> Model
-setScene scene model =
-    let
-        scenes =
-            model.scenes
-                |> List.map
-                    (\s ->
-                        if s.id == scene.id then
-                            scene
-                        else
-                            s
-                    )
-    in
-        { model | scenes = scenes }
-
-
-setSceneName : Int -> String -> Model -> Model
-setSceneName id name model =
-    let
-        maybeScene =
-            getById model.scenes id
-    in
-        case maybeScene of
-            Just scene ->
-                model |> setScene { scene | name = name }
-
-            Nothing ->
-                model
-
-
-setSceneContent : Int -> List Token -> Model -> Model
-setSceneContent id content model =
-    let
-        maybeScene =
-            getById model.scenes id
-    in
-        case maybeScene of
-            Just scene ->
-                if content == scene.content then
-                    model
-                else
-                    model
-                        |> setScene
-                            { scene
-                                | content = content
-                                , history = scene.content :: scene.history
-                                , commit = scene.commit + 1
-                            }
-
-            Nothing ->
-                model
-
-
-setSceneWordTarget : Int -> Int -> Model -> Model
-setSceneWordTarget id wordTarget model =
-    let
-        maybeScene =
-            getById model.scenes id
-    in
-        case maybeScene of
-            Just scene ->
-                model |> setScene { scene | wordTarget = wordTarget }
-
-            Nothing ->
-                model
+                    |> Data.Novel.updateScene id
+                        (\scene ->
+                            if tokens == scene.content then
+                                scene
+                            else
+                                { scene
+                                    | content = tokens
+                                    , history = scene.content :: scene.history
+                                    , commit = scene.commit + 1
+                                }
+                        )
 
 
 
