@@ -37,7 +37,7 @@
         }
     ],
     "editingFileName": null,
-    "activeFile": 2,
+    "activeFile": 1,
     "activeView": "editor",
     "scenes": [
         {
@@ -188,6 +188,6 @@
     ],
     "title": "Title",
     "author": "Author",
-    "totalWordTarget": null,
+    "totalWordTarget": 80000,
     "deadline": "1533164400000"
 }

@@ -1,5 +1,6 @@
 port module Novelist exposing (..)
 
+import Char
 import Date exposing (Date)
 import Debug
 import Html exposing (..)
@@ -97,18 +98,18 @@ mock =
         , File 4 (Just 0) SceneFile "Scene Three" False
         ]
     , editingFileName = Nothing
-    , activeFile = Just 0
+    , activeFile = Just 1
     , activeView = EditorView
     , scenes =
-        [ Scene 0
-            Nothing
-            "Chapter One"
+        [ Scene 0 Nothing "Chapter One" [] [] 0 0
+        , Scene 1
+            (Just 0)
+            "Scene One"
             [ Token Paragraph (TokenChildren [ Token (Text "New scene") (TokenChildren []) ])
             ]
             []
             0
             2000
-        , Scene 1 (Just 0) "Scene One" [] [] 0 0
         , Scene 2 Nothing "Chapter Two" [] [] 0 0
         , Scene 3 (Just 0) "Scene Two" [] [] 0 0
         , Scene 4 (Just 0) "Scene Three" [] [] 0 0
@@ -131,25 +132,64 @@ getActiveScene model =
             Nothing
 
 
-getWordCount : Model -> Int
-getWordCount model =
+getActiveSceneWordCount : Model -> Int
+getActiveSceneWordCount model =
     case getActiveScene model of
         Just scene ->
-            scene
-                |> .content
-                |> tokensToPlainText
-                -- then replace all non-alphanumeric and space characters
-                |>
-                    String.split " "
-                |> List.length
+            getSceneWordCount scene
 
         Nothing ->
             0
 
 
+isSpaceChar char =
+    case char of
+        "\n" ->
+            True
+
+        _ ->
+            False
+
+
+isAlphaNumericChar string =
+    let
+        char =
+            case String.uncons string of
+                Just ( c, rest ) ->
+                    c
+
+                Nothing ->
+                    ' '
+
+        code =
+            Char.toCode char
+    in
+        if
+            (code >= 48 && code <= 57)
+                || (code >= 65 && code <= 90)
+                || (code >= 97 && code <= 122)
+        then
+            True
+        else
+            False
+
+
+getSceneWordCount : Scene -> Int
+getSceneWordCount =
+    .content >> tokensToPlainText >> getStringWordCount
+
+
+getStringWordCount : String -> Int
+getStringWordCount =
+    String.split " "
+        >> List.filter (isSpaceChar >> not)
+        >> List.filter isAlphaNumericChar
+        >> List.length
+
+
 getTotalWordCount : Model -> Int
-getTotalWordCount model =
-    0
+getTotalWordCount =
+    .scenes >> List.map getSceneWordCount >> List.sum
 
 
 getRootFiles : List File -> List File
@@ -519,18 +559,48 @@ viewInspector deadline totalWordTarget totalWordCount =
     div
         [ class [ Styles.Inspector ] ]
         [ viewPanel
-            [ viewInspectorDeadline deadline totalWordTarget totalWordCount ]
+            [ viewInspectorDeadline deadline
+            , viewInspectorWords totalWordTarget totalWordCount
+            ]
         ]
 
 
-viewInspectorDeadline : Maybe Date -> Maybe Int -> Int -> Html Msg
-viewInspectorDeadline deadline totalWordTarget totalWordCount =
+viewInspectorDeadline : Maybe Date -> Html Msg
+viewInspectorDeadline deadline =
     let
         deadlineString =
             Maybe.Extra.unwrap "" formatDateHuman deadline
     in
         div []
             [ Html.text deadlineString ]
+
+
+viewInspectorWords : Maybe Int -> Int -> Html Msg
+viewInspectorWords totalWordTarget totalWordCount =
+    let
+        countString =
+            toString totalWordCount
+
+        phrase =
+            case totalWordTarget of
+                Just target ->
+                    countString ++ " words of " ++ (toString target) ++ " word target"
+
+                Nothing ->
+                    countString ++ " words"
+
+        percent =
+            case totalWordTarget of
+                Just target ->
+                    (toString (floor ((totalWordCount * 100 |> toFloat) / (toFloat target)))) ++ "% complete"
+
+                Nothing ->
+                    "no target"
+    in
+        div []
+            [ div [] [ Html.text phrase ]
+            , div [] [ Html.text percent ]
+            ]
 
 
 viewFooter : Model -> Html Msg
@@ -567,7 +637,7 @@ viewFooterWordCount model =
     let
         wordCount =
             model
-                |> getWordCount
+                |> getActiveSceneWordCount
                 |> toString
                 |> Html.text
     in
