@@ -147,6 +147,11 @@ getWordCount model =
             0
 
 
+getTotalWordCount : Model -> Int
+getTotalWordCount model =
+    0
+
+
 getRootFiles : List File -> List File
 getRootFiles files =
     files |> List.filter (\f -> f.parent == Nothing)
@@ -205,7 +210,7 @@ viewEditor model =
             [ class [ Styles.Editor ] ]
             [ viewBinder model.files
             , viewWorkspace model
-            , viewInspector
+            , viewInspector model.deadline model.totalWordTarget (getTotalWordCount model)
             ]
         , viewFooter model
         ]
@@ -509,13 +514,23 @@ viewTokenInner (TokenChildren children) =
     List.map viewToken children
 
 
-viewInspector : Html Msg
-viewInspector =
+viewInspector : Maybe Date -> Maybe Int -> Int -> Html Msg
+viewInspector deadline totalWordTarget totalWordCount =
     div
         [ class [ Styles.Inspector ] ]
         [ viewPanel
-            []
+            [ viewInspectorDeadline deadline totalWordTarget totalWordCount ]
         ]
+
+
+viewInspectorDeadline : Maybe Date -> Maybe Int -> Int -> Html Msg
+viewInspectorDeadline deadline totalWordTarget totalWordCount =
+    let
+        deadlineString =
+            Maybe.Extra.unwrap "" formatDateHuman deadline
+    in
+        div []
+            [ Html.text deadlineString ]
 
 
 viewFooter : Model -> Html Msg
@@ -1234,10 +1249,45 @@ formatDateShort : Date -> String
 formatDateShort date =
     let
         year =
-            date |> Date.year |> toString
+            dateYear date
 
         month =
-            case Date.month date of
+            dateMonthNumber date
+
+        day =
+            dateDayPadded date
+    in
+        year ++ "-" ++ month ++ "-" ++ day
+
+
+formatDateHuman : Date -> String
+formatDateHuman date =
+    let
+        year =
+            dateYear date
+
+        month =
+            dateMonth date
+
+        day =
+            dateDay date
+
+        daySuffix =
+            dateDaySuffix date
+    in
+        day ++ daySuffix ++ " " ++ month ++ ", " ++ year
+
+
+dateYear : Date -> String
+dateYear =
+    Date.year >> toString
+
+
+dateMonthNumber : Date -> String
+dateMonthNumber =
+    let
+        monthToString month =
+            case month of
                 Date.Jan ->
                     "01"
 
@@ -1273,11 +1323,91 @@ formatDateShort date =
 
                 Date.Dec ->
                     "12"
-
-        day =
-            date
-                |> Date.day
-                |> toString
-                |> String.padLeft 2 '0'
     in
-        year ++ "-" ++ month ++ "-" ++ day
+        Date.month >> monthToString
+
+
+dateMonth : Date -> String
+dateMonth =
+    let
+        monthToString month =
+            case month of
+                Date.Jan ->
+                    "January"
+
+                Date.Feb ->
+                    "February"
+
+                Date.Mar ->
+                    "March"
+
+                Date.Apr ->
+                    "April"
+
+                Date.May ->
+                    "May"
+
+                Date.Jun ->
+                    "June"
+
+                Date.Jul ->
+                    "July"
+
+                Date.Aug ->
+                    "August"
+
+                Date.Sep ->
+                    "September"
+
+                Date.Oct ->
+                    "October"
+
+                Date.Nov ->
+                    "November"
+
+                Date.Dec ->
+                    "December"
+    in
+        Date.month >> monthToString
+
+
+dateDay : Date -> String
+dateDay =
+    Date.day >> toString
+
+
+dateDayPadded : Date -> String
+dateDayPadded =
+    dateDay >> String.padLeft 2 '0'
+
+
+dateDaySuffix : Date -> String
+dateDaySuffix =
+    let
+        dayToSuffix day =
+            case day of
+                "1" ->
+                    "st"
+
+                "21" ->
+                    "st"
+
+                "31" ->
+                    "st"
+
+                "2" ->
+                    "nd"
+
+                "22" ->
+                    "nd"
+
+                "3" ->
+                    "rd"
+
+                "23" ->
+                    "rd"
+
+                _ ->
+                    "th"
+    in
+        dateDay >> dayToSuffix
