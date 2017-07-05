@@ -1,11 +1,11 @@
 module Tests exposing (..)
 
 import Test exposing (..)
-import Test.Token as Token
+import Test.Novelist
 
 
 all : Test
 all =
-    describe "Novelist"
-        [ Token.all
+    describe "All"
+        [ Test.Novelist.all
         ]

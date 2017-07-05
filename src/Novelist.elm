@@ -667,6 +667,9 @@ viewProjectMeta model =
                 [ class [ Styles.FormInputText ]
                 , Html.Attributes.type_ "date"
                 , onInput SetDeadline
+                , model.deadline
+                    |> Maybe.Extra.unwrap "" formatDateShort
+                    |> value
                 ]
                 []
             )
@@ -1117,7 +1120,10 @@ maybeDateEncoder : Maybe Date -> Encode.Value
 maybeDateEncoder maybeDate =
     case maybeDate of
         Just date ->
-            Encode.float (Date.toTime date)
+            date
+                |> Date.toTime
+                |> toString
+                |> Encode.string
 
         Nothing ->
             Encode.null
@@ -1222,3 +1228,56 @@ timeUntil timeFrom timeTo =
             format timeDays "day"
         else
             format timeWeeks "week"
+
+
+formatDateShort : Date -> String
+formatDateShort date =
+    let
+        year =
+            date |> Date.year |> toString
+
+        month =
+            case Date.month date of
+                Date.Jan ->
+                    "01"
+
+                Date.Feb ->
+                    "02"
+
+                Date.Mar ->
+                    "03"
+
+                Date.Apr ->
+                    "04"
+
+                Date.May ->
+                    "05"
+
+                Date.Jun ->
+                    "06"
+
+                Date.Jul ->
+                    "07"
+
+                Date.Aug ->
+                    "08"
+
+                Date.Sep ->
+                    "09"
+
+                Date.Oct ->
+                    "10"
+
+                Date.Nov ->
+                    "11"
+
+                Date.Dec ->
+                    "12"
+
+        day =
+            date
+                |> Date.day
+                |> toString
+                |> String.padLeft 2 '0'
+    in
+        year ++ "-" ++ month ++ "-" ++ day
