@@ -180,11 +180,13 @@ function showOpenDialog() {
         }
 
         if (Array.isArray(files) && files.length === 1) {
-            const projectDir = files[0];
-            const projectName = path.basename(projectDir, '.novl');
+            const projectPath = files[0];
+            const projectName = path.basename(projectPath, '.novl');
             // const metaPath = path.join(projectDir, `${projectName}.novj`);
 
-            createWindow(projectDir);
+            // createWindow(projectDir);
+
+            windows[0].window.loadURL(`file://${__dirname}/index.html?projectPath=${projectPath}`);
         }
     });
 }

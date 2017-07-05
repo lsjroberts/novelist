@@ -14,6 +14,7 @@ import Html.Keyed
 import Json.Encode as Encode
 import Json.Decode as Json
 import Json.Decode.Extra exposing ((|:))
+import Maybe.Extra
 import Regex
 import Styles exposing (class)
 import Task
@@ -648,10 +649,8 @@ viewProjectMeta model =
                 , Html.Attributes.type_ "number"
                 , Html.Attributes.placeholder "Default: 80000"
                 , onInput SetTargetWordCount
-                  -- use Maybe.Extra.mapDefault "" toString
                 , model.targetWordCount
-                    |> Maybe.withDefault 0
-                    |> toString
+                    |> Maybe.Extra.unwrap "" toString
                     |> value
                 ]
                 []
@@ -940,6 +939,13 @@ textContentDecoder =
     Json.oneOf [ Json.field "textContent" Json.string, Json.succeed "nope" ]
 
 
+tokenChildrenDecoder : Json.Decoder TokenChildren
+tokenChildrenDecoder =
+    -- This definition must be above `decodeProject`
+    -- @see https://github.com/elm-lang/elm-compiler/issues/1560
+    Json.lazy <| \_ -> Json.map TokenChildren (Json.list tokenDecoder)
+
+
 decodeProject : String -> Model
 decodeProject payload =
     case Json.decodeString modelDecoder payload of
@@ -1034,13 +1040,6 @@ tokenTypeDecoder =
                         Json.succeed (Text value)
     in
         Json.string |> Json.andThen stringToTokenType
-
-
-tokenChildrenDecoder : Json.Decoder TokenChildren
-tokenChildrenDecoder =
-    -- This definition must be above `decodeProject`
-    -- @see https://github.com/elm-lang/elm-compiler/issues/1560
-    Json.lazy <| \_ -> Json.map TokenChildren (Json.list tokenDecoder)
 
 
 dateDecoder : Json.Decoder Date
