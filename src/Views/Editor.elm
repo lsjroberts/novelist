@@ -1,9 +1,7 @@
 module Views.Editor exposing (view)
 
 import Html exposing (..)
-import Html.Events exposing (..)
 import Data.Model exposing (Model, getTotalWordCount)
-import Data.Ui exposing (ViewType(..))
 import Messages exposing (Msg(..))
 import Styles exposing (class)
 import Views.Binder
