@@ -10,7 +10,7 @@ type alias Novel r =
         | scenes : List Scene
         , title : String
         , author : String
-        , targetWordCount : Maybe Int
+        , totalWordTarget : Maybe Int
         , deadline : Maybe Date
     }
 

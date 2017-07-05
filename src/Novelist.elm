@@ -58,7 +58,7 @@ init =
 
 
 createModel : List File -> Maybe Int -> List Scene -> String -> String -> Maybe Int -> Maybe Date -> Model
-createModel files activeFile scenes title author targetWordCount deadline =
+createModel files activeFile scenes title author totalWordTarget deadline =
     { files = files
     , editingFileName = Nothing
     , activeFile = activeFile
@@ -66,7 +66,7 @@ createModel files activeFile scenes title author targetWordCount deadline =
     , scenes = scenes
     , title = title
     , author = author
-    , targetWordCount = targetWordCount
+    , totalWordTarget = totalWordTarget
     , deadline = deadline
     , time = 0
     }
@@ -81,7 +81,7 @@ empty =
     , scenes = []
     , title = "Title"
     , author = "Author"
-    , targetWordCount = Nothing
+    , totalWordTarget = Nothing
     , deadline = Nothing
     , time = 0
     }
@@ -115,7 +115,7 @@ mock =
         ]
     , title = "Title"
     , author = "Author"
-    , targetWordCount = Nothing
+    , totalWordTarget = Nothing
     , deadline = Nothing
     , time = 0
     }
@@ -649,7 +649,7 @@ viewProjectMeta model =
                 , Html.Attributes.type_ "number"
                 , Html.Attributes.placeholder "Default: 80000"
                 , onInput SetTargetWordCount
-                , model.targetWordCount
+                , model.totalWordTarget
                     |> Maybe.Extra.unwrap "" toString
                     |> value
                 ]
@@ -850,7 +850,7 @@ update msg model =
 
         SetTargetWordCount targetString ->
             { model
-                | targetWordCount =
+                | totalWordTarget =
                     targetString
                         |> String.toInt
                         |> Result.withDefault 0
@@ -964,7 +964,7 @@ modelDecoder =
         |: (Json.field "scenes" (Json.list sceneDecoder))
         |: (Json.field "title" Json.string)
         |: (Json.field "author" Json.string)
-        |: (Json.field "targetWordCount" (Json.maybe Json.int))
+        |: (Json.field "totalWordTarget" (Json.maybe Json.int))
         |: (Json.field "deadline" (Json.maybe dateDecoder))
 
 
@@ -1070,7 +1070,7 @@ modelEncoder model =
         , ( "scenes", Encode.list (List.map sceneEncoder model.scenes) )
         , ( "title", Encode.string model.title )
         , ( "author", Encode.string model.author )
-        , ( "targetWordCount", maybeIntEncoder model.targetWordCount )
+        , ( "totalWordTarget", maybeIntEncoder model.totalWordTarget )
         , ( "deadline", maybeDateEncoder model.deadline )
         ]
 

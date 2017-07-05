@@ -188,6 +188,6 @@
     ],
     "title": "Title",
     "author": "Author",
-    "targetWordCount": null,
+    "totalWordTarget": null,
     "deadline": null
 }
