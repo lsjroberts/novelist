@@ -3,7 +3,7 @@ module Views.Footer exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (value)
 import Html.Events exposing (..)
-import Data.Model exposing (..)
+import Data.Model exposing (Model, getActiveScene, getActiveSceneWordCount)
 import Styles exposing (class)
 import Messages exposing (Msg(..))
 

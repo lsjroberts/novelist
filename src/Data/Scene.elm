@@ -1,6 +1,7 @@
-module Data.Scene exposing (Scene)
+module Data.Scene exposing (..)
 
-import Data.Token exposing (Token)
+import Data.Token exposing (Token, tokensToPlainText)
+import Utils.String exposing (getStringWordCount)
 
 
 type alias Scene =
@@ -12,3 +13,8 @@ type alias Scene =
     , commit : Int
     , wordTarget : Int
     }
+
+
+getSceneWordCount : Scene -> Int
+getSceneWordCount =
+    .content >> tokensToPlainText >> getStringWordCount

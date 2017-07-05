@@ -3,7 +3,7 @@ module Data.Model exposing (..)
 import Date exposing (Date)
 import Data.File exposing (File, FileType(..))
 import Data.Novel exposing (Novel)
-import Data.Scene exposing (Scene)
+import Data.Scene exposing (Scene, getSceneWordCount)
 import Data.Token
     exposing
         ( Token
@@ -24,6 +24,7 @@ import Data.Ui
         )
 import Messages exposing (Msg(..))
 import Utils.String exposing (getStringWordCount)
+import Utils.List exposing (getById)
 
 
 type alias Model =
@@ -121,42 +122,6 @@ getActiveSceneWordCount model =
             0
 
 
-getSceneWordCount : Scene -> Int
-getSceneWordCount =
-    .content >> tokensToPlainText >> getStringWordCount
-
-
 getTotalWordCount : Model -> Int
 getTotalWordCount =
     .scenes >> List.map getSceneWordCount >> List.sum
-
-
-getRootFiles : List File -> List File
-getRootFiles files =
-    files |> List.filter (\f -> f.parent == Nothing)
-
-
-getSceneFiles : List File -> List File
-getSceneFiles files =
-    files |> List.filter (\f -> f.type_ == SceneFile)
-
-
-getFileChildren : List File -> File -> List File
-getFileChildren files file =
-    files
-        |> List.filter
-            (\f ->
-                case f.parent of
-                    Just parent ->
-                        parent == file.id
-
-                    Nothing ->
-                        False
-            )
-
-
-getById : List { a | id : Int } -> Int -> Maybe { a | id : Int }
-getById xs id =
-    xs
-        |> List.filter (\x -> x.id == id)
-        |> List.head

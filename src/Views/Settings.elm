@@ -9,7 +9,7 @@ import Html.Attributes
         )
 import Html.Events exposing (..)
 import Maybe.Extra
-import Data.Model exposing (..)
+import Data.Model exposing (Model)
 import Styles exposing (class)
 import Messages exposing (Msg(..))
 import Utils.Date exposing (..)

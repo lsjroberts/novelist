@@ -12,7 +12,7 @@ import Html.Keyed
 import Json.Decode as Json
 import Data.Decode exposing (childrenContentDecoder)
 import Data.File exposing (File, FileType(..))
-import Data.Model exposing (..)
+import Data.Model exposing (Model)
 import Data.Scene exposing (Scene)
 import Data.Token
     exposing
@@ -26,6 +26,7 @@ import Data.Token
         )
 import Styles exposing (class)
 import Messages exposing (Msg(..))
+import Utils.List exposing (getById)
 import Views.Common exposing (viewPanel)
 
 
