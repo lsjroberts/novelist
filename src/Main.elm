@@ -1,7 +1,9 @@
 module Main exposing (..)
 
 import Html exposing (program)
-import Novelist exposing (init, view, updateWithStorage, subscriptions)
+import Data.Model exposing (init)
+import State exposing (updateWithStorage, subscriptions)
+import Views.Main exposing (view)
 
 
 -- PROGRAM

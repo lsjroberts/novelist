@@ -1,11 +1,13 @@
 module Tests exposing (..)
 
 import Test exposing (..)
-import Test.Novelist
+import Test.Utils.Date
+import Test.Utils.String
 
 
 all : Test
 all =
     describe "All"
-        [ Test.Novelist.all
+        [ Test.Utils.Date.all
+        , Test.Utils.String.all
         ]
