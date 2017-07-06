@@ -99,8 +99,8 @@ viewScene scenes scene =
 viewSceneHeading : List Scene -> Scene -> Html Msg
 viewSceneHeading scenes scene =
     div []
-        [ viewSceneParentHeading scenes scene
-        , input
+        [ --viewSceneParentHeading scenes scene
+          input
             [ class [ Styles.SceneHeading ]
             , onInput (SetSceneName scene.id)
             , value scene.name

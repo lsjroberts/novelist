@@ -61,12 +61,16 @@ type CssClasses
     | WorkspaceHeaderAuthor
 
 
+colors =
+    { primary = hex "#fdf6e3" }
+
+
 css =
     (stylesheet << namespace "")
         [ Css.class Root
             [ fontFamilies [ "Quicksand" ]
             , fontWeight lighter
-            , backgroundColor (hex "#fdf6e3")
+            , backgroundColor colors.primary
             , color (hex "#333333")
             , overflow hidden
             , height (pct 100)
@@ -101,7 +105,7 @@ css =
             [ displayFlex
             , property "justify-content" "space-between"
             , height (pct 100)
-            , overflow scroll
+            , overflow hidden
             ]
         , Css.class EditorWrapper
             [ height (pct 100)
@@ -109,10 +113,10 @@ css =
             , flexDirection column
             ]
         , Css.class Footer
-            [ backgroundColor (rgba 235 235 235 0.3)
+            [ -- backgroundColor (rgba 235 235 235 0.3)
               -- , height (px 38)
               -- , padding2 (em 0) ((pct 20) + (em 2))
-            , property "padding" "1em calc(20% + 2em)"
+              property "padding" "1em calc(20% + 2em)"
             , displayFlex
             , property "justify-content" "space-between"
             ]
@@ -178,23 +182,26 @@ css =
         , Css.class Inspector
             [ width (pct 20) ]
         , Css.class Menu
-            [ backgroundColor (rgba 235 235 235 0.3)
-            , height (px 38)
+            [ -- backgroundColor (rgba 235 235 235 0.3)
+              height (px 38)
             ]
         , Css.class Panel
-            [ backgroundColor (rgba 245 245 245 0.3)
-            , height (pct 100)
+            [ -- backgroundColor (rgba 245 245 245 0.3)
+              height (pct 100)
             , padding (px 34)
             ]
         , Css.class Scene
-            [ paddingTop (px 72)
+            [ padding2 (px 72) (px 0)
+            , margin (px 10)
             , fontFamilies [ "Cochin" ]
+            , boxShadow4 (px 0) (px 2) (px 3) (rgba 0 0 0 0.1)
+            , backgroundColor colors.primary
             ]
         , Css.class SceneContent
-            [ maxWidth (em 31)
+            [ maxWidth (em 26)
             , margin auto
             , fontSize (em (18 / 16))
-            , lineHeight (num 1.4)
+            , lineHeight (num 1.6)
             ]
         , Css.class SceneContentEditor
             [ height (pct 100)
@@ -219,7 +226,8 @@ css =
             , textAlign center
             ]
         , Css.class SceneParentHeading
-            [ marginBottom (em 0.5)
+            [ backgroundColor transparent
+            , marginBottom (em 0.5)
             , padding (px 0)
             , border (px 0)
             , outline none
@@ -252,7 +260,7 @@ css =
             ]
         , Css.class TokenParagraph
             [ marginTop (em 0)
-            , marginBottom (em 0.5)
+            , marginBottom (em 0.2)
             , textIndent (em 1)
             ]
         , Css.class TokenSpeech
@@ -261,8 +269,13 @@ css =
         , Css.class TokenWrap
             [ display none ]
         , Css.class Workspace
-            [ width (pct 60)
+            [ height (pct 100)
+            , width (pct 60)
             , padding (px 34)
+            , backgroundColor (rgba 235 235 235 0.3)
+            , boxShadow5 inset (px 0) (px 2) (px 3) (rgba 0 0 0 0.1)
+            , borderRadius (px 2)
+            , overflow scroll
             ]
         , Css.class WorkspaceHeader
             [ displayFlex

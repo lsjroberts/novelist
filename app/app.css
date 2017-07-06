@@ -44,7 +44,7 @@
     display: flex;
     justify-content: space-between;
     height: 100%;
-    overflow: scroll;
+    overflow: hidden;
 }
 
 .EditorWrapper {
@@ -54,7 +54,6 @@
 }
 
 .Footer {
-    background-color: rgba(235, 235, 235, 0.3);
     padding: 1em calc(20% + 2em);
     display: flex;
     justify-content: space-between;
@@ -132,26 +131,27 @@
 }
 
 .Menu {
-    background-color: rgba(235, 235, 235, 0.3);
     height: 38px;
 }
 
 .Panel {
-    background-color: rgba(245, 245, 245, 0.3);
     height: 100%;
     padding: 34px;
 }
 
 .Scene {
-    padding-top: 72px;
+    padding: 72px 0px;
+    margin: 10px;
     font-family: Cochin;
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.1);
+    background-color: #fdf6e3;
 }
 
 .SceneContent {
-    max-width: 31em;
+    max-width: 26em;
     margin: auto;
     font-size: 1.125em;
-    line-height: 1.4;
+    line-height: 1.6;
 }
 
 .SceneContentEditor {
@@ -181,6 +181,7 @@
 }
 
 .SceneParentHeading {
+    background-color: transparent;
     margin-bottom: 0.5em;
     padding: 0px;
     border: 0px;
@@ -222,7 +223,7 @@
 
 .TokenParagraph {
     margin-top: 0em;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.2em;
     text-indent: 1em;
 }
 
@@ -235,8 +236,13 @@
 }
 
 .Workspace {
+    height: 100%;
     width: 60%;
     padding: 34px;
+    background-color: rgba(235, 235, 235, 0.3);
+    box-shadow: inset 0px 2px 3px rgba(0, 0, 0, 0.1);
+    border-radius: 2px;
+    overflow: scroll;
 }
 
 .WorkspaceHeader {
