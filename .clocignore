@@ -1,0 +1,5 @@
+.git
+dist
+elm-stuff
+node_modules
+elm.js
