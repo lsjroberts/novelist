@@ -1,5 +1,6 @@
+.DS_Store
 .git
 dist
+elm.js
 elm-stuff
 node_modules
-elm.js
