@@ -164,6 +164,15 @@ viewToken token =
         Emphasis ->
             viewTokenEmphasis token
 
+        Comment _ _ _ ->
+            viewTokenComment token
+
+        Character _ ->
+            viewTokenCharacter token
+
+        Location _ ->
+            viewTokenLocation token
+
         Text a ->
             viewTokenText token
 
@@ -186,6 +195,24 @@ viewTokenEmphasis token =
     token
         |> viewTokenWrap
         |> span [ class [ Styles.TokenEmphasis ] ]
+
+
+viewTokenComment : Token -> Html Msg
+viewTokenComment token =
+    viewTokenInner token.children
+        |> span []
+
+
+viewTokenCharacter : Token -> Html Msg
+viewTokenCharacter token =
+    viewTokenInner token.children
+        |> span []
+
+
+viewTokenLocation : Token -> Html Msg
+viewTokenLocation token =
+    viewTokenInner token.children
+        |> span []
 
 
 viewTokenText : Token -> Html Msg

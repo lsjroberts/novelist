@@ -8,18 +8,20 @@
 }
 
 .Binder {
-    position: fixed;
     height: 100%;
+    width: 100%;
+    padding: 0em 1em;
     line-height: 1.75;
 }
 
 .BinderDirectory {
     padding-left: 1.05em;
+    margin-top: 1em;
 }
 
 .BinderDirectoryIcon {
     display: inline-block;
-    margin-right: 0.25em;
+    margin-right: 0.8em;
     margin-left: -1.05em;
     width: 0.8em;
     vertical-align: middle;
@@ -28,6 +30,28 @@
 
 .BinderFile {
     padding-left: 1.05em;
+}
+
+.BinderFileActive {
+    background-color: #51aae8;
+    color: #ffffff;
+}
+
+.BinderGroupIcon {
+    display: inline-block;
+    margin-right: 0.8em;
+    height: 28px;
+    vertical-align: middle;
+    text-align: center;
+    color: #ffffff;
+}
+
+.BinderGroupTitle {
+    background-color: #268bd2;
+    font-size: 1.2em;
+    margin: 0em -1em;
+    padding: 0.3em 1em;
+    color: #ffffff;
 }
 
 .BinderIcon {
@@ -136,15 +160,13 @@
 
 .Panel {
     height: 100%;
-    padding: 34px;
+    width: 100%;
+    padding: 34px 0px;
 }
 
 .Scene {
     padding: 72px 0px;
-    margin: 10px;
     font-family: Cochin;
-    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.1);
-    background-color: #fdf6e3;
 }
 
 .SceneContent {
@@ -238,10 +260,6 @@
 .Workspace {
     height: 100%;
     width: 60%;
-    padding: 34px;
-    background-color: rgba(235, 235, 235, 0.3);
-    box-shadow: inset 0px 2px 3px rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
     overflow: scroll;
 }
 

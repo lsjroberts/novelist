@@ -1,27 +1,28 @@
 {
-    "name": "Novelist",
-    "scripts": {
-        "start": "npm run compile && npm run app",
-        "start:web": "elm-live ./src/Main.elm --output ./app/elm.js --before-build='./scripts/css' --open",
-        "start:dev": "elm-live ./src/Main.elm --output ./app/elm.js",
-        "app": "electron ./app/electron",
-        "compile": "elm make ./src/Main.elm --output ./app/elm.js || true",
-        "compile:css": "elm-css ./src/Stylesheets.elm -o ./app",
-        "build": "sudo rm -rf ./dist && npm run compile && electron-packager ./app Novelist --all --version=1.4.11 --out=./dist --prune=false",
-        "build:osx": "sudo rm -rf ./dist && npm run compile && electron-packager ./app Novelist --platform=darwin --arch=x64 --version=1.4.11 --out=./dist --prune=false",
-        "cloc": "cloc --exclude-dir=$(tr '\\n' ',' < .clocignore) ."
-    },
-    "dependencies": {
-        "electron": "^1.4.12",
-        "electron-debug": "^1.1.0",
-        "electron-packager": "^8.4.0",
-        "elm-css": "^0.6.0",
-        "fs-extra": "^2.0.0",
-        "octicons": "^5.0.1",
-        "url": "^0.11.0"
-    },
-    "devDependencies": {
-        "cloc": "^2.2.0",
-        "elm-test": "^0.18.3"
-    }
+  "name": "Novelist",
+  "scripts": {
+    "start": "npm run compile && npm run app",
+    "start:web": "elm-live ./src/Main.elm --output ./app/elm.js --before-build='./scripts/css' --open",
+    "start:dev": "elm-live ./src/Main.elm --output ./app/elm.js",
+    "app": "electron ./app/electron",
+    "compile": "elm make ./src/Main.elm --output ./app/elm.js || true",
+    "compile:css": "elm-css ./src/Stylesheets.elm -o ./app",
+    "build": "sudo rm -rf ./dist && npm run compile && electron-packager ./app Novelist --all --version=1.4.11 --out=./dist --prune=false",
+    "build:osx": "sudo rm -rf ./dist && npm run compile && electron-packager ./app Novelist --platform=darwin --arch=x64 --version=1.4.11 --out=./dist --prune=false",
+    "cloc": "cloc --exclude-dir=$(tr '\\n' ',' < .clocignore) ."
+  },
+  "dependencies": {
+    "electron": "^1.4.12",
+    "electron-debug": "^1.1.0",
+    "electron-packager": "^8.4.0",
+    "elm-css": "^0.6.0",
+    "fs-extra": "^2.0.0",
+    "lodash": "^4.17.4",
+    "octicons": "^5.0.1",
+    "url": "^0.11.0"
+  },
+  "devDependencies": {
+    "cloc": "^2.2.0",
+    "elm-test": "^0.18.3"
+  }
 }

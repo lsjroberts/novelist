@@ -8,7 +8,7 @@ import Data.Encode exposing (modelEncoder)
 import Data.Model exposing (Model)
 import Data.Novel exposing (Novel)
 import Data.Token exposing (markdownToTokens)
-import Data.Ui exposing (ViewType(..))
+import Data.Ui exposing (ViewType(..), Selection)
 import Messages exposing (Msg(..))
 
 
@@ -35,6 +35,9 @@ update msg model =
 
         OpenProject project ->
             decodeProject project
+
+        Select selection ->
+            { model | selection = Just selection }
 
         SetActiveFile id ->
             { model | activeFile = Just id }
@@ -119,6 +122,7 @@ subscriptions model =
     Sub.batch
         [ openProject OpenProject
         , gotoSettings GoToSettings
+        , select Select
         , Time.every Time.minute NewTime
         ]
 
@@ -134,3 +138,6 @@ port gotoSettings : (String -> msg) -> Sub msg
 
 
 port setStorage : Encode.Value -> Cmd msg
+
+
+port select : (Selection -> msg) -> Sub msg

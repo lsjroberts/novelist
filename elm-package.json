@@ -9,7 +9,7 @@
     ],
     "exposed-modules": [],
     "dependencies": {
-        "capitalist/elm-octicons": "1.0.0 <= v < 2.0.0",
+        "capitalist/elm-octicons": "2.0.0 <= v < 3.0.0",
         "elm-community/json-extra": "2.2.0 <= v < 3.0.0",
         "elm-community/list-extra": "6.1.0 <= v < 7.0.0",
         "elm-community/maybe-extra": "4.0.0 <= v < 5.0.0",

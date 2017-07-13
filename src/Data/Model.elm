@@ -50,6 +50,7 @@ createModel files activeFile scenes title author totalWordTarget deadline =
     , totalWordTarget = totalWordTarget
     , deadline = deadline
     , time = 0
+    , selection = Nothing
     }
 
 
@@ -65,6 +66,7 @@ empty =
     , totalWordTarget = Nothing
     , deadline = Nothing
     , time = 0
+    , selection = Nothing
     }
 
 
@@ -76,6 +78,7 @@ mock =
         , File 2 Nothing SceneFile "Chapter Two" False
         , File 3 (Just 0) SceneFile "Scene Two" False
         , File 4 (Just 0) SceneFile "Scene Three" False
+        , File 5 (Just 2) SceneFile "Scene Four" False
         ]
     , editingFileName = Nothing
     , activeFile = Just 1
@@ -93,12 +96,14 @@ mock =
         , Scene 2 Nothing "Chapter Two" [] [] 0 0
         , Scene 3 (Just 0) "Scene Two" [] [] 0 0
         , Scene 4 (Just 0) "Scene Three" [] [] 0 0
+        , Scene 5 (Just 2) "Scene Four" [] [] 0 0
         ]
     , title = "Title"
     , author = "Author"
     , totalWordTarget = Nothing
     , deadline = Nothing
     , time = 0
+    , selection = Nothing
     }
 
 

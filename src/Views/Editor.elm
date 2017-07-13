@@ -17,7 +17,7 @@ view model =
         [ viewMenu model.activeView
         , div
             [ class [ Styles.Editor ] ]
-            [ Views.Binder.view model.files
+            [ Views.Binder.view model.files model.activeFile
             , Views.Workspace.view model
             , Views.Inspector.view model.deadline model.totalWordTarget (getTotalWordCount model)
             ]

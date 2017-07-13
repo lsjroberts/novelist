@@ -125,5 +125,14 @@ tokenTypeEncoder tokenType =
         Emphasis ->
             Encode.string "emphasis"
 
+        Comment _ _ _ ->
+            Encode.string "comment"
+
+        Character _ ->
+            Encode.string "character"
+
+        Location _ ->
+            Encode.string "location"
+
         Text value ->
             Encode.string ("text|" ++ value)

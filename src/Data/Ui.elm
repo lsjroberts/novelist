@@ -1,4 +1,4 @@
-module Data.Ui exposing (Ui, ViewType(..), updateFile)
+module Data.Ui exposing (Ui, ViewType(..), Selection, updateFile)
 
 import Data.File exposing (File)
 import List.Extra
@@ -12,12 +12,20 @@ type alias Ui r =
         , activeFile : Maybe Int
         , activeView : ViewType
         , time : Time
+        , selection : Maybe Selection
     }
 
 
 type ViewType
     = EditorView
     | SettingsView
+
+
+type alias Selection =
+    { start : Int
+    , end : Int
+    , paragraphIndex : Int
+    }
 
 
 updateFile : Int -> (File -> File) -> Ui r -> Ui r

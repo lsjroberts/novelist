@@ -19,6 +19,9 @@ type CssClasses
     | BinderDirectoryIcon
     | BinderEntries
     | BinderFile
+    | BinderFileActive
+    | BinderGroupIcon
+    | BinderGroupTitle
     | BinderHeader
     | BinderIcon
     | BinderWrapper
@@ -76,15 +79,18 @@ css =
             , height (pct 100)
             ]
         , Css.class Binder
-            [ position fixed
-            , height (pct 100)
+            [ height (pct 100)
+            , width (pct 100)
+            , padding2 (em 0) (em 1)
             , lineHeight (num 1.75)
             ]
         , Css.class BinderDirectory
-            [ paddingLeft (em 1.05) ]
+            [ paddingLeft (em 1.05)
+            , marginTop (em 1)
+            ]
         , Css.class BinderDirectoryIcon
             [ display inlineBlock
-            , marginRight (em 0.25)
+            , marginRight (em 0.8)
             , marginLeft (em -1.05)
             , width (em 0.8)
             , verticalAlign middle
@@ -93,6 +99,25 @@ css =
         , Css.class BinderEntries []
         , Css.class BinderFile
             [ paddingLeft (em 1.05) ]
+        , Css.class BinderFileActive
+            [ backgroundColor (hex "51aae8")
+            , color (hex "ffffff")
+            ]
+        , Css.class BinderGroupIcon
+            [ display inlineBlock
+            , marginRight (em 0.8)
+            , height (px 28)
+            , verticalAlign middle
+            , textAlign center
+            , color (hex "ffffff")
+            ]
+        , Css.class BinderGroupTitle
+            [ backgroundColor (hex "268bd2")
+            , fontSize (em 1.2)
+            , margin2 (em 0) (em -1)
+            , padding2 (em 0.3) (em 1)
+            , color (hex "ffffff")
+            ]
         , Css.class BinderHeader []
         , Css.class BinderIcon
             [ marginRight (em 0.5)
@@ -100,7 +125,8 @@ css =
             , textAlign center
             ]
         , Css.class BinderWrapper
-            [ width (pct 20) ]
+            [ width (pct 20)
+            ]
         , Css.class Editor
             [ displayFlex
             , property "justify-content" "space-between"
@@ -182,20 +208,19 @@ css =
         , Css.class Inspector
             [ width (pct 20) ]
         , Css.class Menu
-            [ -- backgroundColor (rgba 235 235 235 0.3)
-              height (px 38)
+            [ height (px 38)
             ]
         , Css.class Panel
-            [ -- backgroundColor (rgba 245 245 245 0.3)
-              height (pct 100)
-            , padding (px 34)
+            [ height (pct 100)
+            , width (pct 100)
+            , padding2 (px 34) (px 0)
             ]
         , Css.class Scene
             [ padding2 (px 72) (px 0)
-            , margin (px 10)
+              -- , margin (px 10)
             , fontFamilies [ "Cochin" ]
-            , boxShadow4 (px 0) (px 2) (px 3) (rgba 0 0 0 0.1)
-            , backgroundColor colors.primary
+              -- , boxShadow4 (px 0) (px 2) (px 3) (rgba 0 0 0 0.1)
+              -- , backgroundColor colors.primary
             ]
         , Css.class SceneContent
             [ maxWidth (em 26)
@@ -271,10 +296,10 @@ css =
         , Css.class Workspace
             [ height (pct 100)
             , width (pct 60)
-            , padding (px 34)
-            , backgroundColor (rgba 235 235 235 0.3)
-            , boxShadow5 inset (px 0) (px 2) (px 3) (rgba 0 0 0 0.1)
-            , borderRadius (px 2)
+              -- , padding (px 34)
+              -- , backgroundColor (rgba 235 235 235 0.3)
+              -- , boxShadow5 inset (px 0) (px 2) (px 3) (rgba 0 0 0 0.1)
+              -- , borderRadius (px 2)
             , overflow scroll
             ]
         , Css.class WorkspaceHeader

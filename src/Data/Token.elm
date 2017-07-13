@@ -12,6 +12,7 @@ module Data.Token
         , tokensToPlainText
         )
 
+import Date exposing (Date)
 import Regex
 
 
@@ -25,6 +26,9 @@ type TokenType
     = Paragraph
     | Speech
     | Emphasis
+    | Comment String Int Date
+    | Character Int
+    | Location Int
     | Text String
 
 
