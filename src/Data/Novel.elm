@@ -1,5 +1,6 @@
 module Data.Novel exposing (Novel, updateScene)
 
+import Data.Comment exposing (Comment)
 import Data.Scene exposing (Scene)
 import Date exposing (Date)
 import List.Extra
@@ -12,6 +13,7 @@ type alias Novel r =
         , author : String
         , totalWordTarget : Maybe Int
         , deadline : Maybe Date
+        , comments : List Comment
     }
 
 

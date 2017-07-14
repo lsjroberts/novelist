@@ -1,23 +1,54 @@
 module Views.Inspector exposing (view)
 
+import Data.Comment exposing (Comment)
 import Date exposing (Date)
 import Html exposing (..)
 import Maybe.Extra
 import Styles exposing (class)
 import Messages exposing (Msg(..))
+import Octicons as Icon
 import Utils.Date exposing (..)
 import Views.Common exposing (viewPanel)
 
 
-view : Maybe Date -> Maybe Int -> Int -> Html Msg
-view deadline totalWordTarget totalWordCount =
+view : List Comment -> Html Msg
+view comments =
     div
         [ class [ Styles.Inspector ] ]
         [ viewPanel
-            [ viewInspectorDeadline deadline
-            , viewInspectorWords totalWordTarget totalWordCount
+            [ viewInspectorComments comments
             ]
+          -- [ viewInspectorDeadline deadline
+          -- , viewInspectorWords totalWordTarget totalWordCount
+          -- ]
         ]
+
+
+viewInspectorComments : List Comment -> Html Msg
+viewInspectorComments comments =
+    let
+        viewComment comment =
+            div [ class [ Styles.Comment ] ]
+                [ p [] [ Html.text comment.message ]
+                , p [ class [ Styles.CommentMeta ] ] [ Html.text comment.author ]
+                ]
+
+        viewComments =
+            comments |> List.map viewComment
+    in
+        div [] <|
+            [ h2
+                [ class [ Styles.PanelTitle ] ]
+                [ span [ class [ Styles.PanelTitleIcon ] ]
+                    [ Icon.defaultOptions
+                        |> Icon.color "white"
+                        |> Icon.size 28
+                        |> Icon.repo
+                    ]
+                , Html.text "Comments"
+                ]
+            ]
+                ++ viewComments
 
 
 viewInspectorDeadline : Maybe Date -> Html Msg

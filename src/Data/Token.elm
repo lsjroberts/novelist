@@ -26,9 +26,9 @@ type TokenType
     = Paragraph
     | Speech
     | Emphasis
-    | Comment String Int Date
-    | Character Int
-    | Location Int
+    | CommentTag Int
+    | CharacterTag Int
+    | LocationTag Int
     | Text String
 
 

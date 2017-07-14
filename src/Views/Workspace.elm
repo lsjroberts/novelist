@@ -76,6 +76,15 @@ viewWorkspaceFile activeFile files scenes =
                     SceneFile ->
                         sceneInner f
 
+                    PlanFile ->
+                        div [] []
+
+                    CharacterFile ->
+                        div [] []
+
+                    LocationFile ->
+                        div [] []
+
             Nothing ->
                 div [] []
 
@@ -164,13 +173,13 @@ viewToken token =
         Emphasis ->
             viewTokenEmphasis token
 
-        Comment _ _ _ ->
+        CommentTag _ ->
             viewTokenComment token
 
-        Character _ ->
+        CharacterTag _ ->
             viewTokenCharacter token
 
-        Location _ ->
+        LocationTag _ ->
             viewTokenLocation token
 
         Text a ->

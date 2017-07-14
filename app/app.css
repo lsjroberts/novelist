@@ -37,21 +37,8 @@
     color: #ffffff;
 }
 
-.BinderGroupIcon {
-    display: inline-block;
-    margin-right: 0.8em;
-    height: 28px;
-    vertical-align: middle;
-    text-align: center;
-    color: #ffffff;
-}
-
-.BinderGroupTitle {
-    background-color: #268bd2;
-    font-size: 1.2em;
-    margin: 0em -1em;
-    padding: 0.3em 1em;
-    color: #ffffff;
+.BinderGroup {
+    margin-bottom: 0.6em;
 }
 
 .BinderIcon {
@@ -62,6 +49,18 @@
 
 .BinderWrapper {
     width: 20%;
+}
+
+.Comment {
+    background-color: #f8f3e5;
+    font-size: 0.8em;
+    line-height: 1.6;
+    margin: 0em -1.25em 0.6em;
+    padding: 3.6em 2em;
+}
+
+.CommentMeta {
+    margin-top: 1em;
 }
 
 .Editor {
@@ -164,6 +163,23 @@
     padding: 34px 0px;
 }
 
+.PanelTitle {
+    background-color: #268bd2;
+    font-size: 1.2em;
+    margin: 0em -1em;
+    padding: 0.3em 1em;
+    color: #ffffff;
+}
+
+.PanelTitleIcon {
+    display: inline-block;
+    margin-right: 0.8em;
+    height: 28px;
+    vertical-align: middle;
+    text-align: center;
+    color: #ffffff;
+}
+
 .Scene {
     padding: 72px 0px;
     font-family: Cochin;
@@ -187,7 +203,7 @@
 
 .SceneDebug {
     font-family: Fira Code;
-    line-height: 1.6em;
+    line-height: 1.6;
 }
 
 .SceneHeading {

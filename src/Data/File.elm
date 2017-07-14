@@ -12,6 +12,9 @@ type alias File =
 
 type FileType
     = SceneFile
+    | PlanFile
+    | CharacterFile
+    | LocationFile
 
 
 getRootFiles : List File -> List File
@@ -20,8 +23,28 @@ getRootFiles files =
 
 
 getSceneFiles : List File -> List File
-getSceneFiles files =
-    files |> List.filter (\f -> f.type_ == SceneFile)
+getSceneFiles =
+    getFilesByType SceneFile
+
+
+getPlanFiles : List File -> List File
+getPlanFiles =
+    getFilesByType PlanFile
+
+
+getCharacterFiles : List File -> List File
+getCharacterFiles =
+    getFilesByType CharacterFile
+
+
+getLocationFiles : List File -> List File
+getLocationFiles =
+    getFilesByType LocationFile
+
+
+getFilesByType : FileType -> List File -> List File
+getFilesByType type_ =
+    List.filter (\f -> f.type_ == type_)
 
 
 getFileChildren : List File -> File -> List File

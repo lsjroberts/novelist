@@ -58,6 +58,15 @@ fileTypeEncoder fileType =
         SceneFile ->
             Encode.string "scene"
 
+        PlanFile ->
+            Encode.string "plan"
+
+        CharacterFile ->
+            Encode.string "character"
+
+        LocationFile ->
+            Encode.string "location"
+
 
 viewTypeEncoder : ViewType -> Encode.Value
 viewTypeEncoder viewType =
@@ -125,13 +134,13 @@ tokenTypeEncoder tokenType =
         Emphasis ->
             Encode.string "emphasis"
 
-        Comment _ _ _ ->
+        CommentTag _ ->
             Encode.string "comment"
 
-        Character _ ->
+        CharacterTag _ ->
             Encode.string "character"
 
-        Location _ ->
+        LocationTag _ ->
             Encode.string "location"
 
         Text value ->

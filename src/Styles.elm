@@ -20,11 +20,12 @@ type CssClasses
     | BinderEntries
     | BinderFile
     | BinderFileActive
-    | BinderGroupIcon
-    | BinderGroupTitle
+    | BinderGroup
     | BinderHeader
     | BinderIcon
     | BinderWrapper
+    | Comment
+    | CommentMeta
     | Editor
     | EditorWrapper
     | Footer
@@ -43,6 +44,8 @@ type CssClasses
     | Inspector
     | Menu
     | Panel
+    | PanelTitle
+    | PanelTitleIcon
     | Scene
     | SceneContent
     | SceneContentEditor
@@ -65,7 +68,10 @@ type CssClasses
 
 
 colors =
-    { primary = hex "#fdf6e3" }
+    { primary = hex "#fdf6e3"
+    , secondary = hex "#268bd2"
+    , tertiary = hex "#f8f3e5"
+    }
 
 
 css =
@@ -103,21 +109,8 @@ css =
             [ backgroundColor (hex "51aae8")
             , color (hex "ffffff")
             ]
-        , Css.class BinderGroupIcon
-            [ display inlineBlock
-            , marginRight (em 0.8)
-            , height (px 28)
-            , verticalAlign middle
-            , textAlign center
-            , color (hex "ffffff")
-            ]
-        , Css.class BinderGroupTitle
-            [ backgroundColor (hex "268bd2")
-            , fontSize (em 1.2)
-            , margin2 (em 0) (em -1)
-            , padding2 (em 0.3) (em 1)
-            , color (hex "ffffff")
-            ]
+        , Css.class BinderGroup
+            [ marginBottom (em 0.6) ]
         , Css.class BinderHeader []
         , Css.class BinderIcon
             [ marginRight (em 0.5)
@@ -127,6 +120,15 @@ css =
         , Css.class BinderWrapper
             [ width (pct 20)
             ]
+        , Css.class Comment
+            [ backgroundColor colors.tertiary
+            , fontSize (em 0.8)
+            , lineHeight (num 1.6)
+            , margin3 (em 0) (em (-1 / 0.8)) (em 0.6)
+            , padding2 (em 3.6) (em 2)
+            ]
+        , Css.class CommentMeta
+            [ marginTop (em 1) ]
         , Css.class Editor
             [ displayFlex
             , property "justify-content" "space-between"
@@ -215,6 +217,21 @@ css =
             , width (pct 100)
             , padding2 (px 34) (px 0)
             ]
+        , Css.class PanelTitle
+            [ backgroundColor colors.secondary
+            , fontSize (em 1.2)
+            , margin2 (em 0) (em -1)
+            , padding2 (em 0.3) (em 1)
+            , color (hex "ffffff")
+            ]
+        , Css.class PanelTitleIcon
+            [ display inlineBlock
+            , marginRight (em 0.8)
+            , height (px 28)
+            , verticalAlign middle
+            , textAlign center
+            , color (hex "ffffff")
+            ]
         , Css.class Scene
             [ padding2 (px 72) (px 0)
               -- , margin (px 10)
@@ -237,7 +254,7 @@ css =
             ]
         , Css.class SceneDebug
             [ fontFamilies [ "Fira Code" ]
-            , lineHeight (em 1.6)
+            , lineHeight (num 1.6)
             ]
         , Css.class SceneHeading
             [ backgroundColor transparent
@@ -289,7 +306,7 @@ css =
             , textIndent (em 1)
             ]
         , Css.class TokenSpeech
-            [ color (hex "268bd2")
+            [ color colors.secondary
             ]
         , Css.class TokenWrap
             [ display none ]

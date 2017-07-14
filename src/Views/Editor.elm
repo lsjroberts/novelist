@@ -19,7 +19,8 @@ view model =
             [ class [ Styles.Editor ] ]
             [ Views.Binder.view model.files model.activeFile
             , Views.Workspace.view model
-            , Views.Inspector.view model.deadline model.totalWordTarget (getTotalWordCount model)
+            , Views.Inspector.view model.comments
+              -- , Views.Inspector.view model.deadline model.totalWordTarget (getTotalWordCount model)
             ]
         , Views.Footer.view model
         ]

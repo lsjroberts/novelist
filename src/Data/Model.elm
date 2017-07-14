@@ -1,6 +1,6 @@
 module Data.Model exposing (..)
 
-import Date exposing (Date)
+import Data.Comment exposing (Comment)
 import Data.File exposing (File, FileType(..))
 import Data.Novel exposing (Novel)
 import Data.Scene exposing (Scene, getSceneWordCount)
@@ -22,6 +22,7 @@ import Data.Ui
         ( Ui
         , ViewType(..)
         )
+import Date exposing (Date)
 import Messages exposing (Msg(..))
 import Utils.String exposing (getStringWordCount)
 import Utils.List exposing (getById)
@@ -38,8 +39,17 @@ init =
     )
 
 
-createModel : List File -> Maybe Int -> List Scene -> String -> String -> Maybe Int -> Maybe Date -> Model
-createModel files activeFile scenes title author totalWordTarget deadline =
+createModel :
+    List File
+    -> Maybe Int
+    -> List Scene
+    -> String
+    -> String
+    -> Maybe Int
+    -> Maybe Date
+    -> List Comment
+    -> Model
+createModel files activeFile scenes title author totalWordTarget deadline comments =
     { files = files
     , editingFileName = Nothing
     , activeFile = activeFile
@@ -49,6 +59,7 @@ createModel files activeFile scenes title author totalWordTarget deadline =
     , author = author
     , totalWordTarget = totalWordTarget
     , deadline = deadline
+    , comments = comments
     , time = 0
     , selection = Nothing
     }
@@ -65,6 +76,7 @@ empty =
     , author = "Author"
     , totalWordTarget = Nothing
     , deadline = Nothing
+    , comments = []
     , time = 0
     , selection = Nothing
     }
@@ -102,6 +114,27 @@ mock =
     , author = "Author"
     , totalWordTarget = Nothing
     , deadline = Nothing
+    , comments =
+        [ Comment
+            "Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum."
+            "Laurence"
+            0
+        , Comment
+            ("Maecenas faucibus mollis interdum. Duis mollis, est non commodo "
+                ++ "luctus, nisi erat porttitor ligula, eget lacinia odio sem "
+                ++ "nec elit. Vivamus sagittis lacus vel augue laoreet rutrum "
+                ++ "faucibus dolor auctor. Vestibulum id ligula porta felis "
+                ++ "euismod semper. Vivamus sagittis lacus vel augue laoreet "
+                ++ "rutrum faucibus dolor auctor. Nullam id dolor id nibh "
+                ++ "ultricies vehicula ut id elit. Donec sed odio dui."
+            )
+            "Laurence"
+            0
+        , Comment
+            "Maecenas sed diam eget risus varius blandit sit amet non magna. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus."
+            "Laurence"
+            0
+        ]
     , time = 0
     , selection = Nothing
     }

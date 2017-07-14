@@ -3,7 +3,14 @@ module Views.Binder exposing (view)
 import Html exposing (..)
 import Html.Events exposing (..)
 import Octicons as Icon
-import Data.File exposing (File, getFileChildren, getRootFiles, getSceneFiles)
+import Data.File
+    exposing
+        ( File
+        , FileType(..)
+        , getFileChildren
+        , getRootFiles
+        , getFilesByType
+        )
 import Data.Model exposing (Model)
 import Styles exposing (class)
 import Messages exposing (Msg(..))
@@ -22,25 +29,41 @@ view files maybeActiveFile =
 viewBinderInner : List File -> Maybe Int -> Html Msg
 viewBinderInner files maybeActiveFile =
     let
-        manuscript =
-            files
-                |> getRootFiles
-                |> getSceneFiles
-                |> List.map (viewBinderFile files maybeActiveFile)
+        groups =
+            [ ( "Manuscript", SceneFile )
+            , ( "Plan", PlanFile )
+            ]
     in
         div [ class [ Styles.Binder ] ] <|
-            [ h2
-                [ class [ Styles.BinderGroupTitle ] ]
-                [ span [ class [ Styles.BinderGroupIcon ] ]
-                    [ Icon.defaultOptions
-                        |> Icon.color "white"
-                        |> Icon.size 28
-                        |> Icon.repo
-                    ]
-                , Html.text "Manuscript"
-                ]
+            List.map (viewBinderGroup files maybeActiveFile) groups
+
+
+viewBinderGroupTitle : String -> Html Msg
+viewBinderGroupTitle title =
+    h2
+        [ class [ Styles.PanelTitle ] ]
+        [ span [ class [ Styles.PanelTitleIcon ] ]
+            [ Icon.defaultOptions
+                |> Icon.color "white"
+                |> Icon.size 28
+                |> Icon.repo
             ]
-                ++ manuscript
+        , Html.text title
+        ]
+
+
+viewBinderGroup : List File -> Maybe Int -> ( String, FileType ) -> Html Msg
+viewBinderGroup files maybeActiveFile ( title, fileType ) =
+    let
+        groupFiles =
+            files
+                |> getRootFiles
+                |> getFilesByType fileType
+                |> List.map (viewBinderFile files maybeActiveFile)
+    in
+        div [ class [ Styles.BinderGroup ] ] <|
+            [ viewBinderGroupTitle title ]
+                ++ groupFiles
 
 
 viewBinderFile : List File -> Maybe Int -> File -> Html Msg

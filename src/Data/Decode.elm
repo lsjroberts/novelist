@@ -3,6 +3,7 @@ module Data.Decode exposing (..)
 import Date exposing (Date)
 import Json.Decode as Json
 import Json.Decode.Extra exposing ((|:))
+import Data.Comment exposing (Comment)
 import Data.File exposing (File, FileType(..))
 import Data.Model exposing (..)
 import Data.Novel exposing (Novel)
@@ -78,6 +79,7 @@ modelDecoder =
         |: (Json.field "author" Json.string)
         |: (Json.field "totalWordTarget" (Json.maybe Json.int))
         |: (Json.field "deadline" (Json.maybe dateDecoder))
+        |: (Json.field "comments" (Json.list commentDecoder))
 
 
 activeFileDecoder : Json.Decoder (Maybe Int)
@@ -166,3 +168,11 @@ dateDecoder =
                     Err err ->
                         Json.fail err
             )
+
+
+commentDecoder : Json.Decoder Comment
+commentDecoder =
+    Json.map3 Comment
+        (Json.field "message" Json.string)
+        (Json.field "author" Json.string)
+        (Json.field "timestamp" Json.int)
