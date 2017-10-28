@@ -139,7 +139,7 @@ viewEditor =
     column NoStyle
         [ width fill
         , height fill
-        , paddingLeft <| paddingScale 5
+        , paddingLeft <| paddingScale 6
         ]
         [ viewMonacoEditor
         ]
@@ -148,7 +148,7 @@ viewEditor =
 viewMonacoEditor =
     html <|
         Html.iframe
-            [ Html.Attributes.src "/index.html"
+            [ Html.Attributes.src "http://localhost:8080/editor/editor.html"
             , Html.Attributes.style
                 [ ( "width", "100%" )
                 , ( "height", "100%" )

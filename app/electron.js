@@ -1,10 +1,6 @@
 "use strict";
 
 const { Menu, BrowserWindow, app, dialog } = require("electron");
-// const fs = require("fs-extra");
-// const path = require("path");
-
-// require("electron-debug")({ showDevTools: true });
 
 let windows = [];
 
@@ -28,6 +24,8 @@ function createWindow() {
   });
 
   window.loadURL(`file://${__dirname}/index.html`);
+
+  window.webContents.openDevTools();
 }
 
 // -- OSX
