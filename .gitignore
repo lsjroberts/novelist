@@ -1,7 +1,3 @@
-.DS_Store
-_old
-dist
-app/elm.js
 elm-stuff
+dist
 node_modules
-*.log*
