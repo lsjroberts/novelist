@@ -6,7 +6,8 @@
   "scripts": {
     "start": "npm run elm && npm run app",
     "elm": "elm make ./src/Main.elm --output ./dist/elm.js",
-    "app": "electron ./app/electron"
+    "app": "electron ./app/electron",
+    "cloc": "cloc --exclude-dir=$(tr '\\n' ',' < .clocignore) ."
   },
   "keywords": [],
   "author": "",

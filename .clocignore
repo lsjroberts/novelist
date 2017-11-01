@@ -1,0 +1,13 @@
+.DS_Store
+.clocignore
+.git
+.gitignore
+dist
+docs
+elm-package.json
+package.json
+package-lock.json
+elm-stuff
+node_modules
+stubs
+README.md

@@ -1,16 +1,17 @@
 module Main exposing (..)
 
-import Html exposing (Html, program)
-import Html.Attributes
+import Color exposing (rgb, rgba)
 import Element exposing (..)
 import Element.Attributes exposing (..)
-import Style exposing (style)
+import Html exposing (Html, program)
+import Html.Attributes
+import Style exposing (..)
 import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Style.Scale as Scale
 import Style.Shadow as Shadow
-import Color exposing (rgb, rgba)
+import Octicons as Icon
 
 
 -- PROGRAM
@@ -70,7 +71,22 @@ view model =
 
 
 viewActivityBar =
-    el ActivityBar [ width (px 50) ] (text "a")
+    column (Activity ActivityWrapper)
+        []
+        [ viewActivityItem Icon.book True
+        , viewActivityItem Icon.gistSecret False
+        , viewActivityItem Icon.globe False
+        , viewActivityItem Icon.search False
+        , viewActivityItem Icon.gitBranch False
+        , viewActivityItem Icon.checklist False
+        ]
+
+
+viewActivityItem icon isActive =
+    largeIcon
+        |> icon
+        |> html
+        |> el (Activity <| ActivityItem isActive) [ padding <| paddingScale 2 ]
 
 
 
@@ -79,27 +95,75 @@ viewActivityBar =
 
 viewExplorer =
     column (Explorer ExplorerWrapper)
-        [ width (px 240), padding <| paddingScale 3, spacing <| spacingScale 3 ]
-        [ viewExplorerGroup "Manuscript" [ "Chapter One", "Chapter Two", "Chapter Three", "Chapter Four" ]
-        , viewExplorerGroup "Characters" []
-        , viewExplorerGroup "Locations" []
+        [ width (px 240)
+          -- , spacing <| spacingScale 3
+        ]
+        [ viewExplorerHeader
+        , viewExplorerFolder "Chapter One"
+            [ "Chapter One"
+            , "Chapter Two"
+            , "Chapter Three"
+            , "Chapter Four"
+            ]
+        , row (Explorer (ExplorerFile False))
+            [ paddingXY (paddingScale 3) (paddingScale 1)
+            , spacing <| paddingScale 1
+            ]
+            [ smallIcon
+                |> Icon.file
+                |> html
+                |> el NoStyle []
+            , smallIcon
+                |> Icon.plus
+                |> html
+                |> el NoStyle []
+            ]
         ]
 
 
-viewExplorerGroup label items =
-    column (Explorer Group)
-        [ spacing <| spacingScale 2 ]
-        [ el NoStyle [] <| text label
-        , viewExplorerFolder items
+viewExplorerHeader =
+    row NoStyle
+        [ paddingXY (paddingScale 3) (paddingScale 2), spacing <| spacingScale 1 ]
+        [ el NoStyle [] <| text "Manuscript"
+        , row NoStyle
+            [ alignRight, spacing <| spacingScale 1 ]
+            [ smallIcon
+                |> Icon.file
+                |> html
+                |> el (Explorer ExplorerHeaderAction) []
+            , smallIcon
+                |> Icon.fileDirectory
+                |> html
+                |> el (Explorer ExplorerHeaderAction) []
+            ]
         ]
 
 
-viewExplorerFolder items =
-    column (Explorer Folder) [] <| List.map viewExplorerFile items
+
+-- viewExplorerGroup label items =
+--     column (Explorer Group)
+--         [ spacing <| spacingScale 2 ]
+--         [ el NoStyle [] <| text label
+--         , viewExplorerFolder items
+--         ]
 
 
-viewExplorerFile label =
-    el (Explorer File) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text label
+viewExplorerFolder active items =
+    column (Explorer ExplorerFolder) [] <|
+        List.map (\item -> viewExplorerFile (item == active) item) items
+
+
+viewExplorerFile isActive label =
+    row (Explorer (ExplorerFile isActive))
+        [ paddingXY (paddingScale 3) (paddingScale 1)
+        , spacing <| paddingScale 1
+        ]
+        [ smallIcon
+            |> Icon.file
+            |> html
+            |> el NoStyle []
+        , text label
+        ]
 
 
 
@@ -111,28 +175,34 @@ viewWorkspace =
         [ width fill ]
         [ viewTabBar
         , viewEditor
+        , viewStatusBar
         ]
 
 
 viewTabBar =
     row (Workspace TabBar)
         []
-        [ viewTab True "Chapter One"
-        , viewTab False "Chapter Three"
-        , viewTab False "Mr Bennet"
+        [ viewTab True Icon.file "Chapter One"
+        , viewTab False Icon.file "Chapter Three"
+        , viewTab False Icon.gistSecret "Mr Bennet"
         ]
 
 
-viewTab active label =
-    el
+viewTab active icon label =
+    row
         (Workspace <| Tab active)
         [ paddingTop <| paddingScale 2
         , paddingBottom <| paddingScale 2
         , paddingLeft <| paddingScale 3
         , paddingRight <| paddingScale 3
+        , spacing <| paddingScale 1
         ]
-    <|
-        text label
+        [ smallIcon
+            |> icon
+            |> html
+            |> el NoStyle []
+        , text label
+        ]
 
 
 viewEditor =
@@ -140,6 +210,8 @@ viewEditor =
         [ width fill
         , height fill
         , paddingLeft <| paddingScale 6
+        , paddingTop <| paddingScale 4
+        , paddingBottom <| paddingScale 4
         ]
         [ viewMonacoEditor
         ]
@@ -164,15 +236,123 @@ viewMonacoEditor =
 
 viewMetaPanel =
     column (Meta MetaWrapper)
-        [ width (px 300), padding <| paddingScale 3, spacing <| spacingScale 2 ]
-        [ el (Meta MetaHeading) [] <| text "Synopsis"
-        , paragraph NoStyle [] <|
-            [ text <|
-                "Mr & Mrs Bennet have a conversation. Sociis natoque penatibus et "
-                    ++ "magnis dis parturient montes, nascetur ridiculus mus. Maecenas "
-                    ++ "faucibus mollis interdum."
+        [ width (px 300), padding <| paddingScale 3, spacing <| spacingScale 4 ]
+        [ column NoStyle
+            [ spacing <| spacingScale 1 ]
+            [ el (Meta MetaHeading) [] <| text "Synopsis"
+            , paragraph NoStyle [] <|
+                [ text <|
+                    "Mr & Mrs Bennet have a conversation. Sociis natoque penatibus et "
+                        ++ "magnis dis parturient montes, nascetur ridiculus mus. Maecenas "
+                        ++ "faucibus mollis interdum."
+                ]
+            ]
+        , column NoStyle
+            [ spacing <| spacingScale 1 ]
+            [ el (Meta MetaHeading) [] <| text "Characters"
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.gistSecret
+                    |> html
+                    |> el NoStyle []
+                , text "Mr. Bennet"
+                , smallIcon
+                    |> Icon.megaphone
+                    |> html
+                    |> el NoStyle []
+                ]
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.gistSecret
+                    |> html
+                    |> el NoStyle []
+                , text "Mrs. Bennet"
+                , smallIcon
+                    |> Icon.megaphone
+                    |> html
+                    |> el NoStyle []
+                ]
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.gistSecret
+                    |> html
+                    |> el NoStyle []
+                , text "Mrs. Long"
+                ]
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.gistSecret
+                    |> html
+                    |> el NoStyle []
+                , text "Mr. Bingley"
+                ]
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.gistSecret
+                    |> html
+                    |> el NoStyle []
+                , text "Sir William"
+                ]
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.gistSecret
+                    |> html
+                    |> el NoStyle []
+                , text "Lady Lucas"
+                ]
+            ]
+        , column NoStyle
+            [ spacing <| spacingScale 1 ]
+            [ el (Meta MetaHeading) [] <| text "Locations"
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.globe
+                    |> html
+                    |> el NoStyle []
+                , text "Longbourn House"
+                ]
             ]
         ]
+
+
+
+-- STATUS BAR
+
+
+viewStatusBar =
+    row (StatusBar StatusBarWrapper)
+        [ alignRight
+        , spacing <| spacingScale 1
+        , paddingXY (paddingScale 2) (paddingScale 1)
+        ]
+        [ el NoStyle [] <| text "500 / 2000 words"
+        , el NoStyle [] <| text "2500 characters"
+        , el NoStyle [] <| text "25%"
+        , smallIcon |> Icon.gear |> html |> el NoStyle []
+        ]
+
+
+
+-- ICONS
+
+
+smallIcon =
+    Icon.defaultOptions
+        |> Icon.color "black"
+        |> Icon.size (fontScale 1 |> floor)
+
+
+largeIcon =
+    Icon.defaultOptions
+        |> Icon.color "black"
+        |> Icon.size (fontScale 4 |> floor)
 
 
 
@@ -181,22 +361,33 @@ viewMetaPanel =
 
 type Styles
     = NoStyle
-    | ActivityBar
+    | Activity ActivityStyle
     | Explorer ExplorerStyle
     | Meta MetaStyle
+    | StatusBar StatusBarStyle
     | Workspace WorkspaceStyle
+
+
+type ActivityStyle
+    = ActivityWrapper
+    | ActivityItem Bool
 
 
 type ExplorerStyle
     = ExplorerWrapper
     | Group
-    | Folder
-    | File
+    | ExplorerFolder
+    | ExplorerFile Bool
+    | ExplorerHeaderAction
 
 
 type MetaStyle
     = MetaWrapper
     | MetaHeading
+
+
+type StatusBarStyle
+    = StatusBarWrapper
 
 
 type WorkspaceStyle
@@ -206,23 +397,46 @@ type WorkspaceStyle
 
 styleSheet =
     Style.styleSheet
-        [ style ActivityBar <|
+        [ style (Activity ActivityWrapper) <|
             panelStyles
                 ++ [ Border.right 1 ]
+        , style (Activity (ActivityItem False)) <|
+            [ cursor "pointer"
+            , hover [ Color.background (rgb 229 229 229) ]
+            ]
+        , style (Activity (ActivityItem True)) <|
+            [ cursor "pointer"
+            , Color.background (rgb 229 229 229)
+            ]
         , style (Explorer ExplorerWrapper) <|
             panelStyles
                 ++ [ Border.right 1 ]
         , style (Explorer Group)
             [ Font.size <| fontScale 2 ]
-        , style (Explorer Folder)
+        , style (Explorer ExplorerFolder)
             [ Font.size <| fontScale 1 ]
-        , style (Explorer File)
-            []
+        , style (Explorer (ExplorerFile False))
+            [ cursor "pointer"
+            , hover [ Color.background (rgb 229 229 229) ]
+            ]
+        , style (Explorer (ExplorerFile True))
+            [ cursor "pointer"
+            , Color.background (rgb 229 229 229)
+            ]
+        , style (Explorer ExplorerHeaderAction)
+            [ cursor "pointer"
+            , hover [ Color.background (rgb 229 229 229) ]
+            ]
         , style (Meta MetaWrapper) <|
             panelStyles
                 ++ [ Border.left 1 ]
         , style (Meta MetaHeading)
             [ Font.size <| fontScale 2 ]
+        , style (StatusBar StatusBarWrapper)
+            [ Color.background (rgb 229 229 229)
+            , Font.typeface <| fontStack SansSerif
+            , Font.size <| fontScale 1
+            ]
         , style (Workspace TabBar)
             [ Border.bottom 1
             , Color.border (rgb 229 229 229)
@@ -235,13 +449,15 @@ styleSheet =
             , Border.right 1
             , Color.text (rgb 170 170 170)
             , Color.border (rgb 229 229 229)
+            , cursor "pointer"
+            , hover [ Color.background (rgb 229 229 229) ]
             ]
         , style (Workspace (Tab True))
             [ Font.typeface (fontStack SansSerif)
             , Font.size <| fontScale 1
             , Border.right 1
-            , Color.text (rgb 203 71 25)
             , Color.border (rgb 229 229 229)
+            , Color.background (rgb 229 229 229)
             ]
         ]
 
@@ -258,11 +474,6 @@ type FontStack
     = SansSerif
     | Serif
     | Mono
-
-
-
--- type UiColor
--- =
 
 
 fontStack stack =
@@ -283,6 +494,25 @@ fontStack stack =
 
         Mono ->
             [ Font.font "monospaced" ]
+
+
+type UiColor
+    = PrimaryColor
+    | SecondaryColor
+    | TertiaryColor
+
+
+uiColor : UiColor -> Color.Color
+uiColor color =
+    case color of
+        PrimaryColor ->
+            rgb 0 0 0
+
+        SecondaryColor ->
+            rgb 0 0 0
+
+        TertiaryColor ->
+            rgb 0 0 0
 
 
 fontScale =
