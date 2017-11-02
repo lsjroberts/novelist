@@ -1,10 +1,14 @@
 module Main exposing (..)
 
 import Color exposing (rgb, rgba)
+import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Attributes exposing (..)
+import Element.Events exposing (..)
 import Html exposing (Html, program)
 import Html.Attributes
+import Maybe.Extra
+import Set exposing (Set)
 import Style exposing (..)
 import Style.Border as Border
 import Style.Color as Color
@@ -22,7 +26,7 @@ main =
     program
         { init = init
         , view = view
-        , update = update
+        , update = updateWithCmds
         , subscriptions = subscriptions
         }
 
@@ -32,7 +36,9 @@ main =
 
 
 type Msg
-    = NoOp
+    = SetActivity Activity
+    | OpenFile FileId
+    | CloseFile FileId
 
 
 
@@ -40,12 +46,43 @@ type Msg
 
 
 type alias Model =
+    { activity : Activity
+    , files : Dict FileId File
+    , openFiles : Set FileId
+    , activeFile : Maybe FileId
+    }
+
+
+type Activity
+    = Manuscript
+    | Characters
+    | Locations
+    | Search
+    | Plan
+    | Editor
+
+
+type alias FileId =
     Int
+
+
+type alias File =
+    { name : String }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( 0
+    ( Model
+        Manuscript
+        (Dict.fromList
+            [ ( 0, File "Chapter One" )
+            , ( 1, File "Chapter Two" )
+            , ( 2, File "Chapter Three" )
+            , ( 3, File "Chapter Four" )
+            ]
+        )
+        (Set.fromList [ 0, 2 ])
+        (Just 0)
     , Cmd.none
     )
 
@@ -59,9 +96,9 @@ view model =
     Element.viewport styleSheet <|
         row NoStyle
             [ height (percent 100) ]
-            [ viewActivityBar
-            , viewExplorer
-            , viewWorkspace
+            [ viewActivityBar model.activity
+            , viewExplorer model.files model.activeFile
+            , viewWorkspace model.files model.openFiles model.activeFile
             , viewMetaPanel
             ]
 
@@ -70,41 +107,39 @@ view model =
 -- VIEW ACTIVITY BAR
 
 
-viewActivityBar =
+viewActivityBar activity =
     column (Activity ActivityWrapper)
         []
-        [ viewActivityItem Icon.book True
-        , viewActivityItem Icon.gistSecret False
-        , viewActivityItem Icon.globe False
-        , viewActivityItem Icon.search False
-        , viewActivityItem Icon.gitBranch False
-        , viewActivityItem Icon.checklist False
+        [ viewActivityItem activity Manuscript Icon.book
+        , viewActivityItem activity Characters Icon.gistSecret
+        , viewActivityItem activity Locations Icon.globe
+        , viewActivityItem activity Search Icon.search
+        , viewActivityItem activity Plan Icon.gitBranch
+        , viewActivityItem activity Editor Icon.checklist
         ]
 
 
-viewActivityItem icon isActive =
+viewActivityItem activeActivity activity icon =
     largeIcon
         |> icon
         |> html
-        |> el (Activity <| ActivityItem isActive) [ padding <| paddingScale 2 ]
+        |> el (Activity <| ActivityItem (activity == activeActivity))
+            [ padding <| paddingScale 2
+            , onClick (SetActivity activity)
+            ]
 
 
 
 -- VIEW EXPLORER
 
 
-viewExplorer =
+viewExplorer files activeFile =
     column (Explorer ExplorerWrapper)
         [ width (px 240)
           -- , spacing <| spacingScale 3
         ]
         [ viewExplorerHeader
-        , viewExplorerFolder "Chapter One"
-            [ "Chapter One"
-            , "Chapter Two"
-            , "Chapter Three"
-            , "Chapter Four"
-            ]
+        , viewExplorerFolder files activeFile
         , row (Explorer (ExplorerFile False))
             [ paddingXY (paddingScale 3) (paddingScale 1)
             , spacing <| paddingScale 1
@@ -148,21 +183,35 @@ viewExplorerHeader =
 --         ]
 
 
-viewExplorerFolder active items =
-    column (Explorer ExplorerFolder) [] <|
-        List.map (\item -> viewExplorerFile (item == active) item) items
+viewExplorerFolder files maybeActive =
+    let
+        viewFile fileId file =
+            viewExplorerFile
+                (case maybeActive of
+                    Just active ->
+                        active == fileId
+
+                    Nothing ->
+                        False
+                )
+                fileId
+                file.name
+    in
+        column (Explorer ExplorerFolder) [] <|
+            Dict.values (Dict.map viewFile files)
 
 
-viewExplorerFile isActive label =
+viewExplorerFile isActive fileId name =
     row (Explorer (ExplorerFile isActive))
         [ paddingXY (paddingScale 3) (paddingScale 1)
         , spacing <| paddingScale 1
+        , onClick (OpenFile fileId)
         ]
         [ smallIcon
             |> Icon.file
             |> html
             |> el NoStyle []
-        , text label
+        , text name
         ]
 
 
@@ -170,27 +219,32 @@ viewExplorerFile isActive label =
 -- VIEW WORKSPACE
 
 
-viewWorkspace =
+viewWorkspace files openFiles activeFile =
     column NoStyle
         [ width fill ]
-        [ viewTabBar
+        [ viewTabBar files openFiles activeFile
         , viewEditor
         , viewStatusBar
         ]
 
 
-viewTabBar =
-    row (Workspace TabBar)
-        []
-        [ viewTab True Icon.file "Chapter One"
-        , viewTab False Icon.file "Chapter Three"
-        , viewTab False Icon.gistSecret "Mr Bennet"
-        ]
+viewTabBar files openFiles activeFile =
+    let
+        tab fileId =
+            viewTab Icon.file
+                fileId
+                (Maybe.Extra.unwrap "" (\f -> f.name) (Dict.get fileId files))
+                (Maybe.Extra.unwrap False (\a -> fileId == a) activeFile)
+    in
+        row (Workspace TabBar) [] <|
+            (openFiles |> Set.toList |> List.map tab)
+                ++ [ viewTab Icon.gistSecret 99 "Mr Bennet" False
+                   ]
 
 
-viewTab active icon label =
+viewTab icon fileId name isActive =
     row
-        (Workspace <| Tab active)
+        (Workspace <| Tab isActive)
         [ paddingTop <| paddingScale 2
         , paddingBottom <| paddingScale 2
         , paddingLeft <| paddingScale 3
@@ -201,7 +255,12 @@ viewTab active icon label =
             |> icon
             |> html
             |> el NoStyle []
-        , text label
+        , el NoStyle [ onClick (OpenFile fileId) ] <| text name
+        , smallIcon
+            |> Icon.color "grey"
+            |> Icon.x
+            |> html
+            |> el NoStyle [ onClick (CloseFile fileId) ]
         ]
 
 
@@ -246,6 +305,13 @@ viewMetaPanel =
                         ++ "magnis dis parturient montes, nascetur ridiculus mus. Maecenas "
                         ++ "faucibus mollis interdum."
                 ]
+            , el (Meta MetaStatus) [ alignLeft, paddingXY (paddingScale 2) (paddingScale 1) ] <| text "Draft"
+            , row NoStyle
+                [ spacing <| spacingScale 1 ]
+                [ el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text "tag"
+                , el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text "another tag"
+                , el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text "third tag"
+                ]
             ]
         , column NoStyle
             [ spacing <| spacingScale 1 ]
@@ -288,7 +354,7 @@ viewMetaPanel =
                     |> Icon.gistSecret
                     |> html
                     |> el NoStyle []
-                , text "Mr. Bingley"
+                , text "Charles Bingley"
                 ]
             , row NoStyle
                 [ spacing <| paddingScale 1 ]
@@ -296,7 +362,7 @@ viewMetaPanel =
                     |> Icon.gistSecret
                     |> html
                     |> el NoStyle []
-                , text "Sir William"
+                , text "Sir William Lucas"
                 ]
             , row NoStyle
                 [ spacing <| paddingScale 1 ]
@@ -305,6 +371,14 @@ viewMetaPanel =
                     |> html
                     |> el NoStyle []
                 , text "Lady Lucas"
+                ]
+            , row NoStyle
+                [ spacing <| paddingScale 1 ]
+                [ smallIcon
+                    |> Icon.gistSecret
+                    |> html
+                    |> el NoStyle []
+                , text "Elizabeth Bennet"
                 ]
             ]
         , column NoStyle
@@ -384,6 +458,8 @@ type ExplorerStyle
 type MetaStyle
     = MetaWrapper
     | MetaHeading
+    | MetaStatus
+    | MetaTag
 
 
 type StatusBarStyle
@@ -432,6 +508,14 @@ styleSheet =
                 ++ [ Border.left 1 ]
         , style (Meta MetaHeading)
             [ Font.size <| fontScale 2 ]
+        , style (Meta MetaStatus)
+            [ Border.rounded 100
+            , Color.background (rgb 200 200 241)
+            ]
+        , style (Meta MetaTag)
+            [ Border.rounded 100
+            , Color.background (rgb 241 200 200)
+            ]
         , style (StatusBar StatusBarWrapper)
             [ Color.background (rgb 229 229 229)
             , Font.typeface <| fontStack SansSerif
@@ -531,9 +615,37 @@ spacingScale =
 -- UPDATE
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+updateWithCmds : Msg -> Model -> ( Model, Cmd Msg )
+updateWithCmds msg model =
+    ( update msg model, Cmd.none )
+
+
+update : Msg -> Model -> Model
 update msg model =
-    ( model, Cmd.none )
+    case msg of
+        CloseFile fileId ->
+            { model
+                | activeFile =
+                    case model.activeFile of
+                        Just activeFile ->
+                            if activeFile == fileId then
+                                Nothing
+                            else
+                                model.activeFile
+
+                        Nothing ->
+                            Nothing
+                , openFiles = Set.remove fileId model.openFiles
+            }
+
+        OpenFile fileId ->
+            { model
+                | activeFile = Just fileId
+                , openFiles = Set.insert fileId model.openFiles
+            }
+
+        SetActivity activity ->
+            { model | activity = activity }
 
 
 
@@ -543,3 +655,20 @@ update msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
+
+-- UTILS
+
+
+byId : List ( Int, a ) -> Int -> Maybe a
+byId xs id =
+    xs
+        |> List.filterMap
+            (\( xId, x ) ->
+                if xId == id then
+                    Just x
+                else
+                    Nothing
+            )
+        |> List.head
