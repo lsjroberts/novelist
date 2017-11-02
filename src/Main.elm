@@ -38,7 +38,8 @@ main =
 
 
 type Msg
-    = SetActivity Activity
+    = NoOp
+    | SetActivity Activity
     | OpenFile FileId
     | CloseFile FileId
     | SetWordTarget String
@@ -77,12 +78,26 @@ type alias File =
 
 type FileType
     = SceneFile Scene
-    | CharacterFile
+    | CharacterFile Character
     | LocationFile
 
 
 type alias Scene =
-    { wordTarget : Maybe Int }
+    { synopsis : String
+    , status : String
+    , tags : List String
+    , characters : Dict FileId SceneCharacter
+    , locations : List FileId
+    , wordTarget : Maybe Int
+    }
+
+
+type alias SceneCharacter =
+    { speaking : Bool }
+
+
+type alias Character =
+    { aliases : List String }
 
 
 init : ( Model, Cmd Msg )
@@ -90,10 +105,28 @@ init =
     ( Model
         Manuscript
         (Dict.fromList
-            [ ( 0, File "Chapter One" (SceneFile <| Scene Nothing) )
-            , ( 1, File "Chapter Two" (SceneFile <| Scene <| Just 2000) )
-            , ( 2, File "Chapter Three" (SceneFile <| Scene Nothing) )
-            , ( 3, File "Chapter Four" (SceneFile <| Scene Nothing) )
+            [ ( 0
+              , File "Chapter One"
+                    (SceneFile <|
+                        Scene "Mr and Mrs Bennet have a conversation. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis."
+                            "Draft"
+                            [ "tag", "another tag", "one more", "further tags yay" ]
+                            (Dict.fromList
+                                [ ( 4, SceneCharacter True )
+                                , ( 5, SceneCharacter True )
+                                , ( 6, SceneCharacter False )
+                                ]
+                            )
+                            []
+                            Nothing
+                    )
+              )
+            , ( 1, File "Chapter Two" (SceneFile <| Scene "A dance" "Draft" [] (Dict.fromList []) [] <| Just 2000) )
+            , ( 2, File "Chapter Three" (SceneFile <| Scene "" "Draft" [] (Dict.fromList []) [] Nothing) )
+            , ( 3, File "Chapter Four" (SceneFile <| Scene "" "Draft" [] (Dict.fromList []) [] Nothing) )
+            , ( 4, File "Mr. Bennet" (CharacterFile <| Character [ "Mr. Bennet, Esquire" ]) )
+            , ( 5, File "Mrs. Bennet" (CharacterFile <| Character []) )
+            , ( 6, File "Charles Bingley" (CharacterFile <| Character [ "Mr. Bingley", "Bingley" ]) )
             ]
         )
         (Set.fromList [ 0, 2 ])
@@ -134,9 +167,9 @@ view model =
             row NoStyle
                 [ height (percent 100) ]
                 [ viewActivityBar model.activity
-                , viewExplorer model.files model.activeFile
+                , viewExplorer model.activity model.files model.activeFile
                 , viewWorkspace model.files model.openFiles model.activeFile wordTarget
-                , viewMetaPanel wordTarget
+                , viewMetaPanel model.files activeFile
                 ]
 
 
@@ -160,9 +193,10 @@ viewActivityItem activeActivity activity icon =
     largeIcon
         |> icon
         |> html
-        |> el (Activity <| ActivityItem (activity == activeActivity))
+        |> el (Activity ActivityItem)
             [ padding <| paddingScale 2
             , onClick (SetActivity activity)
+            , vary Active (activity == activeActivity)
             ]
 
 
@@ -170,16 +204,17 @@ viewActivityItem activeActivity activity icon =
 -- VIEW EXPLORER
 
 
-viewExplorer files activeFile =
+viewExplorer activity files activeFile =
     column (Explorer ExplorerWrapper)
         [ width (px 240)
           -- , spacing <| spacingScale 3
         ]
         [ viewExplorerHeader
-        , viewExplorerFolder files activeFile
-        , row (Explorer (ExplorerFile False))
+        , viewExplorerFolder activity files activeFile
+        , row (Explorer ExplorerFile)
             [ paddingXY (paddingScale 3) (paddingScale 1)
             , spacing <| paddingScale 1
+            , vary Active False
             ]
             [ smallIcon
                 |> Icon.file
@@ -195,7 +230,9 @@ viewExplorer files activeFile =
 
 viewExplorerHeader =
     row NoStyle
-        [ paddingXY (paddingScale 3) (paddingScale 2), spacing <| spacingScale 1 ]
+        [ paddingXY (paddingScale 3) (paddingScale 2)
+        , spacing <| spacingScale 1
+        ]
         [ el NoStyle [] <| text "Manuscript"
         , row NoStyle
             [ alignRight, spacing <| spacingScale 1 ]
@@ -220,8 +257,19 @@ viewExplorerHeader =
 --         ]
 
 
-viewExplorerFolder files maybeActive =
+viewExplorerFolder activity files maybeActive =
     let
+        filterByActivity fileId file =
+            case file.fileType of
+                SceneFile _ ->
+                    activity == Manuscript
+
+                CharacterFile _ ->
+                    activity == Characters
+
+                _ ->
+                    False
+
         viewFile fileId file =
             viewExplorerFile
                 (case maybeActive of
@@ -235,14 +283,15 @@ viewExplorerFolder files maybeActive =
                 file.name
     in
         column (Explorer ExplorerFolder) [] <|
-            Dict.values (Dict.map viewFile files)
+            Dict.values (Dict.map viewFile (Dict.filter filterByActivity files))
 
 
 viewExplorerFile isActive fileId name =
-    row (Explorer (ExplorerFile isActive))
+    row (Explorer ExplorerFile)
         [ paddingXY (paddingScale 3) (paddingScale 1)
         , spacing <| paddingScale 1
         , onClick (OpenFile fileId)
+        , vary Active isActive
         ]
         [ smallIcon
             |> Icon.file
@@ -260,7 +309,7 @@ viewWorkspace files openFiles activeFile wordTarget =
     column NoStyle
         [ width fill ]
         [ viewTabBar files openFiles activeFile
-        , viewEditor activeFile
+        , viewEditor files activeFile
         , viewStatusBar wordTarget
         ]
 
@@ -275,18 +324,17 @@ viewTabBar files openFiles activeFile =
     in
         row (Workspace TabBar) [] <|
             (openFiles |> Set.toList |> List.map tab)
-                ++ [ viewTab Icon.gistSecret 99 "Mr Bennet" False
-                   ]
 
 
 viewTab icon fileId name isActive =
     row
-        (Workspace <| Tab isActive)
+        (Workspace Tab)
         [ paddingTop <| paddingScale 2
         , paddingBottom <| paddingScale 2
         , paddingLeft <| paddingScale 3
         , paddingRight <| paddingScale 3
         , spacing <| paddingScale 1
+        , vary Active isActive
         ]
         [ smallIcon
             |> icon
@@ -301,17 +349,38 @@ viewTab icon fileId name isActive =
         ]
 
 
-viewEditor activeFile =
-    column NoStyle
-        [ width fill
-        , height fill
-        , paddingLeft <| paddingScale 6
-        , paddingTop <| paddingScale 4
-        , paddingBottom <| paddingScale 4
-        ]
-        [ --viewMonacoEditor activeFile
-          el Placeholder [ width fill, height fill ] empty
-        ]
+viewEditor : Dict FileId File -> Maybe FileId -> Element Styles Variations Msg
+viewEditor files activeFile =
+    let
+        maybeFile =
+            Maybe.Extra.unwrap Nothing (\fileId -> Dict.get fileId files) activeFile
+
+        viewFile =
+            case maybeFile of
+                Just file ->
+                    case file.fileType of
+                        SceneFile scene ->
+                            --viewMonacoEditor activeFile
+                            el Placeholder [ width fill, height fill ] empty
+
+                        CharacterFile character ->
+                            viewCharacterEditor file character
+
+                        _ ->
+                            el Placeholder [ width fill, height fill ] empty
+
+                Nothing ->
+                    el Placeholder [ width fill, height fill ] empty
+    in
+        column NoStyle
+            [ width fill
+            , height fill
+            , paddingTop <| paddingScale 4
+            , paddingRight <| paddingScale 6
+            , paddingBottom <| paddingScale 4
+            , paddingLeft <| paddingScale 6
+            ]
+            [ viewFile ]
 
 
 viewMonacoEditor activeFile =
@@ -332,98 +401,101 @@ viewMonacoEditor activeFile =
             el NoStyle [] empty
 
 
+viewCharacterEditor : File -> Character -> Element Styles Variations Msg
+viewCharacterEditor file character =
+    column (Workspace CharacterEditor)
+        [ width fill, height fill, spacing <| spacingScale 3 ]
+        [ h1 (Workspace CharacterEditorTitle) [] <|
+            Input.text InputText
+                [ paddingXY 0 (paddingScale 2)
+                , vary Light True
+                ]
+                { onChange = SetWordTarget
+                , value = file.name
+                , label = Input.hiddenLabel "Name"
+                , options = []
+                }
+        , if List.length character.aliases > 0 then
+            column NoStyle
+                [ spacing <| spacingScale 1 ]
+                [ el NoStyle [] <| text "Also known as:"
+                , column NoStyle [] <|
+                    List.map
+                        (\a ->
+                            Input.text InputText
+                                [ paddingXY 0 (paddingScale 2)
+                                , vary Light True
+                                ]
+                                { onChange = SetWordTarget
+                                , value = a
+                                , label = Input.hiddenLabel "Alias"
+                                , options = []
+                                }
+                        )
+                        character.aliases
+                ]
+          else
+            el NoStyle [] empty
+        ]
+
+
 
 -- VIEW META PANEL
 
 
-viewMetaPanel wordTarget =
+viewMetaPanel files activeFile =
+    case activeFile of
+        Just file ->
+            case file.fileType of
+                CharacterFile character ->
+                    viewCharacterMeta file character
+
+                SceneFile scene ->
+                    viewSceneMeta files scene
+
+                _ ->
+                    el NoStyle [] empty
+
+        Nothing ->
+            el NoStyle [] empty
+
+
+viewCharacterMeta file character =
+    column (Meta MetaWrapper)
+        [ width (px 300), padding <| paddingScale 3, spacing <| spacingScale 4 ]
+        [ column NoStyle
+            [ spacing <| spacingScale 1 ]
+            [ el (Meta MetaHeading) [] <| text file.name ]
+        ]
+
+
+viewSceneMeta files scene =
     column (Meta MetaWrapper)
         [ width (px 300), padding <| paddingScale 3, spacing <| spacingScale 4 ]
         [ column NoStyle
             [ spacing <| spacingScale 1 ]
             [ el (Meta MetaHeading) [] <| text "Synopsis"
-            , paragraph NoStyle [] <|
-                [ text <|
-                    "Mr & Mrs Bennet have a conversation. Sociis natoque penatibus et "
-                        ++ "magnis dis parturient montes, nascetur ridiculus mus. Maecenas "
-                        ++ "faucibus mollis interdum."
+            , Input.multiline InputText
+                [ paddingXY (paddingScale 2) (paddingScale 2)
+                , minHeight (px (fontScale 9))
                 ]
-            , el (Meta MetaStatus) [ alignLeft, paddingXY (paddingScale 2) (paddingScale 1) ] <| text "Draft"
+                { onChange = (\s -> NoOp)
+                , value = scene.synopsis
+                , label = Input.hiddenLabel "Synopsis"
+                , options = []
+                }
+            , el (Meta MetaStatus)
+                [ alignLeft
+                , paddingXY (paddingScale 2) (paddingScale 1)
+                ]
+              <|
+                text scene.status
             , row NoStyle
                 [ spacing <| spacingScale 1 ]
-                [ el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text "tag"
-                , el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text "another tag"
-                , el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text "third tag"
-                ]
+              <|
+                List.map (\tag -> el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text tag) scene.tags
             ]
-        , column NoStyle
-            [ spacing <| spacingScale 1 ]
-            [ el (Meta MetaHeading) [] <| text "Characters"
-            , row NoStyle
-                [ spacing <| paddingScale 1 ]
-                [ smallIcon
-                    |> Icon.gistSecret
-                    |> html
-                    |> el NoStyle []
-                , text "Mr. Bennet"
-                , smallIcon
-                    |> Icon.megaphone
-                    |> html
-                    |> el NoStyle []
-                ]
-            , row NoStyle
-                [ spacing <| paddingScale 1 ]
-                [ smallIcon
-                    |> Icon.gistSecret
-                    |> html
-                    |> el NoStyle []
-                , text "Mrs. Bennet"
-                , smallIcon
-                    |> Icon.megaphone
-                    |> html
-                    |> el NoStyle []
-                ]
-            , row NoStyle
-                [ spacing <| paddingScale 1 ]
-                [ smallIcon
-                    |> Icon.gistSecret
-                    |> html
-                    |> el NoStyle []
-                , text "Mrs. Long"
-                ]
-            , row NoStyle
-                [ spacing <| paddingScale 1 ]
-                [ smallIcon
-                    |> Icon.gistSecret
-                    |> html
-                    |> el NoStyle []
-                , text "Charles Bingley"
-                ]
-            , row NoStyle
-                [ spacing <| paddingScale 1 ]
-                [ smallIcon
-                    |> Icon.gistSecret
-                    |> html
-                    |> el NoStyle []
-                , text "Sir William Lucas"
-                ]
-            , row NoStyle
-                [ spacing <| paddingScale 1 ]
-                [ smallIcon
-                    |> Icon.gistSecret
-                    |> html
-                    |> el NoStyle []
-                , text "Lady Lucas"
-                ]
-            , row NoStyle
-                [ spacing <| paddingScale 1 ]
-                [ smallIcon
-                    |> Icon.gistSecret
-                    |> html
-                    |> el NoStyle []
-                , text "Elizabeth Bennet"
-                ]
-            ]
+        , viewSceneCharacters files scene.characters
         , column NoStyle
             [ spacing <| spacingScale 1 ]
             [ el (Meta MetaHeading) [] <| text "Locations"
@@ -442,12 +514,51 @@ viewMetaPanel wordTarget =
             , Input.text InputText
                 [ paddingXY (paddingScale 2) (paddingScale 2) ]
                 { onChange = SetWordTarget
-                , value = Maybe.Extra.unwrap "" toString wordTarget
+                , value = Maybe.Extra.unwrap "" toString scene.wordTarget
                 , label = Input.hiddenLabel "Word Target"
                 , options = []
                 }
             ]
         ]
+
+
+viewSceneCharacters files characters =
+    let
+        viewCharacter characterId sceneCharacter =
+            let
+                maybeCharacterFile =
+                    Dict.get characterId files
+            in
+                case maybeCharacterFile of
+                    Just characterFile ->
+                        row NoStyle
+                            [ spacing <| paddingScale 1 ]
+                            [ smallIcon
+                                |> Icon.gistSecret
+                                |> html
+                                |> el NoStyle []
+                            , text characterFile.name
+                            , if sceneCharacter.speaking then
+                                smallIcon
+                                    |> Icon.megaphone
+                                    |> html
+                                    |> el NoStyle []
+                              else
+                                el NoStyle [] empty
+                            ]
+
+                    Nothing ->
+                        el NoStyle [] empty
+    in
+        column NoStyle
+            [ spacing <| spacingScale 1 ]
+            ([ el (Meta MetaHeading) [] <| text "Characters" ]
+                ++ (Dict.values <|
+                        Dict.map
+                            viewCharacter
+                            characters
+                   )
+            )
 
 
 
@@ -509,14 +620,14 @@ type Styles
 
 type ActivityStyle
     = ActivityWrapper
-    | ActivityItem Bool
+    | ActivityItem
 
 
 type ExplorerStyle
     = ExplorerWrapper
     | Group
     | ExplorerFolder
-    | ExplorerFile Bool
+    | ExplorerFile
     | ExplorerHeaderAction
 
 
@@ -532,8 +643,15 @@ type StatusBarStyle
 
 
 type WorkspaceStyle
-    = TabBar
-    | Tab Bool
+    = CharacterEditor
+    | CharacterEditorTitle
+    | TabBar
+    | Tab
+
+
+type Variations
+    = Active
+    | Light
 
 
 styleSheet =
@@ -541,13 +659,11 @@ styleSheet =
         [ style (Activity ActivityWrapper) <|
             panelStyles
                 ++ [ Border.right 1 ]
-        , style (Activity (ActivityItem False)) <|
+        , style (Activity ActivityItem) <|
             [ cursor "pointer"
             , hover [ Color.background (rgb 229 229 229) ]
-            ]
-        , style (Activity (ActivityItem True)) <|
-            [ cursor "pointer"
-            , Color.background (rgb 229 229 229)
+            , variation Active
+                [ Color.background (rgb 229 229 229) ]
             ]
         , style (Explorer ExplorerWrapper) <|
             panelStyles
@@ -556,20 +672,24 @@ styleSheet =
             [ Font.size <| fontScale 2 ]
         , style (Explorer ExplorerFolder)
             [ Font.size <| fontScale 1 ]
-        , style (Explorer (ExplorerFile False))
+        , style (Explorer ExplorerFile)
             [ cursor "pointer"
             , hover [ Color.background (rgb 229 229 229) ]
-            ]
-        , style (Explorer (ExplorerFile True))
-            [ cursor "pointer"
-            , Color.background (rgb 229 229 229)
+            , variation Active
+                [ Color.background (rgb 229 229 229) ]
             ]
         , style (Explorer ExplorerHeaderAction)
             [ cursor "pointer"
             , hover [ Color.background (rgb 229 229 229) ]
             ]
         , style InputText
-            [ Color.background (rgb 229 229 229) ]
+            [ Color.background (rgb 229 229 229)
+            , variation Light
+                [ Color.background (rgb 255 255 255)
+                , hover [ Color.background (rgb 241 241 241) ]
+                , focus [ Color.background (rgb 241 241 241) ]
+                ]
+            ]
         , style (Meta MetaWrapper) <|
             panelStyles
                 ++ [ Border.left 1 ]
@@ -590,13 +710,21 @@ styleSheet =
             , Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
             ]
+        , style (Workspace CharacterEditor)
+            [ Font.typeface <| fontStack SansSerif
+            , Font.size <| fontScale 1
+            ]
+        , style (Workspace CharacterEditorTitle)
+            [ Font.typeface <| fontStack Serif
+            , Font.size <| fontScale 4
+            ]
         , style (Workspace TabBar)
             [ Border.bottom 1
             , Color.border (rgb 229 229 229)
             , Color.background (rgb 241 241 241)
               -- , Shadow.box { offset = ( 0, 2 ), size = 0, blur = 2, color = rgba 0 0 0 0.05 }
             ]
-        , style (Workspace (Tab False))
+        , style (Workspace Tab)
             [ Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
             , Border.right 1
@@ -604,13 +732,10 @@ styleSheet =
             , Color.border (rgb 229 229 229)
             , cursor "pointer"
             , hover [ Color.background (rgb 229 229 229) ]
-            ]
-        , style (Workspace (Tab True))
-            [ Font.typeface (fontStack SansSerif)
-            , Font.size <| fontScale 1
-            , Border.right 1
-            , Color.border (rgb 229 229 229)
-            , Color.background (rgb 229 229 229)
+            , variation Active
+                [ Color.text (rgb 0 0 0)
+                , Color.background (rgb 229 229 229)
+                ]
             ]
         ]
 
@@ -692,6 +817,9 @@ updateWithCmds msg model =
 update : Msg -> Model -> Model
 update msg model =
     case msg of
+        NoOp ->
+            model
+
         CloseFile fileId ->
             { model
                 | activeFile =
