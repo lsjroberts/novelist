@@ -5,6 +5,7 @@ import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Attributes exposing (..)
 import Element.Events exposing (..)
+import Element.Input as Input
 import Html exposing (Html, program)
 import Html.Attributes
 import Maybe.Extra
@@ -15,6 +16,7 @@ import Style.Color as Color
 import Style.Font as Font
 import Style.Scale as Scale
 import Style.Shadow as Shadow
+import Style.Transition as Transition
 import Octicons as Icon
 
 
@@ -39,6 +41,7 @@ type Msg
     = SetActivity Activity
     | OpenFile FileId
     | CloseFile FileId
+    | SetWordTarget String
 
 
 
@@ -67,7 +70,19 @@ type alias FileId =
 
 
 type alias File =
-    { name : String }
+    { name : String
+    , fileType : FileType
+    }
+
+
+type FileType
+    = SceneFile Scene
+    | CharacterFile
+    | LocationFile
+
+
+type alias Scene =
+    { wordTarget : Maybe Int }
 
 
 init : ( Model, Cmd Msg )
@@ -75,10 +90,10 @@ init =
     ( Model
         Manuscript
         (Dict.fromList
-            [ ( 0, File "Chapter One" )
-            , ( 1, File "Chapter Two" )
-            , ( 2, File "Chapter Three" )
-            , ( 3, File "Chapter Four" )
+            [ ( 0, File "Chapter One" (SceneFile <| Scene Nothing) )
+            , ( 1, File "Chapter Two" (SceneFile <| Scene <| Just 2000) )
+            , ( 2, File "Chapter Three" (SceneFile <| Scene Nothing) )
+            , ( 3, File "Chapter Four" (SceneFile <| Scene Nothing) )
             ]
         )
         (Set.fromList [ 0, 2 ])
@@ -93,14 +108,36 @@ init =
 
 view : Model -> Html Msg
 view model =
-    Element.viewport styleSheet <|
-        row NoStyle
-            [ height (percent 100) ]
-            [ viewActivityBar model.activity
-            , viewExplorer model.files model.activeFile
-            , viewWorkspace model.files model.openFiles model.activeFile
-            , viewMetaPanel
-            ]
+    let
+        activeFile =
+            case model.activeFile of
+                Just fileId ->
+                    Dict.get fileId model.files
+
+                Nothing ->
+                    Nothing
+
+        wordTarget =
+            case activeFile of
+                Just file ->
+                    case file.fileType of
+                        SceneFile scene ->
+                            scene.wordTarget
+
+                        _ ->
+                            Nothing
+
+                Nothing ->
+                    Nothing
+    in
+        Element.viewport styleSheet <|
+            row NoStyle
+                [ height (percent 100) ]
+                [ viewActivityBar model.activity
+                , viewExplorer model.files model.activeFile
+                , viewWorkspace model.files model.openFiles model.activeFile wordTarget
+                , viewMetaPanel wordTarget
+                ]
 
 
 
@@ -219,12 +256,12 @@ viewExplorerFile isActive fileId name =
 -- VIEW WORKSPACE
 
 
-viewWorkspace files openFiles activeFile =
+viewWorkspace files openFiles activeFile wordTarget =
     column NoStyle
         [ width fill ]
         [ viewTabBar files openFiles activeFile
-        , viewEditor
-        , viewStatusBar
+        , viewEditor activeFile
+        , viewStatusBar wordTarget
         ]
 
 
@@ -264,7 +301,7 @@ viewTab icon fileId name isActive =
         ]
 
 
-viewEditor =
+viewEditor activeFile =
     column NoStyle
         [ width fill
         , height fill
@@ -272,28 +309,34 @@ viewEditor =
         , paddingTop <| paddingScale 4
         , paddingBottom <| paddingScale 4
         ]
-        [ viewMonacoEditor
+        [ --viewMonacoEditor activeFile
+          el Placeholder [ width fill, height fill ] empty
         ]
 
 
-viewMonacoEditor =
-    html <|
-        Html.iframe
-            [ Html.Attributes.src "http://localhost:8080/editor/editor.html"
-            , Html.Attributes.style
-                [ ( "width", "100%" )
-                , ( "height", "100%" )
-                , ( "border", "none" )
-                ]
-            ]
-            []
+viewMonacoEditor activeFile =
+    case activeFile of
+        Just fileId ->
+            html <|
+                Html.iframe
+                    [ Html.Attributes.src ("http://localhost:8080/editor/editor.html?file=/stubs/PrideAndPrejudice.novel/manuscript/" ++ (toString fileId) ++ ".txt")
+                    , Html.Attributes.style
+                        [ ( "width", "100%" )
+                        , ( "height", "100%" )
+                        , ( "border", "none" )
+                        ]
+                    ]
+                    []
+
+        Nothing ->
+            el NoStyle [] empty
 
 
 
 -- VIEW META PANEL
 
 
-viewMetaPanel =
+viewMetaPanel wordTarget =
     column (Meta MetaWrapper)
         [ width (px 300), padding <| paddingScale 3, spacing <| spacingScale 4 ]
         [ column NoStyle
@@ -393,6 +436,17 @@ viewMetaPanel =
                 , text "Longbourn House"
                 ]
             ]
+        , column NoStyle
+            [ spacing <| spacingScale 1 ]
+            [ el (Meta MetaHeading) [] <| text "Word Target"
+            , Input.text InputText
+                [ paddingXY (paddingScale 2) (paddingScale 2) ]
+                { onChange = SetWordTarget
+                , value = Maybe.Extra.unwrap "" toString wordTarget
+                , label = Input.hiddenLabel "Word Target"
+                , options = []
+                }
+            ]
         ]
 
 
@@ -400,16 +454,25 @@ viewMetaPanel =
 -- STATUS BAR
 
 
-viewStatusBar =
+viewStatusBar maybeWordTarget =
     row (StatusBar StatusBarWrapper)
         [ alignRight
         , spacing <| spacingScale 1
         , paddingXY (paddingScale 2) (paddingScale 1)
         ]
-        [ el NoStyle [] <| text "500 / 2000 words"
+        [ case maybeWordTarget of
+            Just wordTarget ->
+                el NoStyle [] <| text ("500 / " ++ (toString wordTarget) ++ " words")
+
+            Nothing ->
+                el NoStyle [] <| text "500 words"
         , el NoStyle [] <| text "2500 characters"
-        , el NoStyle [] <| text "25%"
-        , smallIcon |> Icon.gear |> html |> el NoStyle []
+        , case maybeWordTarget of
+            Just wordTarget ->
+                el NoStyle [] <| text ((toString (100 * 500 / (toFloat wordTarget))) ++ "%")
+
+            Nothing ->
+                el NoStyle [] empty
         ]
 
 
@@ -437,7 +500,9 @@ type Styles
     = NoStyle
     | Activity ActivityStyle
     | Explorer ExplorerStyle
+    | InputText
     | Meta MetaStyle
+    | Placeholder
     | StatusBar StatusBarStyle
     | Workspace WorkspaceStyle
 
@@ -503,6 +568,8 @@ styleSheet =
             [ cursor "pointer"
             , hover [ Color.background (rgb 229 229 229) ]
             ]
+        , style InputText
+            [ Color.background (rgb 229 229 229) ]
         , style (Meta MetaWrapper) <|
             panelStyles
                 ++ [ Border.left 1 ]
@@ -516,6 +583,8 @@ styleSheet =
             [ Border.rounded 100
             , Color.background (rgb 241 200 200)
             ]
+        , style Placeholder
+            [ Color.background (rgb 241 200 200) ]
         , style (StatusBar StatusBarWrapper)
             [ Color.background (rgb 229 229 229)
             , Font.typeface <| fontStack SansSerif
@@ -646,6 +715,42 @@ update msg model =
 
         SetActivity activity ->
             { model | activity = activity }
+
+        SetWordTarget targetString ->
+            let
+                wordTarget =
+                    targetString
+                        |> String.toInt
+                        |> Result.toMaybe
+
+                updateFile maybeFile =
+                    case maybeFile of
+                        Just file ->
+                            case file.fileType of
+                                SceneFile scene ->
+                                    Just
+                                        { file
+                                            | fileType =
+                                                SceneFile
+                                                    { scene
+                                                        | wordTarget = wordTarget
+                                                    }
+                                        }
+
+                                _ ->
+                                    Just file
+
+                        Nothing ->
+                            Nothing
+            in
+                case model.activeFile of
+                    Just activeFile ->
+                        { model
+                            | files = Dict.update activeFile updateFile model.files
+                        }
+
+                    Nothing ->
+                        model
 
 
 

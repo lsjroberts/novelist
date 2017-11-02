@@ -1,6 +1,8 @@
 require.config({ paths: { vs: "../node_modules/monaco-editor/min/vs" } });
 require(["vs/editor/editor.main"], function() {
-  fetch("/stubs/PrideAndPrejudice.novel/manuscript/1.txt")
+  const url = new URL(document.location);
+  const file = url.searchParams.get("file");
+  fetch(file)
     .then(response => console.log(response) || response.text())
     .then(contents => {
       // Register a new language
