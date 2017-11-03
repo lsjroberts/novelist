@@ -51,12 +51,12 @@ viewTab icon fileId name isActive =
             |> icon
             |> html
             |> el NoStyle []
-        , el NoStyle [ onClick (OpenFile fileId) ] <| text name
+        , el NoStyle [ onClick (Ui <| OpenFile fileId) ] <| text name
         , smallIcon
             |> Icon.color "grey"
             |> Icon.x
             |> html
-            |> el NoStyle [ onClick (CloseFile fileId) ]
+            |> el NoStyle [ onClick (Ui <| CloseFile fileId) ]
         ]
 
 

@@ -86,7 +86,7 @@ viewSceneMeta files scene =
             [ el (Meta MetaHeading) [] <| text "Word Target"
             , Input.text InputText
                 [ paddingXY (paddingScale 2) (paddingScale 2) ]
-                { onChange = SetWordTarget
+                { onChange = (Data << SetWordTarget)
                 , value = Maybe.Extra.unwrap "" toString scene.wordTarget
                 , label = Input.hiddenLabel "Word Target"
                 , options = []

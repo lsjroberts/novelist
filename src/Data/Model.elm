@@ -3,7 +3,6 @@ module Data.Model exposing (..)
 import Data.Activity exposing (Activity(..))
 import Data.File exposing (..)
 import Dict exposing (Dict)
-import Set exposing (Set)
 import Messages exposing (Msg(..))
 import Random.Pcg exposing (Seed)
 import Uuid exposing (Uuid)
@@ -12,10 +11,11 @@ import Uuid exposing (Uuid)
 type alias Model =
     { currentSeed : Seed
     , currentUuid : Uuid
-    , activity : Activity
     , files : Dict FileId File
+    , activity : Activity
     , openFiles : List FileId
     , activeFile : Maybe FileId
+    , renamingFile : Maybe FileId
     }
 
 
@@ -57,6 +57,7 @@ init seed =
                 )
           , openFiles = [ "0", "2", "4" ]
           , activeFile = (Just "0")
+          , renamingFile = Nothing
           }
         , Cmd.none
         )

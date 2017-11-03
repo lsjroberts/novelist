@@ -5,7 +5,6 @@ import Data.Model exposing (..)
 import Dict exposing (Dict)
 import Messages exposing (..)
 import Random.Pcg
-import Set exposing (Set)
 import Uuid
 
 
@@ -20,6 +19,26 @@ update msg model =
         NoOp ->
             model
 
+        Data dataMsg ->
+            updateData dataMsg model
+
+        Ui uiMsg ->
+            updateUi uiMsg model
+
+        NewUuid ->
+            let
+                ( newUuid, newSeed ) =
+                    Random.Pcg.step Uuid.uuidGenerator model.currentSeed
+            in
+                { model
+                    | currentUuid = newUuid
+                    , currentSeed = newSeed
+                }
+
+
+updateData : DataMsg -> Model -> Model
+updateData msg model =
+    case msg of
         AddScene ->
             let
                 newScene =
@@ -33,43 +52,8 @@ update msg model =
                 }
                     |> update NewUuid
 
-        CloseFile fileId ->
-            { model
-                | activeFile =
-                    case model.activeFile of
-                        Just activeFile ->
-                            if activeFile == fileId then
-                                Nothing
-                            else
-                                model.activeFile
-
-                        Nothing ->
-                            Nothing
-                , openFiles = List.filter (\f -> not <| f == fileId) model.openFiles
-            }
-
-        NewUuid ->
-            let
-                ( newUuid, newSeed ) =
-                    Random.Pcg.step Uuid.uuidGenerator model.currentSeed
-            in
-                { model
-                    | currentUuid = newUuid
-                    , currentSeed = newSeed
-                }
-
-        OpenFile fileId ->
-            { model
-                | activeFile = Just fileId
-                , openFiles =
-                    if not <| List.member fileId model.openFiles then
-                        fileId :: model.openFiles
-                    else
-                        model.openFiles
-            }
-
-        SetActivity activity ->
-            { model | activity = activity }
+        RenameFile fileId ->
+            model
 
         SetWordTarget targetString ->
             let
@@ -106,6 +90,41 @@ update msg model =
 
                     Nothing ->
                         model
+
+
+updateUi : UiMsg -> Model -> Model
+updateUi msg model =
+    case msg of
+        CloseFile fileId ->
+            { model
+                | activeFile =
+                    case model.activeFile of
+                        Just activeFile ->
+                            if activeFile == fileId then
+                                Nothing
+                            else
+                                model.activeFile
+
+                        Nothing ->
+                            Nothing
+                , openFiles = List.filter (\f -> not <| f == fileId) model.openFiles
+            }
+
+        OpenFile fileId ->
+            { model
+                | activeFile = Just fileId
+                , openFiles =
+                    if not <| List.member fileId model.openFiles then
+                        fileId :: model.openFiles
+                    else
+                        model.openFiles
+            }
+
+        RenamingFile maybeFileId ->
+            model
+
+        SetActivity activity ->
+            { model | activity = activity }
 
 
 

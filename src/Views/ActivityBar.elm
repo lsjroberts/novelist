@@ -10,6 +10,7 @@ import Octicons as Icon
 import Views.Icons
 
 
+view : Activity -> Element Styles Variations Msg
 view activity =
     column (Activity ActivityWrapper)
         []
@@ -28,6 +29,6 @@ item activeActivity activity icon =
         |> html
         |> el (Activity ActivityItem)
             [ padding <| paddingScale 2
-            , onClick (SetActivity activity)
+            , onClick (Ui <| SetActivity activity)
             , vary Active (activity == activeActivity)
             ]

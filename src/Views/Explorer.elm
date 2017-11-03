@@ -12,6 +12,7 @@ import Octicons as Icon
 import Views.Icons exposing (smallIcon)
 
 
+view : Activity -> Dict FileId File -> Maybe FileId -> Element Styles Variations Msg
 view activity files activeFile =
     column (Explorer ExplorerWrapper)
         [ width (px 240)
@@ -23,7 +24,7 @@ view activity files activeFile =
             [ paddingXY (paddingScale 3) (paddingScale 1)
             , spacing <| paddingScale 1
             , vary Active False
-            , onClick AddScene
+            , onClick (Data AddScene)
             ]
             [ smallIcon
                 |> Icon.file
@@ -64,7 +65,7 @@ viewManuscriptHeader =
         [ smallIcon
             |> Icon.file
             |> html
-            |> el (Explorer ExplorerHeaderAction) [ onClick AddScene ]
+            |> el (Explorer ExplorerHeaderAction) [ onClick (Data AddScene) ]
         , smallIcon
             |> Icon.fileDirectory
             |> html
@@ -131,7 +132,7 @@ viewFile isActive fileId name =
     row (Explorer ExplorerFile)
         [ paddingXY (paddingScale 3) (paddingScale 1)
         , spacing <| paddingScale 1
-        , onClick (OpenFile fileId)
+        , onClick (Ui <| OpenFile fileId)
         , vary Active isActive
         ]
         [ smallIcon
