@@ -8,7 +8,6 @@ import Element.Events exposing (..)
 import Element.Input as Input
 import Html
 import Html.Attributes
-import Set exposing (Set)
 import Styles exposing (..)
 import Maybe.Extra
 import Messages exposing (..)
@@ -64,23 +63,26 @@ viewEditor : Dict FileId File -> Maybe FileId -> Element Styles Variations Msg
 viewEditor files activeFile =
     let
         maybeFile =
-            Maybe.Extra.unwrap Nothing (\fileId -> Dict.get fileId files) activeFile
+            Maybe.Extra.unwrap
+                Nothing
+                (\fileId -> Dict.get fileId files)
+                activeFile
 
         viewFile =
-            case maybeFile of
-                Just file ->
+            case ( activeFile, maybeFile ) of
+                ( Just fileId, Just file ) ->
                     case file.fileType of
                         SceneFile scene ->
                             --viewMonacoEditor activeFile
                             el Placeholder [ width fill, height fill ] empty
 
                         CharacterFile character ->
-                            viewCharacterEditor file character
+                            viewCharacterEditor fileId file character
 
                         _ ->
                             el Placeholder [ width fill, height fill ] empty
 
-                Nothing ->
+                _ ->
                     el Placeholder [ width fill, height fill ] empty
     in
         column NoStyle
@@ -112,8 +114,8 @@ viewMonacoEditor activeFile =
             el NoStyle [] empty
 
 
-viewCharacterEditor : File -> Character -> Element Styles Variations Msg
-viewCharacterEditor file character =
+viewCharacterEditor : FileId -> File -> Character -> Element Styles Variations Msg
+viewCharacterEditor fileId file character =
     let
         input label value =
             Input.text InputText
@@ -135,15 +137,15 @@ viewCharacterEditor file character =
     in
         column (Workspace CharacterEditor)
             [ width fill, height fill, spacing <| spacingScale 3 ]
-            [ h1 (Workspace CharacterEditorTitle) [] <|
+            [ el (Workspace CharacterEditorTitle) [] <|
                 Input.text InputText
                     [ padding (paddingScale 2)
                     , vary Light True
                     ]
-                    { onChange = (\s -> NoOp)
+                    { onChange = Data << RenameFile fileId
                     , value = file.name
                     , label = Input.hiddenLabel "Name"
-                    , options = []
+                    , options = [ Input.textKey file.name ]
                     }
             , column NoStyle
                 [ spacing <| spacingScale 1, width (percent 80), paddingXY (paddingScale 2) 0 ]

@@ -6,13 +6,14 @@ import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Attributes exposing (..)
 import Element.Events exposing (..)
+import Element.Input as Input
 import Styles exposing (..)
+import Maybe.Extra
 import Messages exposing (..)
 import Octicons as Icon
 import Views.Icons exposing (smallIcon)
 
 
-view : Activity -> Dict FileId File -> Maybe FileId -> Element Styles Variations Msg
 view activity files activeFile =
     column (Explorer ExplorerWrapper)
         [ width (px 240)
@@ -132,12 +133,21 @@ viewFile isActive fileId name =
     row (Explorer ExplorerFile)
         [ paddingXY (paddingScale 3) (paddingScale 1)
         , spacing <| paddingScale 1
-        , onClick (Ui <| OpenFile fileId)
+        , onClick <| Ui <| OpenFile fileId
         , vary Active isActive
         ]
         [ smallIcon
             |> Icon.file
             |> html
             |> el NoStyle []
-        , text name
+        , if isActive then
+            Input.text InputText
+                []
+                { onChange = Data << RenameFile fileId
+                , value = name
+                , label = Input.hiddenLabel "Scene Name"
+                , options = []
+                }
+          else
+            text name
         ]

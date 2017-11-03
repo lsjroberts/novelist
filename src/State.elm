@@ -52,8 +52,20 @@ updateData msg model =
                 }
                     |> update NewUuid
 
-        RenameFile fileId ->
-            model
+        RenameFile fileId newName ->
+            { model
+                | files =
+                    Dict.update fileId
+                        (\mf ->
+                            case mf of
+                                Just f ->
+                                    Just { f | name = newName }
+
+                                Nothing ->
+                                    Nothing
+                        )
+                        model.files
+            }
 
         SetWordTarget targetString ->
             let
@@ -119,9 +131,6 @@ updateUi msg model =
                     else
                         model.openFiles
             }
-
-        RenamingFile maybeFileId ->
-            model
 
         SetActivity activity ->
             { model | activity = activity }

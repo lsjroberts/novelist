@@ -15,7 +15,6 @@ type alias Model =
     , activity : Activity
     , openFiles : List FileId
     , activeFile : Maybe FileId
-    , renamingFile : Maybe FileId
     }
 
 
@@ -57,7 +56,6 @@ init seed =
                 )
           , openFiles = [ "0", "2", "4" ]
           , activeFile = (Just "0")
-          , renamingFile = Nothing
           }
         , Cmd.none
         )

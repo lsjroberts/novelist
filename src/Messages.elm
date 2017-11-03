@@ -13,12 +13,11 @@ type Msg
 
 type DataMsg
     = AddScene
-    | RenameFile FileId
+    | RenameFile FileId String
     | SetWordTarget String
 
 
 type UiMsg
     = CloseFile FileId
     | OpenFile FileId
-    | RenamingFile (Maybe FileId)
     | SetActivity Activity
