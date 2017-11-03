@@ -58,7 +58,11 @@ viewSceneMeta files scene =
                 , paddingXY (paddingScale 2) (paddingScale 1)
                 ]
               <|
-                text scene.status
+                text
+                    (case scene.status of
+                        Draft ->
+                            "Draft"
+                    )
             , row NoStyle
                 [ spacing <| spacingScale 1 ]
               <|

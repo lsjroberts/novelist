@@ -4,7 +4,9 @@ import Data.File exposing (..)
 import Data.Model exposing (..)
 import Dict exposing (Dict)
 import Messages exposing (..)
+import Random.Pcg
 import Set exposing (Set)
+import Uuid
 
 
 updateWithCmds : Msg -> Model -> ( Model, Cmd Msg )
@@ -18,6 +20,19 @@ update msg model =
         NoOp ->
             model
 
+        AddScene ->
+            let
+                newScene =
+                    File "New Scene" <|
+                        SceneFile <|
+                            Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
+            in
+                { model
+                    | files = Dict.insert (Uuid.toString model.currentUuid) newScene model.files
+                    , activeFile = Just (Uuid.toString model.currentUuid)
+                }
+                    |> update NewUuid
+
         CloseFile fileId ->
             { model
                 | activeFile =
@@ -30,13 +45,27 @@ update msg model =
 
                         Nothing ->
                             Nothing
-                , openFiles = Set.remove fileId model.openFiles
+                , openFiles = List.filter (\f -> not <| f == fileId) model.openFiles
             }
+
+        NewUuid ->
+            let
+                ( newUuid, newSeed ) =
+                    Random.Pcg.step Uuid.uuidGenerator model.currentSeed
+            in
+                { model
+                    | currentUuid = newUuid
+                    , currentSeed = newSeed
+                }
 
         OpenFile fileId ->
             { model
                 | activeFile = Just fileId
-                , openFiles = Set.insert fileId model.openFiles
+                , openFiles =
+                    if not <| List.member fileId model.openFiles then
+                        fileId :: model.openFiles
+                    else
+                        model.openFiles
             }
 
         SetActivity activity ->

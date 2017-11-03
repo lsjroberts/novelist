@@ -6,7 +6,9 @@ import Data.File exposing (FileId)
 
 type Msg
     = NoOp
-    | SetActivity Activity
-    | OpenFile FileId
+    | AddScene
     | CloseFile FileId
+    | OpenFile FileId
+    | NewUuid
+    | SetActivity Activity
     | SetWordTarget String

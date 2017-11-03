@@ -17,12 +17,13 @@ view activity files activeFile =
         [ width (px 240)
           -- , spacing <| spacingScale 3
         ]
-        [ viewExplorerHeader activity
-        , viewExplorerFolder activity files activeFile
+        [ viewHeader activity
+        , viewFolder activity files activeFile
         , row (Explorer ExplorerFile)
             [ paddingXY (paddingScale 3) (paddingScale 1)
             , spacing <| paddingScale 1
             , vary Active False
+            , onClick AddScene
             ]
             [ smallIcon
                 |> Icon.file
@@ -36,15 +37,15 @@ view activity files activeFile =
         ]
 
 
-viewExplorerHeader activity =
+viewHeader activity =
     let
         header =
             case activity of
                 Manuscript ->
-                    viewManuscriptExplorerHeader
+                    viewManuscriptHeader
 
                 Characters ->
-                    viewCharactersExplorerHeader
+                    viewCharactersHeader
 
                 _ ->
                     [ el NoStyle [] empty ]
@@ -56,14 +57,14 @@ viewExplorerHeader activity =
             header
 
 
-viewManuscriptExplorerHeader =
+viewManuscriptHeader =
     [ el NoStyle [] <| text "Manuscript"
     , row NoStyle
         [ alignRight, spacing <| spacingScale 1 ]
         [ smallIcon
             |> Icon.file
             |> html
-            |> el (Explorer ExplorerHeaderAction) []
+            |> el (Explorer ExplorerHeaderAction) [ onClick AddScene ]
         , smallIcon
             |> Icon.fileDirectory
             |> html
@@ -72,7 +73,7 @@ viewManuscriptExplorerHeader =
     ]
 
 
-viewCharactersExplorerHeader =
+viewCharactersHeader =
     [ el NoStyle [] <| text "Characters"
     , row NoStyle
         [ alignRight, spacing <| spacingScale 1 ]
@@ -97,7 +98,7 @@ viewCharactersExplorerHeader =
 --         ]
 
 
-viewExplorerFolder activity files maybeActive =
+viewFolder activity files maybeActive =
     let
         filterByActivity fileId file =
             case file.fileType of
@@ -110,8 +111,8 @@ viewExplorerFolder activity files maybeActive =
                 _ ->
                     False
 
-        viewFile fileId file =
-            viewExplorerFile
+        viewFileInner fileId file =
+            viewFile
                 (case maybeActive of
                     Just active ->
                         active == fileId
@@ -123,10 +124,10 @@ viewExplorerFolder activity files maybeActive =
                 file.name
     in
         column (Explorer ExplorerFolder) [] <|
-            Dict.values (Dict.map viewFile (Dict.filter filterByActivity files))
+            Dict.values (Dict.map viewFileInner (Dict.filter filterByActivity files))
 
 
-viewExplorerFile isActive fileId name =
+viewFile isActive fileId name =
     row (Explorer ExplorerFile)
         [ paddingXY (paddingScale 3) (paddingScale 1)
         , spacing <| paddingScale 1

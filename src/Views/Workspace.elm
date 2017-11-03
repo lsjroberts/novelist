@@ -34,7 +34,7 @@ viewTabBar files openFiles activeFile =
                 (Maybe.Extra.unwrap False (\a -> fileId == a) activeFile)
     in
         row (Workspace TabBar) [] <|
-            (openFiles |> Set.toList |> List.map tab)
+            (openFiles |> List.map tab)
 
 
 viewTab icon fileId name isActive =
@@ -137,7 +137,7 @@ viewCharacterEditor file character =
             [ width fill, height fill, spacing <| spacingScale 3 ]
             [ h1 (Workspace CharacterEditorTitle) [] <|
                 Input.text InputText
-                    [ paddingXY 0 (paddingScale 2)
+                    [ padding (paddingScale 2)
                     , vary Light True
                     ]
                     { onChange = (\s -> NoOp)
@@ -146,15 +146,20 @@ viewCharacterEditor file character =
                     , options = []
                     }
             , column NoStyle
-                [ spacing <| spacingScale 1, width (percent 80) ]
+                [ spacing <| spacingScale 1, width (percent 80), paddingXY (paddingScale 2) 0 ]
               <|
                 [ el NoStyle [] <| text "Also known as:" ]
                     ++ (List.map (input "Alias") character.aliases)
                     ++ [ input "New Alias" "" ]
             , column NoStyle
-                [ spacing <| spacingScale 1, width (percent 80) ]
+                [ spacing <| spacingScale 1, width (percent 80), paddingXY (paddingScale 2) 0 ]
                 [ el NoStyle [] <| text "Description"
                 , multiline "Description" ""
+                ]
+            , column NoStyle
+                [ spacing <| spacingScale 1, width (percent 80), paddingXY (paddingScale 2) 0 ]
+                [ el NoStyle [] <| text "Relationships"
+                  -- , multiline "Description" ""
                 ]
             ]
 

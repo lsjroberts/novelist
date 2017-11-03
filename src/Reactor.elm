@@ -1,16 +1,16 @@
 module Main exposing (..)
 
 import Data.Model exposing (Model, init)
-import Html exposing (Html, programWithFlags)
+import Html exposing (Html, program)
 import Messages exposing (Msg)
 import State exposing (updateWithCmds, subscriptions)
 import Views.Main exposing (view)
 
 
-main : Program Int Model Msg
+main : Program Never Model Msg
 main =
-    programWithFlags
-        { init = init
+    program
+        { init = init 0
         , view = view
         , update = updateWithCmds
         , subscriptions = subscriptions

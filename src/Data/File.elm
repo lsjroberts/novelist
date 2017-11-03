@@ -4,7 +4,7 @@ import Dict exposing (Dict)
 
 
 type alias FileId =
-    Int
+    String
 
 
 type alias File =
@@ -21,12 +21,17 @@ type FileType
 
 type alias Scene =
     { synopsis : String
-    , status : String
+    , status : SceneStatus
     , tags : List String
+    , position : Int
     , characters : Dict FileId SceneCharacter
     , locations : List FileId
     , wordTarget : Maybe Int
     }
+
+
+type SceneStatus
+    = Draft
 
 
 type alias SceneCharacter =
