@@ -31,21 +31,21 @@ view files activeFile =
 
 viewCharacterMeta file character =
     column (Meta MetaWrapper)
-        [ width (px 300), padding <| paddingScale 3, spacing <| spacingScale 4 ]
+        [ width (px 300), padding <| innerScale 3, spacing <| outerScale 4 ]
         [ column NoStyle
-            [ spacing <| spacingScale 1 ]
+            [ spacing <| outerScale 1 ]
             [ el (Meta MetaHeading) [] <| text file.name ]
         ]
 
 
 viewSceneMeta files scene =
     column (Meta MetaWrapper)
-        [ width (px 300), padding <| paddingScale 3, spacing <| spacingScale 4 ]
+        [ width (px 300), padding <| innerScale 3, spacing <| outerScale 4 ]
         [ column NoStyle
-            [ spacing <| spacingScale 1 ]
+            [ spacing <| outerScale 1 ]
             [ el (Meta MetaHeading) [] <| text "Synopsis"
             , Input.multiline InputText
-                [ paddingXY (paddingScale 2) (paddingScale 2)
+                [ paddingXY (innerScale 2) (innerScale 2)
                 , minHeight (px (fontScale 9))
                 ]
                 { onChange = (\s -> NoOp)
@@ -55,7 +55,7 @@ viewSceneMeta files scene =
                 }
             , el (Meta MetaStatus)
                 [ alignLeft
-                , paddingXY (paddingScale 2) (paddingScale 1)
+                , paddingXY (innerScale 2) (innerScale 1)
                 ]
               <|
                 text
@@ -63,17 +63,17 @@ viewSceneMeta files scene =
                         Draft ->
                             "Draft"
                     )
-            , row NoStyle
-                [ spacing <| spacingScale 1 ]
+            , wrappedRow NoStyle
+                [ spacingXY (outerScale 1) (innerScale 1) ]
               <|
-                List.map (\tag -> el (Meta MetaTag) [ paddingXY (paddingScale 2) (paddingScale 1) ] <| text tag) scene.tags
+                List.map (\tag -> el (Meta MetaTag) [ paddingXY (innerScale 2) (innerScale 1) ] <| text tag) scene.tags
             ]
         , viewSceneCharacters files scene.characters
         , column NoStyle
-            [ spacing <| spacingScale 1 ]
+            [ spacing <| outerScale 1 ]
             [ el (Meta MetaHeading) [] <| text "Locations"
             , row NoStyle
-                [ spacing <| paddingScale 1 ]
+                [ spacing <| innerScale 1 ]
                 [ smallIcon
                     |> Icon.globe
                     |> html
@@ -82,10 +82,10 @@ viewSceneMeta files scene =
                 ]
             ]
         , column NoStyle
-            [ spacing <| spacingScale 1 ]
+            [ spacing <| outerScale 1 ]
             [ el (Meta MetaHeading) [] <| text "Word Target"
             , Input.text InputText
-                [ paddingXY (paddingScale 2) (paddingScale 2) ]
+                [ paddingXY (innerScale 2) (innerScale 2) ]
                 { onChange = (Data << SetWordTarget)
                 , value = Maybe.Extra.unwrap "" toString scene.wordTarget
                 , label = Input.hiddenLabel "Word Target"
@@ -105,7 +105,7 @@ viewSceneCharacters files characters =
                 case maybeCharacterFile of
                     Just characterFile ->
                         row NoStyle
-                            [ spacing <| paddingScale 1 ]
+                            [ spacing <| innerScale 1 ]
                             [ smallIcon
                                 |> Icon.gistSecret
                                 |> html
@@ -124,7 +124,7 @@ viewSceneCharacters files characters =
                         el NoStyle [] empty
     in
         column NoStyle
-            [ spacing <| spacingScale 1 ]
+            [ spacing <| outerScale 1 ]
             ([ el (Meta MetaHeading) [] <| text "Characters" ]
                 ++ (Dict.values <|
                         Dict.map

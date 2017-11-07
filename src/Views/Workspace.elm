@@ -39,11 +39,11 @@ viewTabBar files openFiles activeFile =
 viewTab icon fileId name isActive =
     row
         (Workspace Tab)
-        [ paddingTop <| paddingScale 2
-        , paddingBottom <| paddingScale 2
-        , paddingLeft <| paddingScale 3
-        , paddingRight <| paddingScale 3
-        , spacing <| paddingScale 1
+        [ paddingTop <| innerScale 2
+        , paddingBottom <| innerScale 2
+        , paddingLeft <| innerScale 3
+        , paddingRight <| innerScale 3
+        , spacing <| innerScale 1
         , vary Active isActive
         ]
         [ smallIcon
@@ -88,10 +88,10 @@ viewEditor files activeFile =
         column NoStyle
             [ width fill
             , height fill
-            , paddingTop <| paddingScale 4
-            , paddingRight <| paddingScale 6
-            , paddingBottom <| paddingScale 4
-            , paddingLeft <| paddingScale 6
+            , paddingTop <| innerScale 4
+            , paddingRight <| innerScale 6
+            , paddingBottom <| innerScale 4
+            , paddingLeft <| innerScale 6
             ]
             [ viewFile ]
 
@@ -119,7 +119,7 @@ viewCharacterEditor fileId file character =
     let
         input label value =
             Input.text InputText
-                [ padding <| paddingScale 2 ]
+                [ padding <| innerScale 2 ]
                 { onChange = (\s -> NoOp)
                 , value = value
                 , label = Input.hiddenLabel label
@@ -128,7 +128,7 @@ viewCharacterEditor fileId file character =
 
         multiline label value =
             Input.multiline InputText
-                [ padding <| paddingScale 2, height (px (fontScale 8)) ]
+                [ padding <| innerScale 2, height (px (fontScale 8)) ]
                 { onChange = (\s -> NoOp)
                 , value = value
                 , label = Input.hiddenLabel label
@@ -136,10 +136,10 @@ viewCharacterEditor fileId file character =
                 }
     in
         column (Workspace CharacterEditor)
-            [ width fill, height fill, spacing <| spacingScale 3 ]
+            [ width fill, height fill, spacing <| outerScale 3 ]
             [ el (Workspace CharacterEditorTitle) [] <|
                 Input.text InputText
-                    [ padding (paddingScale 2)
+                    [ padding (innerScale 2)
                     , vary Light True
                     ]
                     { onChange = Data << RenameFile fileId
@@ -148,18 +148,18 @@ viewCharacterEditor fileId file character =
                     , options = [ Input.textKey file.name ]
                     }
             , column NoStyle
-                [ spacing <| spacingScale 1, width (percent 80), paddingXY (paddingScale 2) 0 ]
+                [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
               <|
                 [ el NoStyle [] <| text "Also known as:" ]
                     ++ (List.map (input "Alias") character.aliases)
                     ++ [ input "New Alias" "" ]
             , column NoStyle
-                [ spacing <| spacingScale 1, width (percent 80), paddingXY (paddingScale 2) 0 ]
+                [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
                 [ el NoStyle [] <| text "Description"
                 , multiline "Description" ""
                 ]
             , column NoStyle
-                [ spacing <| spacingScale 1, width (percent 80), paddingXY (paddingScale 2) 0 ]
+                [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
                 [ el NoStyle [] <| text "Relationships"
                   -- , multiline "Description" ""
                 ]
@@ -169,8 +169,8 @@ viewCharacterEditor fileId file character =
 viewStatusBar maybeWordTarget =
     row (StatusBar StatusBarWrapper)
         [ alignRight
-        , spacing <| spacingScale 1
-        , paddingXY (paddingScale 2) (paddingScale 1)
+        , spacing <| outerScale 1
+        , paddingXY (innerScale 2) (innerScale 1)
         ]
         [ case maybeWordTarget of
             Just wordTarget ->

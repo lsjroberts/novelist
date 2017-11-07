@@ -12,6 +12,7 @@ import Styles exposing (..)
 import Views.ActivityBar
 import Views.Explorer
 import Views.MetaPanel
+import Views.Palette
 import Views.Workspace
 
 
@@ -46,4 +47,5 @@ view model =
                 , Views.Explorer.view model.activity model.files model.activeFile
                 , Views.Workspace.view model.files model.openFiles model.activeFile wordTarget
                 , Views.MetaPanel.view model.files activeFile
+                , Views.Palette.view model.files model.palette
                 ]

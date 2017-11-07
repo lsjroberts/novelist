@@ -2,6 +2,7 @@ module State exposing (..)
 
 import Data.File exposing (..)
 import Data.Model exposing (..)
+import Data.Palette exposing (..)
 import Dict exposing (Dict)
 import Messages exposing (..)
 import Random.Pcg
@@ -121,6 +122,10 @@ updateUi msg model =
                             Nothing
                 , openFiles = List.filter (\f -> not <| f == fileId) model.openFiles
             }
+                |> update (Ui ClosePalette)
+
+        ClosePalette ->
+            { model | palette = Closed }
 
         OpenFile fileId ->
             { model
@@ -131,9 +136,16 @@ updateUi msg model =
                     else
                         model.openFiles
             }
+                |> update (Ui ClosePalette)
+
+        OpenPalette palette ->
+            { model | palette = palette }
+
+        SearchName search ->
+            { model | palette = Files search }
 
         SetActivity activity ->
-            { model | activity = activity }
+            { model | activity = activity } |> update (Ui ClosePalette)
 
 
 

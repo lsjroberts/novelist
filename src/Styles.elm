@@ -6,11 +6,13 @@ import Style.Border as Border
 import Style.Color as Color
 import Style.Font as Font
 import Style.Scale as Scale
+import Style.Shadow as Shadow
 
 
 type Styles
     = NoStyle
     | Activity ActivityStyle
+    | Palette PaletteStyle
     | Explorer ExplorerStyle
     | InputText
     | Meta MetaStyle
@@ -39,6 +41,11 @@ type MetaStyle
     | MetaTag
 
 
+type PaletteStyle
+    = PaletteWrapper
+    | PaletteItem
+
+
 type StatusBarStyle
     = StatusBarWrapper
 
@@ -60,11 +67,11 @@ styleSheet =
         [ style (Activity ActivityWrapper) <|
             panelStyles
                 ++ [ Border.right 1 ]
-        , style (Activity ActivityItem) <|
+        , style (Activity ActivityItem)
             [ cursor "pointer"
-            , hover [ Color.background (rgb 229 229 229) ]
+            , hover [ Color.background (uiColor ActiveColor) ]
             , variation Active
-                [ Color.background (rgb 229 229 229) ]
+                [ Color.background (uiColor ActiveColor) ]
             ]
         , style (Explorer ExplorerWrapper) <|
             panelStyles
@@ -75,22 +82,22 @@ styleSheet =
             [ Font.size <| fontScale 1 ]
         , style (Explorer ExplorerFile)
             [ cursor "pointer"
-            , hover [ Color.background (rgb 229 229 229) ]
+            , hover [ Color.background (uiColor ActiveColor) ]
             , variation Active
-                [ Color.background (rgb 229 229 229) ]
+                [ Color.background (uiColor ActiveColor) ]
             ]
         , style (Explorer ExplorerHeaderAction)
             [ cursor "pointer"
-            , hover [ Color.background (rgb 229 229 229) ]
+            , hover [ Color.background (uiColor ActiveColor) ]
             ]
         , style InputText
-            [ Color.background (rgb 229 229 229)
+            [ Color.background (uiColor ActiveColor)
             , variation Light
                 [ Color.background (rgb 255 255 255)
-                , Color.border (rgb 229 229 229)
+                , Color.border (uiColor ActiveColor)
                 , Border.bottom 1
-                , hover [ Color.background (rgb 241 241 241) ]
-                , focus [ Color.background (rgb 241 241 241) ]
+                , hover [ Color.background (uiColor BackgroundColor) ]
+                , focus [ Color.background (uiColor BackgroundColor) ]
                 ]
             ]
         , style (Meta MetaWrapper) <|
@@ -106,10 +113,22 @@ styleSheet =
             [ Border.rounded 100
             , Color.background (rgb 241 200 200)
             ]
+        , style (Palette PaletteWrapper)
+            [ Color.background (uiColor BackgroundColor)
+            , Color.border (uiColor ActiveColor)
+            , Border.all 1
+            , Shadow.simple
+            , Font.typeface <| fontStack SansSerif
+            , Font.size <| fontScale 1
+            ]
+        , style (Palette PaletteItem)
+            [ cursor "pointer"
+            , hover [ Color.background (uiColor ActiveColor) ]
+            ]
         , style Placeholder
             [ Color.background (rgb 241 200 200) ]
         , style (StatusBar StatusBarWrapper)
-            [ Color.background (rgb 229 229 229)
+            [ Color.background (uiColor ActiveColor)
             , Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
             ]
@@ -123,8 +142,8 @@ styleSheet =
             ]
         , style (Workspace TabBar)
             [ Border.bottom 1
-            , Color.border (rgb 229 229 229)
-            , Color.background (rgb 241 241 241)
+            , Color.border (uiColor ActiveColor)
+            , Color.background (uiColor BackgroundColor)
               -- , Shadow.box { offset = ( 0, 2 ), size = 0, blur = 2, color = rgba 0 0 0 0.05 }
             ]
         , style (Workspace Tab)
@@ -132,20 +151,20 @@ styleSheet =
             , Font.size <| fontScale 1
             , Border.right 1
             , Color.text (rgb 170 170 170)
-            , Color.border (rgb 229 229 229)
+            , Color.border (uiColor ActiveColor)
             , cursor "pointer"
-            , hover [ Color.background (rgb 229 229 229) ]
+            , hover [ Color.background (uiColor ActiveColor) ]
             , variation Active
                 [ Color.text (rgb 0 0 0)
-                , Color.background (rgb 229 229 229)
+                , Color.background (uiColor ActiveColor)
                 ]
             ]
         ]
 
 
 panelStyles =
-    [ Color.background (rgb 241 241 241)
-    , Color.border (rgb 229 229 229)
+    [ Color.background (uiColor BackgroundColor)
+    , Color.border (uiColor ActiveColor)
     , Font.typeface <| fontStack SansSerif
     , Font.size <| fontScale 1
     ]
@@ -181,6 +200,8 @@ type UiColor
     = PrimaryColor
     | SecondaryColor
     | TertiaryColor
+    | BackgroundColor
+    | ActiveColor
 
 
 uiColor : UiColor -> Color.Color
@@ -195,14 +216,20 @@ uiColor color =
         TertiaryColor ->
             rgb 0 0 0
 
+        BackgroundColor ->
+            rgb 241 241 241
+
+        ActiveColor ->
+            rgb 229 229 229
+
 
 fontScale =
     Scale.modular 13 1.3
 
 
-paddingScale =
+innerScale =
     Scale.modular 4 2
 
 
-spacingScale =
+outerScale =
     Scale.modular 13 1.3

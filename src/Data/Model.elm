@@ -2,6 +2,7 @@ module Data.Model exposing (..)
 
 import Data.Activity exposing (Activity(..))
 import Data.File exposing (..)
+import Data.Palette exposing (..)
 import Dict exposing (Dict)
 import Messages exposing (Msg(..))
 import Random.Pcg exposing (Seed)
@@ -15,6 +16,7 @@ type alias Model =
     , activity : Activity
     , openFiles : List FileId
     , activeFile : Maybe FileId
+    , palette : PaletteStatus
     }
 
 
@@ -56,6 +58,7 @@ init seed =
                 )
           , openFiles = [ "0", "2", "4" ]
           , activeFile = (Just "0")
+          , palette = Closed
           }
         , Cmd.none
         )

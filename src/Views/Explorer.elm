@@ -17,13 +17,13 @@ import Views.Icons exposing (smallIcon)
 view activity files activeFile =
     column (Explorer ExplorerWrapper)
         [ width (px 240)
-          -- , spacing <| spacingScale 3
+          -- , spacing <| outerScale 3
         ]
         [ viewHeader activity
         , viewFolder activity files activeFile
         , row (Explorer ExplorerFile)
-            [ paddingXY (paddingScale 3) (paddingScale 1)
-            , spacing <| paddingScale 1
+            [ paddingXY (innerScale 3) (innerScale 1)
+            , spacing <| innerScale 1
             , vary Active False
             , onClick (Data AddScene)
             ]
@@ -53,8 +53,8 @@ viewHeader activity =
                     [ el NoStyle [] empty ]
     in
         row NoStyle
-            [ paddingXY (paddingScale 3) (paddingScale 2)
-            , spacing <| spacingScale 1
+            [ paddingXY (innerScale 3) (innerScale 2)
+            , spacing <| outerScale 1
             ]
             header
 
@@ -62,7 +62,7 @@ viewHeader activity =
 viewManuscriptHeader =
     [ el NoStyle [] <| text "Manuscript"
     , row NoStyle
-        [ alignRight, spacing <| spacingScale 1 ]
+        [ alignRight, spacing <| outerScale 1 ]
         [ smallIcon
             |> Icon.file
             |> html
@@ -78,7 +78,7 @@ viewManuscriptHeader =
 viewCharactersHeader =
     [ el NoStyle [] <| text "Characters"
     , row NoStyle
-        [ alignRight, spacing <| spacingScale 1 ]
+        [ alignRight, spacing <| outerScale 1 ]
         [ smallIcon
             |> Icon.file
             |> html
@@ -94,7 +94,7 @@ viewCharactersHeader =
 
 -- viewExplorerGroup label items =
 --     column (Explorer Group)
---         [ spacing <| spacingScale 2 ]
+--         [ spacing <| outerScale 2 ]
 --         [ el NoStyle [] <| text label
 --         , viewExplorerFolder items
 --         ]
@@ -131,8 +131,8 @@ viewFolder activity files maybeActive =
 
 viewFile isActive fileId name =
     row (Explorer ExplorerFile)
-        [ paddingXY (paddingScale 3) (paddingScale 1)
-        , spacing <| paddingScale 1
+        [ paddingXY (innerScale 3) (innerScale 1)
+        , spacing <| innerScale 1
         , onClick <| Ui <| OpenFile fileId
         , vary Active isActive
         ]
