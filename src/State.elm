@@ -4,14 +4,35 @@ import Data.File exposing (..)
 import Data.Model exposing (..)
 import Data.Palette exposing (..)
 import Dict exposing (Dict)
+import Dom
+import Keyboard.Combo
 import Messages exposing (..)
 import Random.Pcg
+import Task
 import Uuid
 
 
 updateWithCmds : Msg -> Model -> ( Model, Cmd Msg )
 updateWithCmds msg model =
-    ( update msg model, Cmd.none )
+    case msg of
+        Ui (Combos comboMsg) ->
+            let
+                ( updatedCombos, comboCmd ) =
+                    Keyboard.Combo.update comboMsg model.keyCombos
+            in
+                ( { model | keyCombos = updatedCombos }, comboCmd )
+
+        _ ->
+            let
+                cmd =
+                    case msg of
+                        Ui (SetPalette (Files _)) ->
+                            Task.attempt (Ui << FocusPaletteInput) (Dom.focus "palette-input")
+
+                        _ ->
+                            Cmd.none
+            in
+                ( update msg model, cmd )
 
 
 update : Msg -> Model -> Model
@@ -127,6 +148,12 @@ updateUi msg model =
         ClosePalette ->
             { model | palette = Closed }
 
+        Combos msg ->
+            model
+
+        FocusPaletteInput msg ->
+            model
+
         OpenFile fileId ->
             { model
                 | activeFile = Just fileId
@@ -138,11 +165,11 @@ updateUi msg model =
             }
                 |> update (Ui ClosePalette)
 
-        OpenPalette palette ->
-            { model | palette = palette }
-
         SearchName search ->
             { model | palette = Files search }
+
+        SetPalette palette ->
+            { model | palette = palette }
 
         SetActivity activity ->
             { model | activity = activity } |> update (Ui ClosePalette)
@@ -154,4 +181,4 @@ updateUi msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.none
+    Keyboard.Combo.subscriptions model.keyCombos

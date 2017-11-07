@@ -33,7 +33,9 @@ viewFiles files search =
             column NoStyle
                 [ spacing <| outerScale 1 ]
                 [ Input.text InputText
-                    [ padding <| innerScale 2 ]
+                    [ id "palette-input"
+                    , padding <| innerScale 2
+                    ]
                     { onChange = Ui << SearchName
                     , value = search
                     , label = Input.hiddenLabel "Search by name"

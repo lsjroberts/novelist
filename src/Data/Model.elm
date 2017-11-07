@@ -4,7 +4,8 @@ import Data.Activity exposing (Activity(..))
 import Data.File exposing (..)
 import Data.Palette exposing (..)
 import Dict exposing (Dict)
-import Messages exposing (Msg(..))
+import Keyboard.Combo
+import Messages exposing (Msg(..), UiMsg(..))
 import Random.Pcg exposing (Seed)
 import Uuid exposing (Uuid)
 
@@ -17,6 +18,7 @@ type alias Model =
     , openFiles : List FileId
     , activeFile : Maybe FileId
     , palette : PaletteStatus
+    , keyCombos : Keyboard.Combo.Model Msg
     }
 
 
@@ -59,6 +61,12 @@ init seed =
           , openFiles = [ "0", "2", "4" ]
           , activeFile = (Just "0")
           , palette = Closed
+          , keyCombos =
+                Keyboard.Combo.init
+                    [ Keyboard.Combo.combo2 ( Keyboard.Combo.command, Keyboard.Combo.p )
+                        (Ui <| SetPalette (Files ""))
+                    ]
+                    (Ui << Combos)
           }
         , Cmd.none
         )

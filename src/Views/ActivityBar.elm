@@ -26,7 +26,7 @@ view activity =
             |> html
             |> el (Activity ActivityItem)
                 [ padding <| innerScale 2
-                , onClick (Ui <| OpenPalette (Files ""))
+                , onClick (Ui <| SetPalette (Files ""))
                 ]
         ]
 
