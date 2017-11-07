@@ -1,6 +1,7 @@
 module Data.File exposing (..)
 
 import Dict exposing (Dict)
+import Octicons as Icon
 
 
 type alias FileId =
@@ -40,3 +41,15 @@ type alias SceneCharacter =
 
 type alias Character =
     { aliases : List String }
+
+
+fileIcon fileType =
+    case fileType of
+        CharacterFile _ ->
+            Icon.gistSecret
+
+        SceneFile _ ->
+            Icon.file
+
+        LocationFile ->
+            Icon.globe

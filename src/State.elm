@@ -61,6 +61,19 @@ update msg model =
 updateData : DataMsg -> Model -> Model
 updateData msg model =
     case msg of
+        AddCharacter ->
+            let
+                newCharacter =
+                    File "New Character" <|
+                        CharacterFile <|
+                            Character []
+            in
+                { model
+                    | files = Dict.insert (Uuid.toString model.currentUuid) newCharacter model.files
+                    , activeFile = Just (Uuid.toString model.currentUuid)
+                }
+                    |> update NewUuid
+
         AddScene ->
             let
                 newScene =

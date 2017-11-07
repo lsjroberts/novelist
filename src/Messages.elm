@@ -15,7 +15,8 @@ type Msg
 
 
 type DataMsg
-    = AddScene
+    = AddCharacter
+    | AddScene
     | RenameFile FileId String
     | SetWordTarget String
 

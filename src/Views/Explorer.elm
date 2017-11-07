@@ -21,21 +21,7 @@ view activity files activeFile =
         ]
         [ viewHeader activity
         , viewFolder activity files activeFile
-        , row (Explorer ExplorerFile)
-            [ paddingXY (innerScale 3) (innerScale 1)
-            , spacing <| innerScale 1
-            , vary Active False
-            , onClick (Data AddScene)
-            ]
-            [ smallIcon
-                |> Icon.file
-                |> html
-                |> el NoStyle []
-            , smallIcon
-                |> Icon.plus
-                |> html
-                |> el NoStyle []
-            ]
+        , viewAddFile activity
         ]
 
 
@@ -151,3 +137,36 @@ viewFile isActive fileId name =
           else
             text name
         ]
+
+
+viewAddFile activity =
+    let
+        ( msg, icon ) =
+            case activity of
+                Characters ->
+                    ( Data AddCharacter, Icon.gistSecret )
+
+                Manuscript ->
+                    ( Data AddScene, Icon.file )
+
+                Locations ->
+                    ( NoOp, Icon.globe )
+
+                _ ->
+                    ( NoOp, Icon.file )
+    in
+        row (Explorer ExplorerFile)
+            [ paddingXY (innerScale 3) (innerScale 1)
+            , spacing <| innerScale 1
+            , vary Active False
+            , onClick msg
+            ]
+            [ smallIcon
+                |> icon
+                |> html
+                |> el NoStyle []
+            , smallIcon
+                |> Icon.plus
+                |> html
+                |> el NoStyle []
+            ]
