@@ -8,7 +8,6 @@ import Element.Attributes exposing (..)
 import Element.Events exposing (..)
 import Element.Input as Input
 import Styles exposing (..)
-import Maybe.Extra
 import Messages exposing (..)
 import Octicons as Icon
 import Views.Icons exposing (smallIcon)
@@ -34,6 +33,9 @@ viewHeader activity =
 
                 Characters ->
                     viewCharactersHeader
+
+                Locations ->
+                    viewLocationsHeader
 
                 _ ->
                     [ el NoStyle [] empty ]
@@ -66,7 +68,23 @@ viewCharactersHeader =
     , row NoStyle
         [ alignRight, spacing <| outerScale 1 ]
         [ smallIcon
-            |> Icon.file
+            |> Icon.gistSecret
+            |> html
+            |> el (Explorer ExplorerHeaderAction) []
+        , smallIcon
+            |> Icon.fileDirectory
+            |> html
+            |> el (Explorer ExplorerHeaderAction) []
+        ]
+    ]
+
+
+viewLocationsHeader =
+    [ el NoStyle [] <| text "Locations"
+    , row NoStyle
+        [ alignRight, spacing <| outerScale 1 ]
+        [ smallIcon
+            |> Icon.globe
             |> html
             |> el (Explorer ExplorerHeaderAction) []
         , smallIcon
@@ -96,8 +114,8 @@ viewFolder activity files maybeActive =
                 CharacterFile _ ->
                     activity == Characters
 
-                _ ->
-                    False
+                LocationFile ->
+                    activity == Locations
 
         viewFileInner fileId file =
             viewFile
@@ -109,13 +127,14 @@ viewFolder activity files maybeActive =
                         False
                 )
                 fileId
+                file.fileType
                 file.name
     in
         column (Explorer ExplorerFolder) [] <|
             Dict.values (Dict.map viewFileInner (Dict.filter filterByActivity files))
 
 
-viewFile isActive fileId name =
+viewFile isActive fileId fileType name =
     row (Explorer ExplorerFile)
         [ paddingXY (innerScale 3) (innerScale 1)
         , spacing <| innerScale 1
@@ -123,7 +142,7 @@ viewFile isActive fileId name =
         , vary Active isActive
         ]
         [ smallIcon
-            |> Icon.file
+            |> fileIcon fileType
             |> html
             |> el NoStyle []
         , if isActive then
@@ -150,7 +169,7 @@ viewAddFile activity =
                     ( Data AddScene, Icon.file )
 
                 Locations ->
-                    ( NoOp, Icon.globe )
+                    ( Data AddLocation, Icon.globe )
 
                 _ ->
                     ( NoOp, Icon.file )

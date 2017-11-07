@@ -60,83 +60,82 @@ update msg model =
 
 updateData : DataMsg -> Model -> Model
 updateData msg model =
-    case msg of
-        AddCharacter ->
-            let
-                newCharacter =
+    let
+        addFile file =
+            { model
+                | files = Dict.insert (Uuid.toString model.currentUuid) file model.files
+                , activeFile = Just (Uuid.toString model.currentUuid)
+            }
+                |> update NewUuid
+    in
+        case msg of
+            AddCharacter ->
+                addFile <|
                     File "New Character" <|
                         CharacterFile <|
                             Character []
-            in
-                { model
-                    | files = Dict.insert (Uuid.toString model.currentUuid) newCharacter model.files
-                    , activeFile = Just (Uuid.toString model.currentUuid)
-                }
-                    |> update NewUuid
 
-        AddScene ->
-            let
-                newScene =
+            AddLocation ->
+                addFile <|
+                    File "New Location" <|
+                        LocationFile
+
+            AddScene ->
+                addFile <|
                     File "New Scene" <|
                         SceneFile <|
                             Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
-            in
+
+            RenameFile fileId newName ->
                 { model
-                    | files = Dict.insert (Uuid.toString model.currentUuid) newScene model.files
-                    , activeFile = Just (Uuid.toString model.currentUuid)
+                    | files =
+                        Dict.update fileId
+                            (\mf ->
+                                case mf of
+                                    Just f ->
+                                        Just { f | name = newName }
+
+                                    Nothing ->
+                                        Nothing
+                            )
+                            model.files
                 }
-                    |> update NewUuid
 
-        RenameFile fileId newName ->
-            { model
-                | files =
-                    Dict.update fileId
-                        (\mf ->
-                            case mf of
-                                Just f ->
-                                    Just { f | name = newName }
+            SetWordTarget targetString ->
+                let
+                    wordTarget =
+                        targetString
+                            |> String.toInt
+                            |> Result.toMaybe
 
-                                Nothing ->
-                                    Nothing
-                        )
-                        model.files
-            }
+                    updateFile maybeFile =
+                        case maybeFile of
+                            Just file ->
+                                case file.fileType of
+                                    SceneFile scene ->
+                                        Just
+                                            { file
+                                                | fileType =
+                                                    SceneFile
+                                                        { scene
+                                                            | wordTarget = wordTarget
+                                                        }
+                                            }
 
-        SetWordTarget targetString ->
-            let
-                wordTarget =
-                    targetString
-                        |> String.toInt
-                        |> Result.toMaybe
+                                    _ ->
+                                        Just file
 
-                updateFile maybeFile =
-                    case maybeFile of
-                        Just file ->
-                            case file.fileType of
-                                SceneFile scene ->
-                                    Just
-                                        { file
-                                            | fileType =
-                                                SceneFile
-                                                    { scene
-                                                        | wordTarget = wordTarget
-                                                    }
-                                        }
-
-                                _ ->
-                                    Just file
+                            Nothing ->
+                                Nothing
+                in
+                    case model.activeFile of
+                        Just activeFile ->
+                            { model
+                                | files = Dict.update activeFile updateFile model.files
+                            }
 
                         Nothing ->
-                            Nothing
-            in
-                case model.activeFile of
-                    Just activeFile ->
-                        { model
-                            | files = Dict.update activeFile updateFile model.files
-                        }
-
-                    Nothing ->
-                        model
+                            model
 
 
 updateUi : UiMsg -> Model -> Model
