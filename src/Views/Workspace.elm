@@ -15,11 +15,11 @@ import Octicons as Icon
 import Views.Icons exposing (smallIcon)
 
 
-view files openFiles activeFile wordTarget =
+view files openFiles activeFile fileContents wordTarget =
     column NoStyle
         [ width fill ]
         [ viewTabBar files openFiles activeFile
-        , viewEditor files activeFile
+        , viewEditor files activeFile fileContents
         , viewStatusBar wordTarget
         ]
 
@@ -59,8 +59,8 @@ viewTab icon fileId name isActive =
         ]
 
 
-viewEditor : Dict FileId File -> Maybe FileId -> Element Styles Variations Msg
-viewEditor files activeFile =
+viewEditor : Dict FileId File -> Maybe FileId -> Maybe String -> Element Styles Variations Msg
+viewEditor files activeFile fileContents =
     let
         maybeFile =
             Maybe.Extra.unwrap
@@ -73,9 +73,9 @@ viewEditor files activeFile =
                 ( Just fileId, Just file ) ->
                     case file.fileType of
                         SceneFile scene ->
-                            --viewMonacoEditor activeFile
-                            el Placeholder [ width fill, height fill ] empty
+                            viewMonacoEditor fileContents
 
+                        -- el Placeholder [ width fill, height fill ] empty
                         CharacterFile character ->
                             viewCharacterEditor fileId file character
 
@@ -96,20 +96,21 @@ viewEditor files activeFile =
             [ viewFile ]
 
 
-viewMonacoEditor activeFile =
-    case activeFile of
-        Just fileId ->
-            html <|
-                Html.iframe
-                    [ Html.Attributes.src ("http://localhost:8080/editor/editor.html?file=/stubs/PrideAndPrejudice.novel/manuscript/" ++ (toString fileId) ++ ".txt")
-                    , Html.Attributes.style
-                        [ ( "width", "100%" )
-                        , ( "height", "100%" )
-                        , ( "border", "none" )
-                        ]
-                    ]
-                    []
+viewMonacoEditor maybeFileContents =
+    case maybeFileContents of
+        Just fileContents ->
+            el NoStyle [] <| text fileContents
 
+        -- html <|
+        --     Html.iframe
+        --         [ Html.Attributes.src ("http://localhost:8080/editor/editor.html?file=/stubs/PrideAndPrejudice.novel/manuscript/" ++ (toString fileId) ++ ".txt")
+        --         , Html.Attributes.style
+        --             [ ( "width", "100%" )
+        --             , ( "height", "100%" )
+        --             , ( "border", "none" )
+        --             ]
+        --         ]
+        --         []
         Nothing ->
             el NoStyle [] empty
 

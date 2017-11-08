@@ -45,7 +45,7 @@ view model =
                 [ height (percent 100) ]
                 [ Views.ActivityBar.view model.activity
                 , Views.Explorer.view model.activity model.files model.activeFile
-                , Views.Workspace.view model.files model.openFiles model.activeFile wordTarget
+                , Views.Workspace.view model.files model.openFiles model.activeFile model.fileContents wordTarget
                 , Views.MetaPanel.view model.files activeFile
                 , Views.Palette.view model.files model.palette
                 ]

@@ -17,6 +17,7 @@ type alias Model =
     , activity : Activity
     , openFiles : List FileId
     , activeFile : Maybe FileId
+    , fileContents : Maybe String
     , palette : PaletteStatus
     , keyCombos : Keyboard.Combo.Model Msg
     }
@@ -30,6 +31,7 @@ createModel seed uuid files openFiles activeFile =
     , activity = Manuscript
     , openFiles = openFiles
     , activeFile = activeFile
+    , fileContents = Nothing
     , palette = Closed
     , keyCombos =
         Keyboard.Combo.init

@@ -30,6 +30,9 @@ updateWithCmds msg model =
                         Ui (SetPalette (Files _)) ->
                             Task.attempt (Ui << FocusPaletteInput) (Dom.focus "palette-input")
 
+                        Ui (OpenFile fileId) ->
+                            requestFile fileId
+
                         _ ->
                             Cmd.none
             in
@@ -48,8 +51,11 @@ update msg model =
         Ui uiMsg ->
             updateUi uiMsg model
 
-        OpenProject payload ->
+        PortProject payload ->
             decode (createModel model.currentSeed model.currentUuid) payload
+
+        PortFile payload ->
+            { model | fileContents = Just payload }
 
         NewUuid ->
             let
@@ -198,7 +204,8 @@ updateUi msg model =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ openProject OpenProject
+        [ openProject PortProject
+        , openFile PortFile
         , Keyboard.Combo.subscriptions model.keyCombos
         ]
 
@@ -208,3 +215,9 @@ subscriptions model =
 
 
 port openProject : (String -> msg) -> Sub msg
+
+
+port requestFile : FileId -> Cmd msg
+
+
+port openFile : (String -> msg) -> Sub msg

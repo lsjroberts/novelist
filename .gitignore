@@ -1,6 +1,9 @@
-cypress/screenshots/
-cypress/videos/
+.DS_Store
+.vscode
+
 elm-stuff
 dist
 node_modules
-.vscode
+
+cypress/screenshots/
+cypress/videos/
