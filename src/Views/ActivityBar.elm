@@ -14,7 +14,7 @@ import Views.Icons exposing (largeIcon)
 view : Activity -> Element Styles Variations Msg
 view activity =
     column (Activity ActivityWrapper)
-        []
+        [ id "activity" ]
         [ item activity Manuscript Icon.book
         , item activity Characters Icon.gistSecret
         , item activity Locations Icon.globe
@@ -39,4 +39,5 @@ item activeActivity activity icon =
             [ padding <| innerScale 2
             , onClick (Ui <| SetActivity activity)
             , vary Active (activity == activeActivity)
+            , id ("activity-" ++ (toString activity |> String.toLower))
             ]

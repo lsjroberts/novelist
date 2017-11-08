@@ -32,7 +32,7 @@ viewTabBar files openFiles activeFile =
                 (Maybe.Extra.unwrap "" (\f -> f.name) (Dict.get fileId files))
                 (Maybe.Extra.unwrap False (\a -> fileId == a) activeFile)
     in
-        row (Workspace TabBar) [] <|
+        row (Workspace TabBar) [ id "workspace-tab-bar" ] <|
             (openFiles |> List.map tab)
 
 
