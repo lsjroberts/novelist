@@ -1,5 +1,6 @@
-module State exposing (..)
+port module State exposing (..)
 
+import Data.Decode exposing (decode)
 import Data.File exposing (..)
 import Data.Model exposing (..)
 import Data.Palette exposing (..)
@@ -46,6 +47,9 @@ update msg model =
 
         Ui uiMsg ->
             updateUi uiMsg model
+
+        OpenProject payload ->
+            decode (createModel model.currentSeed model.currentUuid) payload
 
         NewUuid ->
             let
@@ -193,4 +197,14 @@ updateUi msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Keyboard.Combo.subscriptions model.keyCombos
+    Sub.batch
+        [ openProject OpenProject
+        , Keyboard.Combo.subscriptions model.keyCombos
+        ]
+
+
+
+-- PORTS
+
+
+port openProject : (String -> msg) -> Sub msg

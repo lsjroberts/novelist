@@ -1,3 +1,4 @@
 *.json
+*.novl
 node_modules
 elm-stuff

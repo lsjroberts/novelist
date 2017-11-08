@@ -11,6 +11,7 @@ type Msg
     = NoOp
     | Data DataMsg
     | Ui UiMsg
+    | OpenProject String
     | NewUuid
 
 

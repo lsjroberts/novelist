@@ -65,7 +65,8 @@ type Variations
 styleSheet =
     Style.styleSheetWith
         [ unguarded ]
-        [ style (Activity ActivityWrapper) <|
+        [ style NoStyle []
+        , style (Activity ActivityWrapper) <|
             panelStyles
                 ++ [ Border.right 1 ]
         , style (Activity ActivityItem)

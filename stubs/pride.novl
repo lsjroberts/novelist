@@ -1,0 +1,29 @@
+{
+    "files": {
+        "0": {
+            "name": "Chapter One",
+            "type": "scene",
+            "meta": {
+                "synopsis": "Mr and Mrs Bennet have a conversation. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis.",
+                "status": "Draft",
+                "tags": ["tag", "another tag", "one more", "further tags yay"],
+                "position": 0,
+                "characters": {
+                    "4": {
+                        "speaking": true
+                    },
+                    "5": {
+                        "speaking": true
+                    },
+                    "6": {
+                        "speaking": false
+                    }
+                },
+                "locations": [],
+                "wordTarget": null
+            }
+        }
+    },
+    "openFiles": ["0"],
+    "activeFile": "0"
+}
