@@ -57,34 +57,34 @@ const observer = new MutationObserver(mutations => {
 });
 observer.observe(document.querySelector('body'), {
     attributes: true,
-    childList: true,
-    characterData: true,
     subtree: true
 });
 
 // -- MONACO
 
+let editor;
 function createMonacoEditor(contents) {
-    const editor = monaco.editor.create(
-        document.getElementById('monaco-editor'),
-        {
-            automaticLayout: true, // TODO: this occurs every 100ms, do it better
-            theme: 'novelist-speech',
-            language: 'novel',
-            // value: thrones(),
-            value: contents,
-            wordWrap: 'on',
-            // wordWrap: "wordWrapColumn",
-            // wordWrapColumn: 80,
-            lineNumbers: false,
-            fontFamily: 'Cochin',
-            fontSize: 18,
-            lineHeight: 18 * 1.8,
-            minimap: {
-                renderCharacters: false
-            }
+    if (editor) {
+        editor.getModel().dispose();
+        editor.dispose();
+    }
+    editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+        automaticLayout: true, // TODO: this occurs every 100ms, do it better
+        theme: 'novelist-speech',
+        language: 'novel',
+        // value: thrones(),
+        value: contents,
+        wordWrap: 'on',
+        // wordWrap: "wordWrapColumn",
+        // wordWrapColumn: 80,
+        lineNumbers: false,
+        fontFamily: 'Cochin',
+        fontSize: 18,
+        lineHeight: 18 * 1.8,
+        minimap: {
+            renderCharacters: false
         }
-    );
+    });
 
     editor.addAction({
         id: 'novelist-character-add',
