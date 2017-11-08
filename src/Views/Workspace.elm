@@ -99,7 +99,13 @@ viewEditor files activeFile fileContents =
 viewMonacoEditor maybeFileContents =
     case maybeFileContents of
         Just fileContents ->
-            el NoStyle [] <| text fileContents
+            el NoStyle
+                [ width fill
+                , height fill
+                , id "monaco-editor"
+                , attribute "contents" fileContents
+                ]
+                empty
 
         -- html <|
         --     Html.iframe

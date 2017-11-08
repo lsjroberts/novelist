@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" style="height: 100%; overflow: hidden">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Novelist</title>
+</head>
+
+<body style="height: 100%; padding: 0; margin: 0; overflow: hidden">
+</body>
+
+<script>
+  // Monaco uses a custom amd loader that over-rides node's require.
+  // Keep a reference to node's require so we can restore it after executing the amd loader file.
+  var nodeRequire = global.require;
+</script>
+<script src="./node_modules/monaco-editor/min/vs/loader.js"></script>
+<script>
+  // Save Monaco's amd require and restore Node's require
+  var amdRequire = global.require;
+  global.require = nodeRequire;
+</script>
+<script src="./editor.js"></script>
+<script src="./ports.js"></script>
+
+</html>
