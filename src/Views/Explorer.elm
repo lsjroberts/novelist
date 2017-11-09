@@ -13,15 +13,20 @@ import Octicons as Icon
 import Views.Icons exposing (smallIcon)
 
 
-view activity files activeFile =
-    column (Explorer ExplorerWrapper)
-        [ width (px 240)
-          -- , spacing <| outerScale 3
-        ]
-        [ viewHeader activity
-        , viewFolder activity files activeFile
-        , viewAddFile activity
-        ]
+view maybeActivity files activeFile =
+    case maybeActivity of
+        Just activity ->
+            column (Explorer ExplorerWrapper)
+                [ width (px 240)
+                  -- , spacing <| outerScale 3
+                ]
+                [ viewHeader activity
+                , viewFolder activity files activeFile
+                , viewAddFile activity
+                ]
+
+        Nothing ->
+            el NoStyle [] empty
 
 
 viewHeader activity =

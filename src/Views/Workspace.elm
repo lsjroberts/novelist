@@ -13,6 +13,7 @@ import Maybe.Extra
 import Messages exposing (..)
 import Octicons as Icon
 import Views.Icons exposing (smallIcon)
+import Views.Welcome
 
 
 view files openFiles activeFile fileContents wordTarget =
@@ -83,7 +84,7 @@ viewEditor files activeFile fileContents =
                             el Placeholder [ width fill, height fill ] empty
 
                 _ ->
-                    el Placeholder [ width fill, height fill ] empty
+                    Views.Welcome.view
     in
         column NoStyle
             [ width fill

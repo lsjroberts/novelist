@@ -15,9 +15,11 @@ type Styles
     | Palette PaletteStyle
     | Explorer ExplorerStyle
     | InputText
+    | Link
     | Meta MetaStyle
     | Placeholder
     | StatusBar StatusBarStyle
+    | Welcome WelcomeStyle
     | Workspace WorkspaceStyle
 
 
@@ -48,6 +50,12 @@ type PaletteStyle
 
 type StatusBarStyle
     = StatusBarWrapper
+
+
+type WelcomeStyle
+    = WelcomeWrapper
+    | WelcomeTitle
+    | WelcomeHeading
 
 
 type WorkspaceStyle
@@ -102,6 +110,11 @@ styleSheet =
                 , focus [ Color.background (uiColor BackgroundColor) ]
                 ]
             ]
+        , style Link
+            [ Color.text (uiColor LinkColor)
+            , cursor "pointer"
+            , Font.underline
+            ]
         , style (Meta MetaWrapper) <|
             panelStyles
                 ++ [ Border.left 1 ]
@@ -134,6 +147,14 @@ styleSheet =
             , Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
             ]
+        , style (Welcome WelcomeWrapper)
+            [ Font.typeface <| fontStack SansSerif ]
+        , style (Welcome WelcomeTitle)
+            [ Font.typeface <| fontStack Serif
+            , Font.size <| fontScale 6
+            ]
+        , style (Welcome WelcomeHeading)
+            [ Font.size <| fontScale 3 ]
         , style (Workspace CharacterEditor)
             [ Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
@@ -204,6 +225,7 @@ type UiColor
     | TertiaryColor
     | BackgroundColor
     | ActiveColor
+    | LinkColor
 
 
 uiColor : UiColor -> Color.Color
@@ -223,6 +245,9 @@ uiColor color =
 
         ActiveColor ->
             rgb 229 229 229
+
+        LinkColor ->
+            rgb 241 50 50
 
 
 fontScale =

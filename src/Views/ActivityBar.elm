@@ -11,7 +11,7 @@ import Octicons as Icon
 import Views.Icons exposing (largeIcon)
 
 
-view : Activity -> Element Styles Variations Msg
+view : Maybe Activity -> Element Styles Variations Msg
 view activity =
     column (Activity ActivityWrapper)
         [ id "activity" ]
@@ -38,6 +38,6 @@ item activeActivity activity icon =
         |> el (Activity ActivityItem)
             [ padding <| innerScale 2
             , onClick (Ui <| SetActivity activity)
-            , vary Active (activity == activeActivity)
+            , vary Active ((Just activity) == activeActivity)
             , id ("activity-" ++ (toString activity |> String.toLower))
             ]

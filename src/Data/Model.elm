@@ -14,7 +14,7 @@ type alias Model =
     { currentSeed : Seed
     , currentUuid : Uuid
     , files : Dict FileId File
-    , activity : Activity
+    , activity : Maybe Activity
     , openFiles : List FileId
     , activeFile : Maybe FileId
     , fileContents : Maybe String
@@ -28,7 +28,7 @@ createModel seed uuid files openFiles activeFile =
     { currentSeed = seed
     , currentUuid = uuid
     , files = files
-    , activity = Manuscript
+    , activity = Nothing
     , openFiles = openFiles
     , activeFile = activeFile
     , fileContents = Nothing

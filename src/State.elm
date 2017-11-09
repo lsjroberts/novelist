@@ -1,6 +1,7 @@
 port module State exposing (..)
 
 import Data.Decode exposing (decode)
+import Data.Activity exposing (..)
 import Data.File exposing (..)
 import Data.Model exposing (..)
 import Data.Palette exposing (..)
@@ -71,27 +72,26 @@ update msg model =
 updateData : DataMsg -> Model -> Model
 updateData msg model =
     let
-        addFile file =
-            { model
-                | files = Dict.insert (Uuid.toString model.currentUuid) file model.files
-                , activeFile = Just (Uuid.toString model.currentUuid)
-            }
+        addFile activity file =
+            { model | files = Dict.insert (Uuid.toString model.currentUuid) file model.files }
+                |> update (Ui <| OpenFile (Uuid.toString model.currentUuid))
                 |> update NewUuid
+                |> update (Ui <| SetActivity activity)
     in
         case msg of
             AddCharacter ->
-                addFile <|
+                addFile Characters <|
                     File "New Character" <|
                         CharacterFile <|
                             Character []
 
             AddLocation ->
-                addFile <|
+                addFile Locations <|
                     File "New Location" <|
                         LocationFile
 
             AddScene ->
-                addFile <|
+                addFile Manuscript <|
                     File "New Scene" <|
                         SceneFile <|
                             Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
@@ -194,7 +194,7 @@ updateUi msg model =
             { model | palette = palette }
 
         SetActivity activity ->
-            { model | activity = activity } |> update (Ui ClosePalette)
+            { model | activity = Just activity } |> update (Ui ClosePalette)
 
 
 
