@@ -237,65 +237,74 @@ type UiColor
     | LinkColor
 
 
+type alias Theme =
+    { primary : Color.Color
+    , secondary : Color.Color
+    , tertiary : Color.Color
+    , background : Color.Color
+    , text : Color.Color
+    , textSecondary : Color.Color
+    , active : Color.Color
+    , link : Color.Color
+    }
+
+
 uiColor : UiColor -> Color.Color
-uiColor =
-    novelistDarkTheme
+uiColor color =
+    let
+        theme =
+            novelistDarkTheme
+    in
+        case color of
+            PrimaryColor ->
+                .primary theme
+
+            SecondaryColor ->
+                .secondary theme
+
+            TertiaryColor ->
+                .tertiary theme
+
+            BackgroundColor ->
+                .background theme
+
+            TextColor ->
+                .text theme
+
+            TextSecondaryColor ->
+                .textSecondary theme
+
+            ActiveColor ->
+                .active theme
+
+            LinkColor ->
+                .link theme
 
 
-novelistLightTheme : UiColor -> Color.Color
-novelistLightTheme color =
-    case color of
-        PrimaryColor ->
-            rgb 241 200 200
-
-        SecondaryColor ->
-            rgb 200 200 241
-
-        TertiaryColor ->
-            rgb 200 200 241
-
-        BackgroundColor ->
-            rgb 241 241 241
-
-        TextColor ->
-            rgb 30 30 30
-
-        TextSecondaryColor ->
-            rgb 170 170 170
-
-        ActiveColor ->
-            rgb 229 229 229
-
-        LinkColor ->
-            rgb 241 50 50
+novelistLightTheme : Theme
+novelistLightTheme =
+    { primary = rgb 241 200 200
+    , secondary = rgb 200 200 241
+    , tertiary = rgb 200 200 241
+    , background = rgb 241 241 241
+    , text = rgb 30 30 30
+    , textSecondary = rgb 170 170 170
+    , active = rgb 229 229 229
+    , link = rgb 241 50 50
+    }
 
 
-novelistDarkTheme : UiColor -> Color.Color
-novelistDarkTheme color =
-    case color of
-        PrimaryColor ->
-            rgb 141 100 100
-
-        SecondaryColor ->
-            rgb 100 100 141
-
-        TertiaryColor ->
-            rgb 100 100 141
-
-        BackgroundColor ->
-            rgb 40 44 52
-
-        TextColor ->
-            rgb 220 220 220
-
-        TextSecondaryColor ->
-            rgb 200 200 200
-
-        ActiveColor ->
-            rgb 80 88 104
-
-        LinkColor ->
-            rgb 209 154 102
+novelistDarkTheme : Theme
+novelistDarkTheme =
+    { primary = rgb 141 100 100
+    , secondary = rgb 100 100 141
+    , tertiary = rgb 100 100 141
+    , background = rgb 40 44 52
+    , text = rgb 220 220 220
+    , textSecondary = rgb 200 200 200
+    , active = rgb 80 88 104
+    , link = rgb 209 154 102
+    }
 
 
 fontScale =
