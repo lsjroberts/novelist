@@ -8,6 +8,7 @@ const Elm = require('./dist/elm.js');
 
 const container = document.getElementById('container');
 const novelist = Elm.Main.fullscreen(Math.floor(Math.random() * 0x0fffffff));
+let activeFileId;
 
 // -- INIT
 
@@ -25,21 +26,38 @@ if (projectPath) {
 
 // -- SUBSCRIPTIONS
 
-novelist.ports.requestFile.subscribe(fileId => {
+novelist.ports.createFilePort.subscribe(fileId => {
+    fs.writeFile(`${projectPath}/manuscript/${fileId}.txt`, '', (err, data) => {
+        if (err) throw err; // TODO: send errors to a port
+    });
+});
+
+novelist.ports.requestFilePort.subscribe(fileId => {
     fs.readFile(`${projectPath}/manuscript/${fileId}.txt`, (err, data) => {
         if (err) throw err; // TODO: send errors to a port
-        openFile(data.toString());
+        activeFileId = fileId;
+        updateFile(data.toString());
     });
+});
+
+novelist.ports.writeFilePort.subscribe((fileId, contents) => {
+    fs.writeFile(
+        `${projectPath}/manuscript/${fileId}.txt`,
+        contents,
+        (err, data) => {
+            if (err) throw err; // TODO: send errors to a port
+        }
+    );
 });
 
 // -- PORTS
 
 function openProject(meta) {
-    novelist.ports.openProject.send(meta);
+    novelist.ports.openProjectPort.send(meta);
 }
 
-function openFile(contents) {
-    novelist.ports.openFile.send(contents);
+function updateFile(contents) {
+    novelist.ports.updateFilePort.send(contents);
 }
 
 // -- MUTATIONS
@@ -68,6 +86,8 @@ function createMonacoEditor(contents) {
         editor.getModel().dispose();
         editor.dispose();
     }
+
+    // -- Create the editor
     editor = monaco.editor.create(document.getElementById('monaco-editor'), {
         automaticLayout: true, // TODO: this occurs every 100ms, do it better
         theme: 'novelist-speech',
@@ -85,6 +105,13 @@ function createMonacoEditor(contents) {
             renderCharacters: false
         }
     });
+
+    // -- Attach a listener to the model to send the data back to the elm app
+    // const model = editor.getModel();
+    // model.onDidChangeContent(() => {
+    //     const value = model.getValue();
+    //     updateFile(value);
+    // });
 
     editor.addAction({
         id: 'novelist-character-add',

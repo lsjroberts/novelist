@@ -11,8 +11,8 @@ type Msg
     = NoOp
     | Data DataMsg
     | Ui UiMsg
-    | PortProject String
-    | PortFile String
+    | OpenProjectPort String
+    | UpdateFilePort String
     | NewUuid
 
 
