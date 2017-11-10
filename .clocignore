@@ -1,7 +1,10 @@
 .DS_Store
+.vscode
 .clocignore
 .git
 .gitignore
+.prettierignore
+.prettierrc
 dist
 docs
 elm-package.json
@@ -9,5 +12,7 @@ package.json
 package-lock.json
 elm-stuff
 node_modules
+cypress
+cypress.json
 stubs
 README.md
