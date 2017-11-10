@@ -40,7 +40,7 @@ view model =
                 Nothing ->
                     Nothing
     in
-        Element.viewport styleSheet <|
+        Element.viewport (styleSheet model.theme) <|
             row Body
                 [ height (percent 100) ]
                 [ Views.ActivityBar.view model.activity

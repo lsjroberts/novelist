@@ -71,25 +71,25 @@ type Variations
     | Light
 
 
-styleSheet =
+styleSheet theme =
     Style.styleSheetWith
         [ unguarded ]
         [ style NoStyle []
         , style Body
-            [ Color.text (uiColor TextColor)
-            , Color.background (uiColor BackgroundColor)
+            [ Color.text (.text theme)
+            , Color.background (.background theme)
             ]
         , style (Activity ActivityWrapper) <|
-            panelStyles
+            (panelStyles theme)
                 ++ [ Border.right 1 ]
         , style (Activity ActivityItem)
             [ cursor "pointer"
-            , hover [ Color.background (uiColor ActiveColor) ]
+            , hover [ Color.background (.active theme) ]
             , variation Active
-                [ Color.background (uiColor ActiveColor) ]
+                [ Color.background (.active theme) ]
             ]
         , style (Explorer ExplorerWrapper) <|
-            panelStyles
+            (panelStyles theme)
                 ++ [ Border.right 1 ]
         , style (Explorer Group)
             [ Font.size <| fontScale 2 ]
@@ -97,60 +97,60 @@ styleSheet =
             [ Font.size <| fontScale 1 ]
         , style (Explorer ExplorerFile)
             [ cursor "pointer"
-            , hover [ Color.background (uiColor ActiveColor) ]
+            , hover [ Color.background (.active theme) ]
             , variation Active
-                [ Color.background (uiColor ActiveColor) ]
+                [ Color.background (.active theme) ]
             ]
         , style (Explorer ExplorerHeaderAction)
             [ cursor "pointer"
-            , hover [ Color.background (uiColor ActiveColor) ]
+            , hover [ Color.background (.active theme) ]
             ]
         , style InputText
-            [ Color.background (uiColor ActiveColor)
-            , Color.text (uiColor TextColor)
+            [ Color.background (.active theme)
+            , Color.text (.text theme)
             , variation Light
-                [ Color.background (uiColor BackgroundColor)
-                , Color.border (uiColor ActiveColor)
+                [ Color.background (.background theme)
+                , Color.border (.active theme)
                 , Border.bottom 1
-                , hover [ Color.background (uiColor BackgroundColor) ]
-                , focus [ Color.background (uiColor BackgroundColor) ]
+                , hover [ Color.background (.background theme) ]
+                , focus [ Color.background (.background theme) ]
                 ]
             ]
         , style Link
-            [ Color.text (uiColor LinkColor)
+            [ Color.text (.link theme)
             , cursor "pointer"
             , Font.underline
             ]
         , style (Meta MetaWrapper) <|
-            panelStyles
+            (panelStyles theme)
                 ++ [ Border.left 1 ]
         , style (Meta MetaHeading)
             [ Font.size <| fontScale 2 ]
         , style (Meta MetaStatus)
             [ Border.rounded 100
-            , Color.background (uiColor SecondaryColor)
+            , Color.background (.secondary theme)
             ]
         , style (Meta MetaTag)
             [ Border.rounded 100
-            , Color.background (uiColor PrimaryColor)
+            , Color.background (.primary theme)
             ]
         , style (Palette PaletteWrapper)
-            [ Color.background (uiColor BackgroundColor)
-            , Color.border (uiColor ActiveColor)
+            [ Color.background (.background theme)
+            , Color.border (.active theme)
             , Border.all 1
             , Shadow.simple
             , Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
             ]
         , style (Palette PaletteItem)
-            [ Color.text (uiColor TextColor)
+            [ Color.text (.text theme)
             , cursor "pointer"
-            , hover [ Color.background (uiColor ActiveColor) ]
+            , hover [ Color.background (.active theme) ]
             ]
         , style Placeholder
-            [ Color.background (uiColor PrimaryColor) ]
+            [ Color.background (.primary theme) ]
         , style (StatusBar StatusBarWrapper)
-            [ Color.background (uiColor ActiveColor)
+            [ Color.background (.active theme)
             , Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
             ]
@@ -172,29 +172,29 @@ styleSheet =
             ]
         , style (Workspace TabBar)
             [ Border.bottom 1
-            , Color.border (uiColor ActiveColor)
-            , Color.background (uiColor BackgroundColor)
+            , Color.border (.active theme)
+            , Color.background (.background theme)
               -- , Shadow.box { offset = ( 0, 2 ), size = 0, blur = 2, color = rgba 0 0 0 0.05 }
             ]
         , style (Workspace Tab)
             [ Font.typeface <| fontStack SansSerif
             , Font.size <| fontScale 1
             , Border.right 1
-            , Color.text (uiColor TextSecondaryColor)
-            , Color.border (uiColor ActiveColor)
+            , Color.text (.text theme)
+            , Color.border (.active theme)
             , cursor "pointer"
-            , hover [ Color.background (uiColor ActiveColor) ]
+            , hover [ Color.background (.active theme) ]
             , variation Active
-                [ Color.text (uiColor TextColor)
-                , Color.background (uiColor ActiveColor)
+                [ Color.text (.text theme)
+                , Color.background (.active theme)
                 ]
             ]
         ]
 
 
-panelStyles =
-    [ Color.background (uiColor BackgroundColor)
-    , Color.border (uiColor ActiveColor)
+panelStyles theme =
+    [ Color.background (.background theme)
+    , Color.border (.active theme)
     , Font.typeface <| fontStack SansSerif
     , Font.size <| fontScale 1
     ]
@@ -224,87 +224,6 @@ fontStack stack =
 
         Mono ->
             [ Font.font "monospaced" ]
-
-
-type UiColor
-    = PrimaryColor
-    | SecondaryColor
-    | TertiaryColor
-    | BackgroundColor
-    | TextColor
-    | TextSecondaryColor
-    | ActiveColor
-    | LinkColor
-
-
-type alias Theme =
-    { primary : Color.Color
-    , secondary : Color.Color
-    , tertiary : Color.Color
-    , background : Color.Color
-    , text : Color.Color
-    , textSecondary : Color.Color
-    , active : Color.Color
-    , link : Color.Color
-    }
-
-
-uiColor : UiColor -> Color.Color
-uiColor color =
-    let
-        theme =
-            novelistDarkTheme
-    in
-        case color of
-            PrimaryColor ->
-                .primary theme
-
-            SecondaryColor ->
-                .secondary theme
-
-            TertiaryColor ->
-                .tertiary theme
-
-            BackgroundColor ->
-                .background theme
-
-            TextColor ->
-                .text theme
-
-            TextSecondaryColor ->
-                .textSecondary theme
-
-            ActiveColor ->
-                .active theme
-
-            LinkColor ->
-                .link theme
-
-
-novelistLightTheme : Theme
-novelistLightTheme =
-    { primary = rgb 241 200 200
-    , secondary = rgb 200 200 241
-    , tertiary = rgb 200 200 241
-    , background = rgb 241 241 241
-    , text = rgb 30 30 30
-    , textSecondary = rgb 170 170 170
-    , active = rgb 229 229 229
-    , link = rgb 241 50 50
-    }
-
-
-novelistDarkTheme : Theme
-novelistDarkTheme =
-    { primary = rgb 141 100 100
-    , secondary = rgb 100 100 141
-    , tertiary = rgb 100 100 141
-    , background = rgb 40 44 52
-    , text = rgb 220 220 220
-    , textSecondary = rgb 200 200 200
-    , active = rgb 80 88 104
-    , link = rgb 209 154 102
-    }
 
 
 fontScale =

@@ -3,6 +3,7 @@ module Data.Model exposing (..)
 import Data.Activity exposing (Activity(..))
 import Data.File exposing (..)
 import Data.Palette exposing (..)
+import Data.Theme exposing (..)
 import Dict exposing (Dict)
 import Keyboard.Combo
 import Messages exposing (Msg(..), UiMsg(..))
@@ -20,6 +21,7 @@ type alias Model =
     , fileContents : Maybe String
     , palette : PaletteStatus
     , keyCombos : Keyboard.Combo.Model Msg
+    , theme : Theme
     }
 
 
@@ -39,6 +41,7 @@ createModel seed uuid files openFiles activeFile =
                 (Ui <| SetPalette (Files ""))
             ]
             (Ui << Combos)
+    , theme = novelistDarkTheme
     }
 
 
