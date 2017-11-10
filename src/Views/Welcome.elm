@@ -11,7 +11,10 @@ import Views.Icons exposing (largeIcon)
 
 view =
     column (Welcome WelcomeWrapper)
-        [ spacing <| outerScale 5 ]
+        [ width fill
+        , spacing <| outerScale 5
+        , paddingXY (innerScale 6) (innerScale 5)
+        ]
         [ h1 (Welcome WelcomeTitle) [] <| text "Novelist"
         , row NoStyle
             [ width fill ]

@@ -17,12 +17,17 @@ import Views.Welcome
 
 
 view files openFiles activeFile fileContents wordTarget =
-    column NoStyle
-        [ width fill ]
-        [ viewTabBar files openFiles activeFile
-        , viewEditor files activeFile fileContents
-        , viewStatusBar wordTarget
-        ]
+    case activeFile of
+        Just _ ->
+            column NoStyle
+                [ width fill ]
+                [ viewTabBar files openFiles activeFile
+                , viewEditor files activeFile fileContents
+                , viewStatusBar wordTarget
+                ]
+
+        Nothing ->
+            Views.Welcome.view
 
 
 viewTabBar files openFiles activeFile =
@@ -84,42 +89,39 @@ viewEditor files activeFile fileContents =
                             el Placeholder [ width fill, height fill ] empty
 
                 _ ->
-                    Views.Welcome.view
+                    el Placeholder [ width fill, height fill ] empty
     in
-        column NoStyle
-            [ width fill
-            , height fill
-            , paddingTop <| innerScale 4
-            , paddingRight <| innerScale 6
-            , paddingBottom <| innerScale 4
-            , paddingLeft <| innerScale 6
-            ]
-            [ viewFile ]
+        viewFile
+
+
+editorWrapper right =
+    el NoStyle
+        [ width fill
+        , height fill
+        , paddingTop <| innerScale 4
+        , paddingRight <| innerScale right
+        , paddingBottom <| innerScale 4
+        , paddingLeft <| innerScale 6
+        ]
 
 
 viewMonacoEditor maybeFileContents =
-    case maybeFileContents of
-        Just fileContents ->
-            el NoStyle
-                [ width fill
-                , height fill
-                , id "monaco-editor"
-                , attribute "contents" fileContents
-                ]
-                empty
+    let
+        monaco =
+            case maybeFileContents of
+                Just fileContents ->
+                    el NoStyle
+                        [ width fill
+                        , height fill
+                        , id "monaco-editor"
+                        , attribute "contents" fileContents
+                        ]
+                        empty
 
-        -- html <|
-        --     Html.iframe
-        --         [ Html.Attributes.src ("http://localhost:8080/editor/editor.html?file=/stubs/PrideAndPrejudice.novel/manuscript/" ++ (toString fileId) ++ ".txt")
-        --         , Html.Attributes.style
-        --             [ ( "width", "100%" )
-        --             , ( "height", "100%" )
-        --             , ( "border", "none" )
-        --             ]
-        --         ]
-        --         []
-        Nothing ->
-            el NoStyle [] empty
+                Nothing ->
+                    el NoStyle [] empty
+    in
+        editorWrapper 0 monaco
 
 
 viewCharacterEditor : FileId -> File -> Character -> Element Styles Variations Msg
@@ -143,35 +145,36 @@ viewCharacterEditor fileId file character =
                 , options = []
                 }
     in
-        column (Workspace CharacterEditor)
-            [ width fill, height fill, spacing <| outerScale 3 ]
-            [ el (Workspace CharacterEditorTitle) [] <|
-                Input.text InputText
-                    [ padding (innerScale 2)
-                    , vary Light True
+        editorWrapper 6 <|
+            column (Workspace CharacterEditor)
+                [ width fill, height fill, spacing <| outerScale 3 ]
+                [ el (Workspace CharacterEditorTitle) [] <|
+                    Input.text InputText
+                        [ padding (innerScale 2)
+                        , vary Light True
+                        ]
+                        { onChange = Data << RenameFile fileId
+                        , value = file.name
+                        , label = Input.hiddenLabel "Name"
+                        , options = [ Input.textKey file.name ]
+                        }
+                , column NoStyle
+                    [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
+                  <|
+                    [ el NoStyle [] <| text "Also known as:" ]
+                        ++ (List.map (input "Alias") character.aliases)
+                        ++ [ input "New Alias" "" ]
+                , column NoStyle
+                    [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
+                    [ el NoStyle [] <| text "Description"
+                    , multiline "Description" ""
                     ]
-                    { onChange = Data << RenameFile fileId
-                    , value = file.name
-                    , label = Input.hiddenLabel "Name"
-                    , options = [ Input.textKey file.name ]
-                    }
-            , column NoStyle
-                [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
-              <|
-                [ el NoStyle [] <| text "Also known as:" ]
-                    ++ (List.map (input "Alias") character.aliases)
-                    ++ [ input "New Alias" "" ]
-            , column NoStyle
-                [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
-                [ el NoStyle [] <| text "Description"
-                , multiline "Description" ""
+                , column NoStyle
+                    [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
+                    [ el NoStyle [] <| text "Relationships"
+                      -- , multiline "Description" ""
+                    ]
                 ]
-            , column NoStyle
-                [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
-                [ el NoStyle [] <| text "Relationships"
-                  -- , multiline "Description" ""
-                ]
-            ]
 
 
 viewStatusBar maybeWordTarget =
