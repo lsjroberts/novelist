@@ -41,7 +41,7 @@ view model =
                     Nothing
     in
         Element.viewport styleSheet <|
-            row NoStyle
+            row Body
                 [ height (percent 100) ]
                 [ Views.ActivityBar.view model.activity
                 , Views.Explorer.view model.activity model.files model.activeFile
