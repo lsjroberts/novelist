@@ -14,6 +14,7 @@ import Messages exposing (..)
 import Octicons as Icon
 import Views.Icons exposing (smallIcon)
 import Views.Welcome
+import Views.Workspace.Character
 
 
 view files openFiles activeFile fileContents wordTarget =
@@ -83,7 +84,7 @@ viewEditor files activeFile fileContents =
 
                         -- el Placeholder [ width fill, height fill ] empty
                         CharacterFile character ->
-                            viewCharacterEditor fileId file character
+                            Views.Workspace.Character.view (characters files) fileId file character
 
                         _ ->
                             el Placeholder [ width fill, height fill ] empty
@@ -122,59 +123,6 @@ viewMonacoEditor maybeFileContents =
                     el NoStyle [] empty
     in
         editorWrapper 0 monaco
-
-
-viewCharacterEditor : FileId -> File -> Character -> Element Styles Variations Msg
-viewCharacterEditor fileId file character =
-    let
-        input label value =
-            Input.text InputText
-                [ padding <| innerScale 2 ]
-                { onChange = (\s -> NoOp)
-                , value = value
-                , label = Input.hiddenLabel label
-                , options = []
-                }
-
-        multiline label value =
-            Input.multiline InputText
-                [ padding <| innerScale 2, height (px (fontScale 8)) ]
-                { onChange = (\s -> NoOp)
-                , value = value
-                , label = Input.hiddenLabel label
-                , options = []
-                }
-    in
-        editorWrapper 6 <|
-            column (Workspace CharacterEditor)
-                [ width fill, height fill, spacing <| outerScale 3 ]
-                [ el (Workspace CharacterEditorTitle) [] <|
-                    Input.text InputText
-                        [ padding (innerScale 2)
-                        , vary Light True
-                        ]
-                        { onChange = Data << RenameFile fileId
-                        , value = file.name
-                        , label = Input.hiddenLabel "Name"
-                        , options = [ Input.textKey file.name ]
-                        }
-                , column NoStyle
-                    [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
-                  <|
-                    [ el NoStyle [] <| text "Also known as:" ]
-                        ++ (List.map (input "Alias") character.aliases)
-                        ++ [ input "New Alias" "" ]
-                , column NoStyle
-                    [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
-                    [ el NoStyle [] <| text "Description"
-                    , multiline "Description" ""
-                    ]
-                , column NoStyle
-                    [ spacing <| outerScale 1, width (percent 80), paddingXY (innerScale 2) 0 ]
-                    [ el NoStyle [] <| text "Relationships"
-                      -- , multiline "Description" ""
-                    ]
-                ]
 
 
 viewStatusBar maybeWordTarget =

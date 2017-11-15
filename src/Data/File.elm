@@ -53,3 +53,22 @@ fileIcon fileType =
 
         LocationFile ->
             Icon.globe
+
+
+characters : Dict FileId File -> Dict FileId File
+characters files =
+    Dict.filter
+        (\fileId file ->
+            case file.fileType of
+                CharacterFile a ->
+                    True
+
+                _ ->
+                    False
+        )
+        files
+
+
+except : Dict FileId File -> FileId -> Dict FileId File
+except files fileId =
+    Dict.filter (\id f -> not (id == fileId)) files

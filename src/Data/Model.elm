@@ -51,11 +51,29 @@ init seed =
         ( newUuid, newSeed ) =
             Random.Pcg.step Uuid.uuidGenerator (Random.Pcg.initialSeed seed)
     in
-        ( createModel
-            newSeed
-            newUuid
-            (Dict.fromList [])
-            []
-            Nothing
+        ( testCharacters newUuid newSeed
         , Cmd.none
         )
+
+
+blankModel newUuid newSeed =
+    createModel
+        newSeed
+        newUuid
+        (Dict.fromList [])
+        []
+        Nothing
+
+
+testCharacters newUuid newSeed =
+    createModel
+        newSeed
+        newUuid
+        (Dict.fromList
+            [ ( "0", File "Bob" <| CharacterFile { aliases = [ "Robert" ] } )
+            , ( "1", File "Alice" <| CharacterFile { aliases = [] } )
+            , ( "2", File "Sam" <| CharacterFile { aliases = [] } )
+            ]
+        )
+        [ "0" ]
+        (Just "0")

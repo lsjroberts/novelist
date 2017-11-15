@@ -8,6 +8,7 @@ type alias Theme =
     , secondary : Color
     , tertiary : Color
     , background : Color
+    , backgroundSecondary : Color
     , text : Color
     , textSecondary : Color
     , active : Color
@@ -20,7 +21,8 @@ novelistLightTheme =
     { primary = rgb 241 200 200
     , secondary = rgb 200 200 241
     , tertiary = rgb 200 200 241
-    , background = rgb 241 241 241
+    , background = rgb 243 243 243
+    , backgroundSecondary = rgb 241 241 241
     , text = rgb 30 30 30
     , textSecondary = rgb 170 170 170
     , active = rgb 229 229 229
@@ -34,6 +36,7 @@ novelistDarkTheme =
     , secondary = rgb 100 100 141
     , tertiary = rgb 100 100 141
     , background = rgb 40 44 52
+    , backgroundSecondary = rgb 33 37 43
     , text = rgb 220 220 220
     , textSecondary = rgb 200 200 200
     , active = rgb 80 88 104

@@ -173,7 +173,7 @@ styleSheet theme =
         , style (Workspace TabBar)
             [ Border.bottom 1
             , Color.border (.active theme)
-            , Color.background (.background theme)
+            , Color.background (.backgroundSecondary theme)
               -- , Shadow.box { offset = ( 0, 2 ), size = 0, blur = 2, color = rgba 0 0 0 0.05 }
             ]
         , style (Workspace Tab)
@@ -193,7 +193,7 @@ styleSheet theme =
 
 
 panelStyles theme =
-    [ Color.background (.background theme)
+    [ Color.background (.backgroundSecondary theme)
     , Color.border (.active theme)
     , Font.typeface <| fontStack SansSerif
     , Font.size <| fontScale 1

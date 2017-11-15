@@ -30,7 +30,7 @@ function createWindow() {
         frame: true
     });
 
-    window.loadURL(`file://${__dirname}/index.html`);
+    window.loadURL(`file://${__dirname}/app.html`);
 
     window.webContents.openDevTools();
 
