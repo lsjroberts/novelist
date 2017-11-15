@@ -12,6 +12,7 @@ type Msg
     | Data DataMsg
     | Ui UiMsg
     | OpenProjectPort String
+    | SaveProjectPort String
     | UpdateFilePort String
     | NewUuid
 

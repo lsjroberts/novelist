@@ -1,17 +1,15 @@
-module Data.Encode exposing (..)
+module Data.Encode exposing (encode)
 
 import Data.File exposing (..)
 import Data.Model exposing (Model)
 import Dict exposing (Dict)
 import Json.Encode exposing (..)
-import Random.Pcg
 
 
-encoder : Model -> Value
-encoder model =
+encode : Model -> Value
+encode model =
     object
         [ ( "version", int 1 )
-        , ( "seed", Random.Pcg.toJson model.currentSeed )
         , ( "files", filesEncoder model.files )
         , ( "openFiles", list [] )
         , ( "activeFile", maybeStringEncoder model.activeFile )

@@ -51,7 +51,7 @@ init seed =
         ( newUuid, newSeed ) =
             Random.Pcg.step Uuid.uuidGenerator (Random.Pcg.initialSeed seed)
     in
-        ( testCharacters newUuid newSeed
+        ( blankModel newUuid newSeed
         , Cmd.none
         )
 

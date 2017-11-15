@@ -1,4 +1,4 @@
-module Data.Decode exposing (..)
+module Data.Decode exposing (decode)
 
 import Data.File exposing (..)
 import Data.Model exposing (Model)

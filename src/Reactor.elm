@@ -3,7 +3,7 @@ module Main exposing (..)
 import Data.Model exposing (Model, init)
 import Html exposing (Html, program)
 import Messages exposing (Msg)
-import State exposing (updateWithCmds, subscriptions)
+import State exposing (update, subscriptions)
 import Views.Main exposing (view)
 
 
@@ -12,6 +12,6 @@ main =
     program
         { init = init 0
         , view = view
-        , update = updateWithCmds
+        , update = update
         , subscriptions = subscriptions
         }

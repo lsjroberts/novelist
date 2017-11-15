@@ -2,11 +2,13 @@ port module State exposing (..)
 
 import Data.Decode exposing (decode)
 import Data.Activity exposing (..)
+import Data.Encode exposing (encode)
 import Data.File exposing (..)
 import Data.Model exposing (..)
 import Data.Palette exposing (..)
 import Dict exposing (Dict)
 import Dom
+import Json.Encode
 import Keyboard.Combo
 import Messages exposing (..)
 import Random.Pcg
@@ -14,141 +16,118 @@ import Task
 import Uuid
 
 
-updateWithCmds : Msg -> Model -> ( Model, Cmd Msg )
-updateWithCmds msg model =
-    case msg of
-        Ui (Combos comboMsg) ->
-            let
-                ( updatedCombos, comboCmd ) =
-                    Keyboard.Combo.update comboMsg model.keyCombos
-            in
-                ( { model | keyCombos = updatedCombos }, comboCmd )
-
-        _ ->
-            let
-                cmd =
-                    case msg of
-                        Ui (SetPalette (Files _)) ->
-                            Task.attempt (Ui << FocusPaletteInput) (Dom.focus "palette-input")
-
-                        Ui (OpenFile fileId) ->
-                            requestFilePort fileId
-
-                        _ ->
-                            Cmd.none
-            in
-                ( update msg model, cmd )
-
-
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        NoOp ->
-            model
-
-        Data dataMsg ->
-            updateData dataMsg model
-
-        Ui uiMsg ->
-            updateUi uiMsg model
-
-        OpenProjectPort payload ->
-            decode (createModel model.currentSeed model.currentUuid) payload
-
-        UpdateFilePort payload ->
-            { model | fileContents = Just payload }
-
-        NewUuid ->
-            let
-                ( newUuid, newSeed ) =
-                    Random.Pcg.step Uuid.uuidGenerator model.currentSeed
-            in
-                { model
-                    | currentUuid = newUuid
-                    , currentSeed = newSeed
-                }
-
-
-updateData : DataMsg -> Model -> Model
-updateData msg model =
     let
-        addFile activity file =
-            { model | files = Dict.insert (Uuid.toString model.currentUuid) file model.files }
-                |> update (Ui <| OpenFile (Uuid.toString model.currentUuid))
-                |> update NewUuid
-                |> update (Ui <| SetActivity activity)
+        ( newModel, newCmds ) =
+            case msg of
+                NoOp ->
+                    model ! []
+
+                Data dataMsg ->
+                    updateData dataMsg model
+
+                Ui uiMsg ->
+                    updateUi uiMsg model
+
+                OpenProjectPort payload ->
+                    decode (createModel model.currentSeed model.currentUuid) payload ! []
+
+                SaveProjectPort payload ->
+                    model ! []
+
+                UpdateFilePort payload ->
+                    { model | fileContents = Just payload } ! []
+
+                NewUuid ->
+                    let
+                        ( newUuid, newSeed ) =
+                            Random.Pcg.step Uuid.uuidGenerator model.currentSeed
+                    in
+                        { model
+                            | currentUuid = newUuid
+                            , currentSeed = newSeed
+                        }
+                            ! []
     in
-        case msg of
-            AddCharacter ->
-                addFile Characters <|
-                    File "New Character" <|
-                        CharacterFile <|
-                            Character []
+        newModel ! [ newCmds, writeMetaPort (encode newModel) ]
 
-            AddLocation ->
-                addFile Locations <|
-                    File "New Location" <|
-                        LocationFile
 
-            AddScene ->
-                addFile Manuscript <|
-                    File "New Scene" <|
-                        SceneFile <|
-                            Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
+updateData : DataMsg -> Model -> ( Model, Cmd Msg )
+updateData msg model =
+    case msg of
+        AddCharacter ->
+            addFile model Characters <|
+                File "New Character" <|
+                    CharacterFile <|
+                        Character []
 
-            RenameFile fileId newName ->
-                { model
-                    | files =
-                        Dict.update fileId
-                            (\mf ->
-                                case mf of
-                                    Just f ->
-                                        Just { f | name = newName }
+        AddLocation ->
+            addFile model Locations <|
+                File "New Location" <|
+                    LocationFile
 
-                                    Nothing ->
-                                        Nothing
-                            )
-                            model.files
-                }
+        AddScene ->
+            addFile model Manuscript <|
+                File "New Scene" <|
+                    SceneFile <|
+                        Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
 
-            SetWordTarget targetString ->
-                let
-                    wordTarget =
-                        targetString
-                            |> String.toInt
-                            |> Result.toMaybe
+        RenameFile fileId newName ->
+            { model
+                | files =
+                    Dict.update fileId
+                        (\mf ->
+                            case mf of
+                                Just f ->
+                                    Just { f | name = newName }
 
-                    updateFile maybeFile =
-                        case maybeFile of
-                            Just file ->
-                                case file.fileType of
-                                    SceneFile scene ->
-                                        Just
-                                            { file
-                                                | fileType =
-                                                    SceneFile
-                                                        { scene
-                                                            | wordTarget = wordTarget
-                                                        }
-                                            }
+                                Nothing ->
+                                    Nothing
+                        )
+                        model.files
+            }
+                ! []
 
-                                    _ ->
-                                        Just file
+        SetWordTarget targetString ->
+            let
+                wordTarget =
+                    targetString
+                        |> String.toInt
+                        |> Result.toMaybe
 
-                            Nothing ->
-                                Nothing
-                in
-                    case model.activeFile of
-                        Just activeFile ->
-                            { model
-                                | files = Dict.update activeFile updateFile model.files
-                            }
+                updateFile maybeFile =
+                    case maybeFile of
+                        Just file ->
+                            case file.fileType of
+                                SceneFile scene ->
+                                    Just
+                                        { file
+                                            | fileType =
+                                                SceneFile
+                                                    { scene
+                                                        | wordTarget = wordTarget
+                                                    }
+                                        }
+
+                                _ ->
+                                    Just file
 
                         Nothing ->
-                            model
+                            Nothing
+            in
+                case model.activeFile of
+                    Just activeFile ->
+                        { model
+                            | files = Dict.update activeFile updateFile model.files
+                        }
+                            ! []
+
+                    Nothing ->
+                        model ! []
 
 
-updateUi : UiMsg -> Model -> Model
+updateUi : UiMsg -> Model -> ( Model, Cmd Msg )
 updateUi msg model =
     case msg of
         CloseFile fileId ->
@@ -165,16 +144,22 @@ updateUi msg model =
                             Nothing
                 , openFiles = List.filter (\f -> not <| f == fileId) model.openFiles
             }
-                |> update (Ui ClosePalette)
+                -- |> update (Ui ClosePalette)
+                !
+                    []
 
         ClosePalette ->
-            { model | palette = Closed }
+            { model | palette = Closed } ! []
 
-        Combos msg ->
-            model
+        Combos comboMsg ->
+            let
+                ( updatedCombos, comboCmd ) =
+                    Keyboard.Combo.update comboMsg model.keyCombos
+            in
+                ( { model | keyCombos = updatedCombos }, comboCmd )
 
         FocusPaletteInput msg ->
-            model
+            model ! []
 
         OpenFile fileId ->
             { model
@@ -185,16 +170,45 @@ updateUi msg model =
                     else
                         model.openFiles
             }
-                |> update (Ui ClosePalette)
+                -- |> update (Ui ClosePalette)
+                !
+                    [ requestFilePort fileId ]
 
         SearchName search ->
-            { model | palette = Files search }
+            { model | palette = Files search } ! []
 
         SetPalette palette ->
             { model | palette = palette }
+                ! [ Task.attempt (Ui << FocusPaletteInput) (Dom.focus "palette-input") ]
 
         SetActivity activity ->
-            { model | activity = Just activity } |> update (Ui ClosePalette)
+            { model | activity = Just activity }
+                -- |> update (Ui ClosePalette)
+                !
+                    []
+
+
+addFile model activity file =
+    let
+        withFile =
+            { model
+                | files =
+                    Dict.insert
+                        (Uuid.toString model.currentUuid)
+                        file
+                        model.files
+            }
+
+        ( withOpenFile, cmdsOpenFile ) =
+            withFile |> update (Ui <| OpenFile (Uuid.toString model.currentUuid))
+
+        ( withNewUuid, cmdsNewUuid ) =
+            withOpenFile |> update NewUuid
+
+        ( withActivity, cmdsActivity ) =
+            withNewUuid |> update (Ui <| SetActivity activity)
+    in
+        withActivity ! [ cmdsOpenFile, cmdsNewUuid, cmdsActivity ]
 
 
 
@@ -205,6 +219,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ openProjectPort OpenProjectPort
+        , saveProjectPort SaveProjectPort
         , updateFilePort UpdateFilePort
         , Keyboard.Combo.subscriptions model.keyCombos
         ]
@@ -212,12 +227,16 @@ subscriptions model =
 
 
 -- PORTS
-
-
-port createFilePort : FileId -> Cmd msg
+-- port createFilePort : FileId -> Cmd msg
 
 
 port openProjectPort : (String -> msg) -> Sub msg
+
+
+port saveProjectPort : (String -> msg) -> Sub msg
+
+
+port writeMetaPort : Json.Encode.Value -> Cmd msg
 
 
 port requestFilePort : FileId -> Cmd msg

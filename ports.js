@@ -1,6 +1,6 @@
 'use strict';
 
-const fs = require('fs');
+const fs = require('fs-extra');
 
 const Elm = require('./dist/elm.js');
 
@@ -12,12 +12,12 @@ let activeFileId;
 
 // -- INIT
 
-const projectPath = new URL(document.location).searchParams.get('projectPath');
+const projectPath =
+    new URL(document.location).searchParams.get('projectPath') || '.tmp';
 
 if (projectPath) {
     fs.readFile(`${projectPath}/meta.json`, (err, data) => {
         if (err) throw err; // TODO: send errors to a port
-        console.log('ports open', data.toString());
         openProject(data.toString());
     });
 } else {
@@ -26,29 +26,26 @@ if (projectPath) {
 
 // -- SUBSCRIPTIONS
 
-novelist.ports.createFilePort.subscribe(fileId => {
-    fs.writeFile(`${projectPath}/manuscript/${fileId}.txt`, '', (err, data) => {
+novelist.ports.writeMetaPort.subscribe(json => {
+    const filePath = `${projectPath}/meta.json`;
+    fs.writeFile(filePath, JSON.stringify(json, null, 2), err => {
         if (err) throw err; // TODO: send errors to a port
     });
 });
 
 novelist.ports.requestFilePort.subscribe(fileId => {
-    fs.readFile(`${projectPath}/manuscript/${fileId}.txt`, (err, data) => {
+    const filePath = `${projectPath}/manuscript/${fileId}.txt`;
+    fs.ensureFile(filePath, err => {
         if (err) throw err; // TODO: send errors to a port
-        activeFileId = fileId;
-        updateFile(data.toString());
+        fs.readFile(filePath, (err, data) => {
+            if (err) throw err; // TODO: send errors to a port
+            activeFileId = fileId;
+            updateFile(data.toString());
+        });
     });
 });
 
-novelist.ports.writeFilePort.subscribe((fileId, contents) => {
-    fs.writeFile(
-        `${projectPath}/manuscript/${fileId}.txt`,
-        contents,
-        (err, data) => {
-            if (err) throw err; // TODO: send errors to a port
-        }
-    );
-});
+novelist.ports.writeFilePort.subscribe(writeFile);
 
 // -- PORTS
 
@@ -58,6 +55,18 @@ function openProject(meta) {
 
 function updateFile(contents) {
     novelist.ports.updateFilePort.send(contents);
+}
+
+// -- FILES
+
+function writeFile(fileId, contents) {
+    fs.writeFile(
+        `${projectPath}/manuscript/${fileId}.txt`,
+        contents,
+        (err, data) => {
+            if (err) throw err; // TODO: send errors to a port
+        }
+    );
 }
 
 // -- MUTATIONS
@@ -106,12 +115,12 @@ function createMonacoEditor(contents) {
         }
     });
 
-    // -- Attach a listener to the model to send the data back to the elm app
-    // const model = editor.getModel();
-    // model.onDidChangeContent(() => {
-    //     const value = model.getValue();
-    //     updateFile(value);
-    // });
+    // -- Attach a listener to automatically save the file
+    const model = editor.getModel();
+    model.onDidChangeContent(() => {
+        const value = model.getValue();
+        writeFile(activeFileId, value);
+    });
 
     editor.addAction({
         id: 'novelist-character-add',

@@ -4,10 +4,10 @@
   "description": "A Writer's Environment",
   "main": "src/Main.elm",
   "scripts": {
-    "start": "npm run elm && npm run app",
+    "start": "rm -rf .tmp && npm run elm && npm run app",
     "elm": "elm make ./src/Main.elm --output ./dist/elm.js",
     "app": "electron ./electron",
-    "dev": "elm live ./src/Reactor.elm",
+    "dev": "elm live ./src/Reactor.elm --debug",
     "cloc": "cloc --exclude-dir=$(tr '\\n' ',' < .clocignore) ."
   },
   "keywords": [],

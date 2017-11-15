@@ -1,5 +1,7 @@
 .DS_Store
+.tmp
 .vscode
+*.code-workspace
 
 elm-stuff
 dist
