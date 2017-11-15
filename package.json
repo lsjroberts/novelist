@@ -1,17 +1,18 @@
 {
   "name": "writing-app-monaco",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A Writer's Environment",
+  "main": "src/Main.elm",
   "scripts": {
     "start": "npm run elm && npm run app",
     "elm": "elm make ./src/Main.elm --output ./dist/elm.js",
     "app": "electron ./electron",
+    "dev": "elm live ./src/Reactor.elm",
     "cloc": "cloc --exclude-dir=$(tr '\\n' ',' < .clocignore) ."
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Laurence Roberts",
+  "license": "UNLICENSED",
   "dependencies": {
     "connect": "^3.6.5",
     "electron": "^1.7.9",
