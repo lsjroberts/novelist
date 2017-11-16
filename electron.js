@@ -1,9 +1,11 @@
-'use strict';
-
 const { Menu, BrowserWindow, app, dialog } = require('electron');
 const path = require('path');
+const fs = require('fs-extra');
 
 let windows = [];
+
+const DEFAULT_PROJECT_PATH = '.tmp';
+let activeProjectPath = DEFAULT_PROJECT_PATH;
 
 // -- GLOBAL
 
@@ -16,7 +18,9 @@ function ready() {
     createWindow();
 }
 
-function createWindow(projectPath = '') {
+function createWindow(projectPath = DEFAULT_PROJECT_PATH) {
+    activeProjectPath = projectPath;
+
     const window =
         windows[0] ||
         new BrowserWindow({
@@ -26,7 +30,9 @@ function createWindow(projectPath = '') {
             frame: true
         });
 
-    window.loadURL(`file://${__dirname}/app.html?projectPath=${projectPath}`);
+    window.loadURL(
+        `file://${__dirname}/app.html?projectPath=${activeProjectPath}`
+    );
 
     window.webContents.openDevTools();
 
@@ -166,32 +172,28 @@ function showOpenDialog() {
 }
 
 function saveProject() {
-    windows[0].window.webContents
-        .executeJavaScript(`localStorage.getItem("model")`, true)
-        .then(model => {
-            console.log('save', model);
-            dialog.showSaveDialog(
-                windows[0].window,
-                {
-                    title: 'my-story.novl',
-                    filters: [
-                        {
-                            name: 'Novelist Projects',
-                            extensions: ['novl']
-                        }
-                    ]
-                },
-                path => {
-                    fs.outputFile(
-                        path,
-                        JSON.stringify(JSON.parse(model), null, 4)
-                    );
-                }
-            );
-        })
-        .catch(e => {
-            console.error(e);
-        });
+    if (activeProjectPath === DEFAULT_PROJECT_PATH) {
+        // open dialog
+        dialog.showSaveDialog(
+            windows[0].window,
+            {
+                title: 'my-story.novl',
+                filters: [
+                    {
+                        name: 'Novelist Projects',
+                        extensions: ['novl']
+                    }
+                ]
+            },
+            path => {
+                fs.copy(activeProjectPath, path);
+                activeProjectPath = path;
+                createWindow(path);
+            }
+        );
+    } else {
+        // there is nothing to do
+    }
 }
 
 function compile() {

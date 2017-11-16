@@ -11,7 +11,7 @@ encode model =
     object
         [ ( "version", int 1 )
         , ( "files", filesEncoder model.files )
-        , ( "openFiles", list [] )
+        , ( "openFiles", list (List.map string model.openFiles) )
         , ( "activeFile", maybeStringEncoder model.activeFile )
         ]
 
