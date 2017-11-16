@@ -234,30 +234,37 @@ viewSearch files maybeSearch =
             ]
         , case maybeSearch of
             Just search ->
-                column NoStyle
-                    [ spacing <| innerScale 2 ]
-                <|
-                    case search.result.contents of
-                        Just contents ->
-                            Dict.values <|
-                                Dict.map
-                                    (\fileId matches ->
-                                        case Dict.get fileId files of
-                                            Just file ->
-                                                column NoStyle
-                                                    [ spacing <| innerScale 1 ]
-                                                <|
-                                                    ([ el NoStyle [] <| text file.name ])
-                                                        ++ (List.map (\c -> el NoStyle [ paddingLeft <| innerScale 2 ] <| text c) matches)
+                let
+                    viewContents =
+                        case search.result.contents of
+                            Just contents ->
+                                viewSearchResults files contents
 
-                                            Nothing ->
-                                                el NoStyle [] empty
-                                    )
-                                    contents
-
-                        Nothing ->
-                            [ el NoStyle [] empty ]
+                            Nothing ->
+                                [ el NoStyle [] empty ]
+                in
+                    column NoStyle [ spacing <| innerScale 2 ] viewContents
 
             Nothing ->
                 el NoStyle [] empty
         ]
+
+
+viewSearchResults files contents =
+    let
+        fileMatches fileId matches =
+            case Dict.get fileId files of
+                Just file ->
+                    column NoStyle
+                        [ spacing <| innerScale 1 ]
+                        (([ el NoStyle [] <| text file.name ])
+                            ++ (List.map item matches)
+                        )
+
+                Nothing ->
+                    el NoStyle [] empty
+
+        item snippet =
+            el NoStyle [ paddingLeft <| innerScale 2 ] <| text snippet
+    in
+        Dict.values <| Dict.map fileMatches contents
