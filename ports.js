@@ -65,6 +65,11 @@ novelist.ports.searchPort.subscribe(term => {
                                 }
 
                                 const indices = getIndicesOf(term, contents);
+
+                                if (indices.length === 0) {
+                                    return files;
+                                }
+
                                 const matches = indices.map(index => {
                                     let numSpaces = 0;
                                     let left = index;
@@ -91,7 +96,7 @@ novelist.ports.searchPort.subscribe(term => {
                                 });
 
                                 return Object.assign({}, files, {
-                                    [fileName]: matches
+                                    [fileName.replace('.txt', '')]: matches
                                 });
                             })
                     ),

@@ -239,15 +239,21 @@ viewSearch files maybeSearch =
                 <|
                     case search.result.contents of
                         Just contents ->
-                            Dict.values contents
-                                |> List.map
-                                    (\file ->
-                                        column NoStyle
-                                            [ spacing <| innerScale 1 ]
-                                        <|
-                                            ([ el NoStyle [] <| text "File Name Here" ])
-                                                ++ (List.map (\c -> el NoStyle [] <| text c) file)
+                            Dict.values <|
+                                Dict.map
+                                    (\fileId matches ->
+                                        case Dict.get fileId files of
+                                            Just file ->
+                                                column NoStyle
+                                                    [ spacing <| innerScale 1 ]
+                                                <|
+                                                    ([ el NoStyle [] <| text file.name ])
+                                                        ++ (List.map (\c -> el NoStyle [ paddingLeft <| innerScale 2 ] <| text c) matches)
+
+                                            Nothing ->
+                                                el NoStyle [] empty
                                     )
+                                    contents
 
                         Nothing ->
                             [ el NoStyle [] empty ]
