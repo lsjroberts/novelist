@@ -1,5 +1,6 @@
 'use strict';
 
+// const path = require('path');
 const fs = require('fs-extra');
 
 const Elm = require('./dist/elm.js');
@@ -34,7 +35,7 @@ novelist.ports.writeMetaPort.subscribe(json => {
 });
 
 novelist.ports.requestFilePort.subscribe(fileId => {
-    const filePath = `${projectPath}/files/${fileId}.txt`;
+    const filePath = path.join(projectPath, 'files', `${fileId}.txt`);
     console.log('requesting file', filePath);
     fs.ensureFile(filePath, err => {
         if (err) throw err; // TODO: send errors to a port
@@ -48,14 +49,68 @@ novelist.ports.requestFilePort.subscribe(fileId => {
 
 novelist.ports.writeFilePort.subscribe(writeFile);
 
+novelist.ports.searchPort.subscribe(term => {
+    const dir = path.join(projectPath, 'files');
+    fs
+        .readdir(dir)
+        .then(fileNames =>
+            fileNames.reduce(
+                (promise, fileName) =>
+                    promise.then(files =>
+                        fs
+                            .readFile(path.join(dir, fileName), 'utf-8')
+                            .then(contents => {
+                                if (!contents.includes(term)) {
+                                    return files;
+                                }
+
+                                const indices = getIndicesOf(term, contents);
+                                const matches = indices.map(index => {
+                                    let numSpaces = 0;
+                                    let left = index;
+                                    while (left > 0 && numSpaces < 3) {
+                                        left -= 1;
+                                        if (contents[left] === ' ') {
+                                            numSpaces += 1;
+                                        }
+                                        if (contents[left] === '\n') break;
+                                    }
+                                    numSpaces = 0;
+                                    let right = index + term.length;
+                                    while (
+                                        right < contents.length - 1 &&
+                                        numSpaces < 3
+                                    ) {
+                                        right += 1;
+                                        if (contents[right] === ' ') {
+                                            numSpaces += 1;
+                                        }
+                                        if (contents[right] === '\n') break;
+                                    }
+                                    return contents.slice(left, right).trim();
+                                });
+
+                                return Object.assign({}, files, {
+                                    [fileName]: matches
+                                });
+                            })
+                    ),
+                Promise.resolve({})
+            )
+        )
+        .then(files => {
+            novelist.ports.searchSubscription.send(JSON.stringify(files));
+        });
+});
+
 // -- PORTS
 
 function openProject(meta) {
-    novelist.ports.openProjectPort.send(meta);
+    novelist.ports.openProjectSubscription.send(meta);
 }
 
 function updateFile(contents) {
-    novelist.ports.updateFilePort.send(contents);
+    novelist.ports.updateFileSubscription.send(contents);
 }
 
 // -- FILES
@@ -173,4 +228,26 @@ function createMonacoEditor(contents) {
             });
         });
     });
+}
+
+// -- UTILS
+
+// https://stackoverflow.com/a/3410557
+function getIndicesOf(searchStr, str, caseSensitive = false) {
+    var searchStrLen = searchStr.length;
+    if (searchStrLen == 0) {
+        return [];
+    }
+    var startIndex = 0,
+        index,
+        indices = [];
+    if (!caseSensitive) {
+        str = str.toLowerCase();
+        searchStr = searchStr.toLowerCase();
+    }
+    while ((index = str.indexOf(searchStr, startIndex)) > -1) {
+        indices.push(index);
+        startIndex = index + searchStrLen;
+    }
+    return indices;
 }

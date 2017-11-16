@@ -1,11 +1,12 @@
 port module State exposing (..)
 
 import Data.Decode exposing (decode)
-import Data.Activity exposing (..)
+import Data.Activity as Activity
 import Data.Encode exposing (encode)
 import Data.File exposing (..)
 import Data.Model exposing (..)
 import Data.Palette exposing (..)
+import Data.Search exposing (..)
 import Dict exposing (Dict)
 import Dom
 import Json.Encode
@@ -30,14 +31,28 @@ update msg model =
                 Ui uiMsg ->
                     updateUi uiMsg model
 
-                OpenProjectPort payload ->
+                OpenProjectSubscription payload ->
                     decode (createModel model.currentSeed model.currentUuid) payload ! []
 
-                SaveProjectPort payload ->
-                    model ! []
-
-                UpdateFilePort payload ->
+                UpdateFileSubscription payload ->
                     { model | fileContents = Just payload } ! []
+
+                SearchSubscription payload ->
+                    case model.search of
+                        Just search ->
+                            { model
+                                | search =
+                                    Just
+                                        { search
+                                            | result =
+                                                { contents = Just (decodeSearchContents payload)
+                                                }
+                                        }
+                            }
+                                ! []
+
+                        Nothing ->
+                            model ! []
 
                 NewUuid ->
                     let
@@ -50,25 +65,30 @@ update msg model =
                         }
                             ! []
     in
-        newModel ! [ newCmds, writeMetaPort (encode newModel) ]
+        case msg of
+            Data _ ->
+                newModel ! [ newCmds, writeMetaPort (encode newModel) ]
+
+            _ ->
+                newModel ! [ newCmds ]
 
 
 updateData : DataMsg -> Model -> ( Model, Cmd Msg )
 updateData msg model =
     case msg of
         AddCharacter ->
-            addFile model Characters <|
+            addFile model Activity.Characters <|
                 File "New Character" <|
                     CharacterFile <|
                         Character []
 
         AddLocation ->
-            addFile model Locations <|
+            addFile model Activity.Locations <|
                 File "New Location" <|
                     LocationFile
 
         AddScene ->
-            addFile model Manuscript <|
+            addFile model Activity.Manuscript <|
                 File "New Scene" <|
                     SceneFile <|
                         Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
@@ -174,6 +194,17 @@ updateUi msg model =
                 !
                     [ requestFilePort fileId ]
 
+        Search term ->
+            { model
+                | search =
+                    Just
+                        (FileSearch term
+                            { contents = Nothing
+                            }
+                        )
+            }
+                ! [ searchPort term ]
+
         SearchName search ->
             { model | palette = Files search } ! []
 
@@ -218,9 +249,9 @@ addFile model activity file =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ openProjectPort OpenProjectPort
-        , saveProjectPort SaveProjectPort
-        , updateFilePort UpdateFilePort
+        [ openProjectSubscription OpenProjectSubscription
+        , updateFileSubscription UpdateFileSubscription
+        , searchSubscription SearchSubscription
         , Keyboard.Combo.subscriptions model.keyCombos
         ]
 
@@ -230,19 +261,22 @@ subscriptions model =
 -- port createFilePort : FileId -> Cmd msg
 
 
-port openProjectPort : (String -> msg) -> Sub msg
+port openProjectSubscription : (String -> msg) -> Sub msg
 
 
-port saveProjectPort : (String -> msg) -> Sub msg
+port updateFileSubscription : (String -> msg) -> Sub msg
+
+
+port searchPort : String -> Cmd msg
+
+
+port searchSubscription : (String -> msg) -> Sub msg
 
 
 port writeMetaPort : Json.Encode.Value -> Cmd msg
 
 
 port requestFilePort : FileId -> Cmd msg
-
-
-port updateFilePort : (String -> msg) -> Sub msg
 
 
 port writeFilePort : { fileId : FileId, contents : String } -> Cmd msg

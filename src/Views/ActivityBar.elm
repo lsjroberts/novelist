@@ -6,7 +6,7 @@ import Element exposing (..)
 import Element.Attributes exposing (..)
 import Element.Events exposing (..)
 import Styles exposing (..)
-import Messages exposing (..)
+import Messages exposing (Msg(Ui), UiMsg(SetActivity, SetPalette))
 import Octicons as Icon
 import Views.Icons exposing (largeIcon)
 

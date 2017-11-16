@@ -11,9 +11,9 @@ type Msg
     = NoOp
     | Data DataMsg
     | Ui UiMsg
-    | OpenProjectPort String
-    | SaveProjectPort String
-    | UpdateFilePort String
+    | OpenProjectSubscription String
+    | UpdateFileSubscription String
+    | SearchSubscription String
     | NewUuid
 
 
@@ -31,6 +31,7 @@ type UiMsg
     | Combos Keyboard.Combo.Msg
     | FocusPaletteInput (Result Dom.Error ())
     | OpenFile FileId
+    | Search String
+    | SearchName String
     | SetActivity Activity
     | SetPalette PaletteStatus
-    | SearchName String
