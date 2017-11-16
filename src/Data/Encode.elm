@@ -50,7 +50,7 @@ sceneEncoder scene =
         , ( "tags", list [] )
         , ( "position", int scene.position )
         , ( "characters", object [] )
-        , ( "locations", object [] )
+        , ( "locations", list [] )
         , ( "wordTarget", maybeIntEncoder scene.wordTarget )
         ]
 

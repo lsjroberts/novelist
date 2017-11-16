@@ -22,15 +22,17 @@ function ready() {
     createWindow();
 }
 
-function createWindow() {
-    const window = new BrowserWindow({
-        title: 'Novelist',
-        width: 800,
-        height: 600,
-        frame: true
-    });
+function createWindow(projectPath = '') {
+    const window =
+        windows[0] ||
+        new BrowserWindow({
+            title: 'Novelist',
+            width: 1920,
+            height: 1080,
+            frame: true
+        });
 
-    window.loadURL(`file://${__dirname}/app.html`);
+    window.loadURL(`file://${__dirname}/app.html?projectPath=${projectPath}`);
 
     window.webContents.openDevTools();
 
@@ -163,14 +165,7 @@ function showOpenDialog() {
 
             if (Array.isArray(files) && files.length === 1) {
                 const projectPath = files[0];
-                const projectName = path.basename(projectPath, '.novl');
-                // const metaPath = path.join(projectDir, `${projectName}.novj`);
-
-                // createWindow(projectDir);
-
-                windows[0].loadURL(
-                    `file://${__dirname}/index.html?projectPath=${projectPath}`
-                );
+                createWindow(projectPath);
             }
         }
     );

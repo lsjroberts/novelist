@@ -34,7 +34,8 @@ novelist.ports.writeMetaPort.subscribe(json => {
 });
 
 novelist.ports.requestFilePort.subscribe(fileId => {
-    const filePath = `${projectPath}/manuscript/${fileId}.txt`;
+    const filePath = `${projectPath}/files/${fileId}.txt`;
+    console.log('requesting file', filePath);
     fs.ensureFile(filePath, err => {
         if (err) throw err; // TODO: send errors to a port
         fs.readFile(filePath, (err, data) => {
@@ -61,7 +62,7 @@ function updateFile(contents) {
 
 function writeFile(fileId, contents) {
     fs.writeFile(
-        `${projectPath}/manuscript/${fileId}.txt`,
+        `${projectPath}/files/${fileId}.txt`,
         contents,
         (err, data) => {
             if (err) throw err; // TODO: send errors to a port
