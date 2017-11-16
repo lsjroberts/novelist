@@ -41,7 +41,7 @@ createModel seed uuid files openFiles activeFile =
                 (Ui <| SetPalette (Files ""))
             ]
             (Ui << Combos)
-    , theme = novelistDarkTheme
+    , theme = novelistLightTheme
     }
 
 

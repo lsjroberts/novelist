@@ -32,6 +32,7 @@ fileDecoder =
         (field "meta"
             (oneOf
                 [ sceneDecoder |> andThen (\s -> succeed (SceneFile s))
+                , characterDecoder |> andThen (\c -> succeed (CharacterFile c))
                 ]
             )
         )
@@ -67,3 +68,9 @@ sceneCharacterDecoder : Decoder SceneCharacter
 sceneCharacterDecoder =
     map SceneCharacter
         (field "speaking" bool)
+
+
+characterDecoder : Decoder Character
+characterDecoder =
+    succeed Character
+        |: (field "aliases" (list string))

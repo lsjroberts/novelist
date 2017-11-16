@@ -62,6 +62,7 @@ type WelcomeStyle
 type WorkspaceStyle
     = CharacterEditor
     | CharacterEditorTitle
+    | SceneEditor
     | TabBar
     | Tab
 
@@ -170,6 +171,8 @@ styleSheet theme =
             [ Font.typeface <| fontStack Serif
             , Font.size <| fontScale 4
             ]
+        , style (Workspace SceneEditor)
+            []
         , style (Workspace TabBar)
             [ Border.bottom 1
             , Color.border (.active theme)

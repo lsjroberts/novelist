@@ -82,7 +82,6 @@ viewEditor files activeFile fileContents =
                         SceneFile scene ->
                             viewMonacoEditor fileContents
 
-                        -- el Placeholder [ width fill, height fill ] empty
                         CharacterFile character ->
                             Views.Workspace.Character.view (characters files) fileId file character
 
@@ -93,17 +92,6 @@ viewEditor files activeFile fileContents =
                     el Placeholder [ width fill, height fill ] empty
     in
         viewFile
-
-
-editorWrapper right =
-    el NoStyle
-        [ width fill
-        , height fill
-        , paddingTop <| innerScale 4
-        , paddingRight <| innerScale right
-        , paddingBottom <| innerScale 4
-        , paddingLeft <| innerScale 6
-        ]
 
 
 viewMonacoEditor maybeFileContents =
@@ -122,7 +110,15 @@ viewMonacoEditor maybeFileContents =
                 Nothing ->
                     el NoStyle [] empty
     in
-        editorWrapper 0 monaco
+        el (Workspace SceneEditor)
+            [ width fill
+            , height fill
+            , paddingTop <| innerScale 4
+            , paddingRight <| innerScale 6
+            , paddingBottom <| innerScale 4
+            , paddingLeft <| innerScale 6
+            ]
+            monaco
 
 
 viewStatusBar maybeWordTarget =

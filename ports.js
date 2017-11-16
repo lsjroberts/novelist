@@ -81,9 +81,15 @@ const observer = new MutationObserver(mutations => {
         ) {
             createMonacoEditor(mutation.target.attributes.contents.textContent);
         }
+
+        if (!document.getElementById('monaco-editor')) {
+            destroyMonacoEditor();
+        }
     });
 });
 observer.observe(document.querySelector('body'), {
+    childList: true,
+    characterData: true,
     attributes: true,
     subtree: true
 });
@@ -91,27 +97,32 @@ observer.observe(document.querySelector('body'), {
 // -- MONACO
 
 let editor;
-function createMonacoEditor(contents) {
+
+function destroyMonacoEditor() {
     if (editor) {
-        editor.getModel().dispose();
+        const model = editor.getModel();
+        if (model) model.dispose();
         editor.dispose();
     }
+}
+
+function createMonacoEditor(contents) {
+    destroyMonacoEditor();
 
     // -- Create the editor
     editor = monaco.editor.create(document.getElementById('monaco-editor'), {
         automaticLayout: true, // TODO: this occurs every 100ms, do it better
         theme: 'novelist-speech',
         language: 'novel',
-        // value: thrones(),
         value: contents,
-        wordWrap: 'on',
-        // wordWrap: "wordWrapColumn",
-        // wordWrapColumn: 80,
+        wordWrap: 'wordWrapColumn',
+        wordWrapColumn: 70,
         lineNumbers: false,
         fontFamily: 'Cochin',
         fontSize: 18,
         lineHeight: 18 * 1.8,
         minimap: {
+            enabled: false,
             renderCharacters: false
         }
     });
@@ -123,13 +134,13 @@ function createMonacoEditor(contents) {
         writeFile(activeFileId, value);
     });
 
-    editor.addAction({
-        id: 'novelist-character-add',
-        label: 'Character: Add new character',
-        run: () => {
-            console.log('creating a new character');
-        }
-    });
+    // editor.addAction({
+    //     id: 'novelist-character-add',
+    //     label: 'Character: Add new character',
+    //     run: () => {
+    //         console.log('creating a new character');
+    //     }
+    // });
 
     var viewZoneId = null;
 

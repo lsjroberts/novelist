@@ -62,11 +62,11 @@ amdRequire(['vs/editor/editor.main'], function() {
 
     const defaultThemeColors = {
         // "editor.background": "#F7F7F7",
-        'editor.background': '#FFFFFF',
+        'editor.background': '#F3F3F3',
         'editor.foreground': '#333333',
-        'editorHoverWidget.background': '#F7F7F7',
-        'editorLineNumber.foreground': '#F0F0F0',
-        'editor.lineHighlightBackground': '#F2F2F2',
+        'editorHoverWidget.background': '#F3F3F3',
+        'editorLineNumber.foreground': '#F3F3F3',
+        'editor.lineHighlightBackground': '#F3F3F3',
         'editor.lineHighlightBorder': '#00000000'
     };
 
