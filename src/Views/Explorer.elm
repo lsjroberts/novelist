@@ -206,12 +206,18 @@ viewAddFile activity =
 viewSearch files maybeSearch =
     column NoStyle
         [ paddingXY (innerScale 3) (innerScale 1)
-        , spacing <| innerScale 3
+        , spacing <| outerScale 3
         ]
         [ Input.text InputText
             [ padding <| innerScale 2 ]
             { onChange = (Ui << Messages.Search)
-            , value = ""
+            , value =
+                case maybeSearch of
+                    Just search ->
+                        search.term
+
+                    Nothing ->
+                        ""
             , label = Input.hiddenLabel "Scene Name"
             , options = []
             }
@@ -243,7 +249,7 @@ viewSearch files maybeSearch =
                             Nothing ->
                                 [ el NoStyle [] empty ]
                 in
-                    column NoStyle [ spacing <| innerScale 2 ] viewContents
+                    column NoStyle [ spacing <| outerScale 2 ] viewContents
 
             Nothing ->
                 el NoStyle [] empty
@@ -257,7 +263,16 @@ viewSearchResults files contents =
                 Just file ->
                     column NoStyle
                         [ spacing <| innerScale 1 ]
-                        (([ el NoStyle [] <| text file.name ])
+                        (([ row NoStyle
+                                [ spacing <| innerScale 1 ]
+                                [ smallIcon
+                                    |> fileIcon file.fileType
+                                    |> html
+                                    |> el NoStyle []
+                                , el NoStyle [] <| text file.name
+                                ]
+                          ]
+                         )
                             ++ (List.map item matches)
                         )
 

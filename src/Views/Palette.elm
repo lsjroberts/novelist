@@ -9,7 +9,6 @@ import Element.Events exposing (..)
 import Element.Input as Input
 import Styles exposing (..)
 import Messages exposing (..)
-import Octicons as Icon
 import Views.Icons exposing (..)
 
 
@@ -53,16 +52,7 @@ viewFiles files search =
                                     , onClick (Ui <| OpenFile fileId)
                                     ]
                                     [ smallIcon
-                                        |> (case file.fileType of
-                                                SceneFile _ ->
-                                                    Icon.file
-
-                                                CharacterFile _ ->
-                                                    Icon.gistSecret
-
-                                                _ ->
-                                                    Icon.file
-                                           )
+                                        |> fileIcon file.fileType
                                         |> html
                                         |> el NoStyle []
                                     , text file.name

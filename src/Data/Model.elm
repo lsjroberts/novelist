@@ -127,3 +127,27 @@ testScenes newUuid newSeed =
         )
         [ "0" ]
         (Just "0")
+
+
+testSearch newUuid newSeed =
+    let
+        model =
+            testScenes newUuid newSeed
+    in
+        { model
+            | activity = Just Data.Activity.Search
+            , search =
+                Just
+                    (FileSearch
+                        "Bennet"
+                        { contents =
+                            Just
+                                (Dict.fromList
+                                    [ ( "0", [ "Hello Mr. Bennet blah", "Lorem ipsum Bennet" ] )
+                                    , ( "1", [ "Bennet said some stuff", "Lorem ipsum Bennet" ] )
+                                    , ( "2", [ "Hello Mr. Bennet blah", "Lorem ipsum Bennet" ] )
+                                    ]
+                                )
+                        }
+                    )
+        }
