@@ -112,13 +112,22 @@ viewExplorer activity files maybeActive search =
             viewSearch files search
 
         _ ->
-            viewFolder activity files maybeActive
+            viewFolder activity files maybeActive Nothing
 
 
-viewFolder activity files maybeActive =
+viewFolder activity files maybeActive maybeParent =
     let
         filterByActivity fileId file =
             case file.fileType of
+                FolderFile SceneFolder ->
+                    activity == Activity.Manuscript
+
+                FolderFile CharacterFolder ->
+                    activity == Activity.Characters
+
+                FolderFile LocationFolder ->
+                    activity == Activity.Locations
+
                 SceneFile _ ->
                     activity == Activity.Manuscript
 
@@ -128,21 +137,40 @@ viewFolder activity files maybeActive =
                 LocationFile ->
                     activity == Activity.Locations
 
-        viewFileInner fileId file =
-            viewFile
-                (case maybeActive of
-                    Just active ->
-                        active == fileId
+        filterByParent fileId file =
+            file.parentId == maybeParent
 
-                    Nothing ->
-                        False
-                )
-                fileId
-                file.fileType
-                file.name
+        viewFileInner fileId file =
+            case file.fileType of
+                FolderFile _ ->
+                    column NoStyle
+                        []
+                        [ viewFile False fileId file.fileType file.name
+                        , el NoStyle [ paddingLeft <| innerScale 2 ] <| viewFolder activity files maybeActive (Just fileId)
+                        ]
+
+                _ ->
+                    viewFile
+                        (case maybeActive of
+                            Just active ->
+                                active == fileId
+
+                            Nothing ->
+                                False
+                        )
+                        fileId
+                        file.fileType
+                        file.name
+
+        showFiles =
+            files
+                |> Dict.filter filterByActivity
+                |> Dict.filter filterByParent
+                |> Dict.map viewFileInner
+                |> Dict.values
     in
         column (Explorer ExplorerFolder) [] <|
-            (Dict.values (Dict.map viewFileInner (Dict.filter filterByActivity files)))
+            showFiles
                 ++ [ viewAddFile activity ]
 
 
@@ -162,7 +190,7 @@ viewFile isActive fileId fileType name =
                 []
                 { onChange = Data << RenameFile fileId
                 , value = name
-                , label = Input.hiddenLabel "Scene Name"
+                , label = Input.hiddenLabel "File Name"
                 , options = []
                 }
           else

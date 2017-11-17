@@ -15,6 +15,7 @@ import Octicons as Icon
 import Views.Icons exposing (smallIcon)
 import Views.Welcome
 import Views.Workspace.Character
+import Views.Workspace.Folder
 
 
 view files openFiles activeFile fileContents wordTarget =
@@ -34,16 +35,18 @@ view files openFiles activeFile fileContents wordTarget =
 viewTabBar files openFiles activeFile =
     let
         tab fileId =
-            viewTab Icon.file
-                fileId
-                (Maybe.Extra.unwrap "" (\f -> f.name) (Dict.get fileId files))
-                (Maybe.Extra.unwrap False (\a -> fileId == a) activeFile)
+            case Dict.get fileId files of
+                Just file ->
+                    viewTab fileId file (Maybe.Extra.unwrap False (\a -> fileId == a) activeFile)
+
+                Nothing ->
+                    el NoStyle [] empty
     in
         row (Workspace TabBar) [ id "workspace-tab-bar" ] <|
             (openFiles |> List.map tab)
 
 
-viewTab icon fileId name isActive =
+viewTab fileId file isActive =
     row
         (Workspace Tab)
         [ paddingTop <| innerScale 2
@@ -54,10 +57,10 @@ viewTab icon fileId name isActive =
         , vary Active isActive
         ]
         [ smallIcon
-            |> icon
+            |> fileIcon file.fileType
             |> html
             |> el NoStyle []
-        , el NoStyle [ onClick (Ui <| OpenFile fileId) ] <| text name
+        , el NoStyle [ onClick (Ui <| OpenFile fileId) ] <| text file.name
         , smallIcon
             |> Icon.color "grey"
             |> Icon.x
@@ -84,6 +87,9 @@ viewEditor files activeFile fileContents =
 
                         CharacterFile character ->
                             Views.Workspace.Character.view (characters files) fileId file character
+
+                        FolderFile _ ->
+                            Views.Workspace.Folder.view files fileId file
 
                         _ ->
                             el Placeholder [ width fill, height fill ] empty

@@ -78,18 +78,18 @@ updateData msg model =
     case msg of
         AddCharacter ->
             addFile model Activity.Characters <|
-                File "New Character" <|
+                File "New Character" Nothing <|
                     CharacterFile <|
                         Character []
 
         AddLocation ->
             addFile model Activity.Locations <|
-                File "New Location" <|
+                File "New Location" Nothing <|
                     LocationFile
 
         AddScene ->
             addFile model Activity.Manuscript <|
-                File "New Scene" <|
+                File "New Scene" Nothing <|
                     SceneFile <|
                         Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
 

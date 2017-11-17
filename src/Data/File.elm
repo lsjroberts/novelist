@@ -10,14 +10,22 @@ type alias FileId =
 
 type alias File =
     { name : String
+    , parentId : Maybe FileId
     , fileType : FileType
     }
 
 
 type FileType
-    = SceneFile Scene
+    = FolderFile FolderType
+    | SceneFile Scene
     | CharacterFile Character
     | LocationFile
+
+
+type FolderType
+    = SceneFolder
+    | CharacterFolder
+    | LocationFolder
 
 
 type alias Scene =
@@ -45,6 +53,9 @@ type alias Character =
 
 fileIcon fileType =
     case fileType of
+        FolderFile _ ->
+            Icon.fileDirectory
+
         CharacterFile _ ->
             Icon.gistSecret
 

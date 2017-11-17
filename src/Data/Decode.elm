@@ -27,8 +27,9 @@ decoder createModel =
 
 fileDecoder : Decoder File
 fileDecoder =
-    map2 File
+    map3 File
         (field "name" string)
+        (field "parentId" (maybe string))
         (field "meta"
             (oneOf
                 [ sceneDecoder |> andThen (\s -> succeed (SceneFile s))

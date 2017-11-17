@@ -54,7 +54,7 @@ init seed =
         ( newUuid, newSeed ) =
             Random.Pcg.step Uuid.uuidGenerator (Random.Pcg.initialSeed seed)
     in
-        ( blankModel newUuid newSeed
+        ( testScenes newUuid newSeed
         , Cmd.none
         )
 
@@ -73,9 +73,9 @@ testCharacters newUuid newSeed =
         newSeed
         newUuid
         (Dict.fromList
-            [ ( "0", File "Bob" <| CharacterFile { aliases = [ "Robert" ] } )
-            , ( "1", File "Alice" <| CharacterFile { aliases = [] } )
-            , ( "2", File "Sam" <| CharacterFile { aliases = [] } )
+            [ ( "0", File "Bob" Nothing <| CharacterFile { aliases = [ "Robert" ] } )
+            , ( "1", File "Alice" Nothing <| CharacterFile { aliases = [] } )
+            , ( "2", File "Sam" Nothing <| CharacterFile { aliases = [] } )
             ]
         )
         [ "0" ]
@@ -83,50 +83,68 @@ testCharacters newUuid newSeed =
 
 
 testScenes newUuid newSeed =
-    createModel
-        newSeed
-        newUuid
-        (Dict.fromList
-            [ ( "0"
-              , File "One" <|
-                    SceneFile
-                        { synopsis = ""
-                        , status = Draft
-                        , tags = []
-                        , position = 0
-                        , characters = Dict.fromList []
-                        , locations = []
-                        , wordTarget = Nothing
-                        }
-              )
-            , ( "1"
-              , File "Two" <|
-                    SceneFile
-                        { synopsis = ""
-                        , status = Draft
-                        , tags = []
-                        , position = 0
-                        , characters = Dict.fromList []
-                        , locations = []
-                        , wordTarget = Nothing
-                        }
-              )
-            , ( "2"
-              , File "Three" <|
-                    SceneFile
-                        { synopsis = ""
-                        , status = Draft
-                        , tags = []
-                        , position = 0
-                        , characters = Dict.fromList []
-                        , locations = []
-                        , wordTarget = Nothing
-                        }
-              )
-            ]
-        )
-        [ "0" ]
-        (Just "0")
+    let
+        model =
+            createModel
+                newSeed
+                newUuid
+                (Dict.fromList
+                    [ ( "0"
+                      , File "Prologue" Nothing <|
+                            SceneFile
+                                { synopsis = ""
+                                , status = Draft
+                                , tags = []
+                                , position = 0
+                                , characters = Dict.fromList []
+                                , locations = []
+                                , wordTarget = Nothing
+                                }
+                      )
+                    , ( "1"
+                      , File "One" (Just "3") <|
+                            SceneFile
+                                { synopsis = ""
+                                , status = Draft
+                                , tags = []
+                                , position = 0
+                                , characters = Dict.fromList []
+                                , locations = []
+                                , wordTarget = Nothing
+                                }
+                      )
+                    , ( "2"
+                      , File "Two" (Just "3") <|
+                            SceneFile
+                                { synopsis = ""
+                                , status = Draft
+                                , tags = []
+                                , position = 0
+                                , characters = Dict.fromList []
+                                , locations = []
+                                , wordTarget = Nothing
+                                }
+                      )
+                    , ( "3", File "Part One" Nothing (FolderFile SceneFolder) )
+                    , ( "4"
+                      , File "Three" (Just "5") <|
+                            SceneFile
+                                { synopsis = ""
+                                , status = Draft
+                                , tags = []
+                                , position = 0
+                                , characters = Dict.fromList []
+                                , locations = []
+                                , wordTarget = Nothing
+                                }
+                      )
+                    , ( "5", File "Part Two" Nothing (FolderFile SceneFolder) )
+                    ]
+                )
+                [ "0" ]
+                (Just "0")
+    in
+        { model | activity = Just Data.Activity.Manuscript }
 
 
 testSearch newUuid newSeed =

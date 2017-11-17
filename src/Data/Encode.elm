@@ -26,6 +26,19 @@ fileEncoder file =
     let
         ( type_, meta ) =
             case file.fileType of
+                FolderFile folderType ->
+                    ( "folder"
+                    , case folderType of
+                        SceneFolder ->
+                            string "scene"
+
+                        CharacterFolder ->
+                            string "character"
+
+                        LocationFolder ->
+                            string "location"
+                    )
+
                 SceneFile scene ->
                     ( "scene", sceneEncoder scene )
 
@@ -37,6 +50,7 @@ fileEncoder file =
     in
         object
             [ ( "name", string file.name )
+            , ( "parent", maybeStringEncoder file.parentId )
             , ( "type", string type_ )
             , ( "meta", meta )
             ]
