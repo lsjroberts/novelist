@@ -8,6 +8,7 @@ import Data.Model exposing (..)
 import Data.Palette exposing (..)
 import Data.Search exposing (..)
 import Dict exposing (Dict)
+import Html5.DragDrop as DragDrop
 import Dom
 import Json.Encode
 import Keyboard.Combo
@@ -62,6 +63,26 @@ update msg model =
                         { model
                             | currentUuid = newUuid
                             , currentSeed = newSeed
+                        }
+                            ! []
+
+                DragDropFiles dragDropMsg ->
+                    let
+                        ( dragDropModel, dragDropResult ) =
+                            DragDrop.update dragDropMsg model.dragDropFiles
+                    in
+                        { model
+                            | dragDropFiles = dragDropModel
+                            , files =
+                                case dragDropResult of
+                                    Nothing ->
+                                        model.files
+
+                                    Just ( dragFileId, dropFileId ) ->
+                                        if isFolder dropFileId model.files then
+                                            setParent dropFileId dragFileId model.files
+                                        else
+                                            placeAfter dropFileId dragFileId model.files
                         }
                             ! []
     in

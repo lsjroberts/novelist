@@ -3,6 +3,7 @@ module Views.Main exposing (view)
 import Data.File exposing (..)
 import Data.Model exposing (..)
 import Dict exposing (Dict)
+import Html5.DragDrop as DragDrop
 import Html exposing (Html)
 import Element exposing (..)
 import Element.Attributes exposing (..)
@@ -44,7 +45,7 @@ view model =
             row Body
                 [ height (percent 100) ]
                 [ Views.ActivityBar.view model.activity
-                , Views.Explorer.view model.activity model.files model.activeFile model.search
+                , Views.Explorer.view model.activity model.files model.activeFile (DragDrop.getDropId model.dragDropFiles) model.search
                 , Views.Workspace.view model.files model.openFiles model.activeFile model.fileContents wordTarget
                 , Views.MetaPanel.view model.files activeFile
                 , Views.Palette.view model.files model.palette

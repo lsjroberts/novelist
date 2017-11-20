@@ -1,6 +1,7 @@
 module Data.File exposing (..)
 
 import Dict exposing (Dict)
+import Maybe.Extra
 import Octicons as Icon
 
 
@@ -119,6 +120,21 @@ filterByType fn =
     Dict.filter (\fileId file -> fn file.fileType)
 
 
+isFolder : FileId -> Dict FileId File -> Bool
+isFolder fileId files =
+    files
+        |> Dict.get fileId
+        |> Maybe.Extra.unwrap False
+            (\file ->
+                case file.fileType of
+                    FolderFile _ ->
+                        True
+
+                    _ ->
+                        False
+            )
+
+
 except : Dict FileId File -> FileId -> Dict FileId File
 except files fileId =
     Dict.filter (\id f -> not (id == fileId)) files
@@ -127,6 +143,57 @@ except files fileId =
 children : Maybe FileId -> Dict FileId File -> Dict FileId File
 children maybeParent =
     Dict.filter (\fileId file -> file.parentId == maybeParent)
+
+
+setParent : FileId -> FileId -> Dict FileId File -> Dict FileId File
+setParent parentId fileId =
+    Dict.update fileId
+        (\maybeFile ->
+            case maybeFile of
+                Just file ->
+                    Just { file | parentId = Just parentId }
+
+                Nothing ->
+                    Nothing
+        )
+
+
+placeAfter : FileId -> FileId -> Dict FileId File -> Dict FileId File
+placeAfter afterId fileId files =
+    let
+        afterFile =
+            Dict.get afterId files
+
+        position =
+            afterFile |> Maybe.Extra.unwrap 0 (\file -> file.position + 1)
+
+        maybeFileAtPosition =
+            files
+                |> Dict.filter (\fileId file -> file.position == position)
+                |> Dict.keys
+                |> List.head
+
+        parentId =
+            afterFile |> Maybe.Extra.unwrap Nothing (\file -> file.parentId)
+
+        filesWithUpdatedPosition =
+            files
+                |> Dict.update fileId
+                    (Maybe.Extra.unwrap Nothing
+                        (\file ->
+                            Just { file | position = position, parentId = parentId }
+                        )
+                    )
+    in
+        case maybeFileAtPosition of
+            Nothing ->
+                filesWithUpdatedPosition
+
+            Just fileAtPosition ->
+                if fileId == fileAtPosition then
+                    filesWithUpdatedPosition
+                else
+                    filesWithUpdatedPosition |> placeAfter fileId fileAtPosition
 
 
 nextPosition : Dict FileId File -> Int

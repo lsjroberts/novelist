@@ -70,6 +70,7 @@ type WorkspaceStyle
 type Variations
     = Active
     | Light
+    | DropTarget
 
 
 styleSheet theme =
@@ -95,12 +96,21 @@ styleSheet theme =
         , style (Explorer Group)
             [ Font.size <| fontScale 2 ]
         , style (Explorer ExplorerFolder)
-            [ Font.size <| fontScale 1 ]
+            [ Font.size <| fontScale 1
+            , variation DropTarget
+                [ Color.background (.active theme)
+                , Border.bottom 2
+                ]
+            ]
         , style (Explorer ExplorerFile)
             [ cursor "pointer"
             , hover [ Color.background (.active theme) ]
             , variation Active
                 [ Color.background (.active theme) ]
+            , variation DropTarget
+                [ Color.background (.active theme)
+                , Border.bottom 1
+                ]
             ]
         , style (Explorer ExplorerHeaderAction)
             [ cursor "pointer"

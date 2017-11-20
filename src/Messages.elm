@@ -3,6 +3,7 @@ module Messages exposing (..)
 import Data.Activity exposing (Activity)
 import Data.File exposing (FileId)
 import Data.Palette exposing (PaletteStatus)
+import Html5.DragDrop as DragDrop
 import Dom
 import Keyboard.Combo
 
@@ -15,6 +16,7 @@ type Msg
     | UpdateFileSubscription String
     | SearchSubscription String
     | NewUuid
+    | DragDropFiles (DragDrop.Msg FileId FileId)
 
 
 type DataMsg

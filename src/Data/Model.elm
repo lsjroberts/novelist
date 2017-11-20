@@ -6,6 +6,7 @@ import Data.Palette exposing (..)
 import Data.Search exposing (FileSearch)
 import Data.Theme exposing (..)
 import Dict exposing (Dict)
+import Html5.DragDrop as DragDrop
 import Keyboard.Combo
 import Messages exposing (Msg(..), UiMsg(..))
 import Random.Pcg exposing (Seed)
@@ -24,6 +25,7 @@ type alias Model =
     , keyCombos : Keyboard.Combo.Model Msg
     , theme : Theme
     , search : Maybe FileSearch
+    , dragDropFiles : DragDrop.Model FileId FileId
     }
 
 
@@ -45,6 +47,7 @@ createModel seed uuid files openFiles activeFile =
             (Ui << Combos)
     , theme = novelistLightTheme
     , search = Nothing
+    , dragDropFiles = DragDrop.init
     }
 
 

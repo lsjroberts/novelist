@@ -3,6 +3,7 @@ module Views.Explorer exposing (view)
 import Data.Activity as Activity
 import Data.File exposing (..)
 import Dict exposing (Dict)
+import Html5.DragDrop as DragDrop
 import Element exposing (..)
 import Element.Attributes exposing (..)
 import Element.Events exposing (..)
@@ -13,7 +14,7 @@ import Octicons as Icon
 import Views.Icons exposing (smallIcon)
 
 
-view maybeActivity files activeFile search =
+view maybeActivity files activeFile dropId search =
     case maybeActivity of
         Just activity ->
             column (Explorer ExplorerWrapper)
@@ -21,7 +22,7 @@ view maybeActivity files activeFile search =
                   -- , spacing <| outerScale 3
                 ]
                 [ viewHeader activity
-                , viewExplorer activity files activeFile search
+                , viewExplorer activity files activeFile dropId search
                 ]
 
         Nothing ->
@@ -106,16 +107,16 @@ viewSearchHeader =
     [ el NoStyle [] <| text "Search" ]
 
 
-viewExplorer activity files maybeActive search =
+viewExplorer activity files maybeActive maybeDropId search =
     case activity of
         Activity.Search ->
             viewSearch files search
 
         _ ->
-            viewFolder activity files maybeActive Nothing
+            viewFolder activity files maybeActive Nothing maybeDropId
 
 
-viewFolder activity files maybeActive maybeParent =
+viewFolder activity files maybeActive maybeParent maybeDropId =
     let
         filterByActivity fileId file =
             case file.fileType of
@@ -140,15 +141,18 @@ viewFolder activity files maybeActive maybeParent =
         filterByParent fileId file =
             file.parentId == maybeParent
 
+        isDropTarget fileId =
+            maybeDropId |> Maybe.map ((==) fileId) |> Maybe.withDefault False
+
         viewFileInner fileId file =
             ( file.position
             , case file.fileType of
                 FolderFile _ ->
                     column NoStyle
                         []
-                        [ viewFile False fileId file.fileType file.name
+                        [ viewFile False (isDropTarget fileId) fileId file.fileType file.name
                         , el NoStyle [ paddingLeft <| innerScale 2 ] <|
-                            viewFolder activity files maybeActive (Just fileId)
+                            viewFolder activity files maybeActive (Just fileId) maybeDropId
                         ]
 
                 _ ->
@@ -160,6 +164,7 @@ viewFolder activity files maybeActive maybeParent =
                             Nothing ->
                                 False
                         )
+                        (isDropTarget fileId)
                         fileId
                         file.fileType
                         file.name
@@ -179,13 +184,17 @@ viewFolder activity files maybeActive maybeParent =
                 ++ [ viewAddFile activity maybeParent ]
 
 
-viewFile isActive fileId fileType name =
+viewFile isActive isDropTarget fileId fileType name =
     row (Explorer ExplorerFile)
-        [ paddingXY (innerScale 3) (innerScale 1)
-        , spacing <| innerScale 1
-        , onClick <| Ui <| OpenFile fileId
-        , vary Active isActive
-        ]
+        ([ paddingXY (innerScale 3) (innerScale 1)
+         , spacing <| innerScale 1
+         , onClick <| Ui <| OpenFile fileId
+         , vary Active isActive
+         , vary DropTarget isDropTarget
+         ]
+            ++ (List.map toAttr (DragDrop.draggable DragDropFiles fileId))
+            ++ (List.map toAttr (DragDrop.droppable DragDropFiles fileId))
+        )
         [ smallIcon
             |> fileIcon fileType
             |> html
