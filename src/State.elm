@@ -90,6 +90,9 @@ update msg model =
             Data _ ->
                 newModel ! [ newCmds, writeMetaPort (encode newModel) ]
 
+            DragDropFiles _ ->
+                newModel ! [ newCmds, writeMetaPort (encode newModel) ]
+
             _ ->
                 newModel ! [ newCmds ]
 

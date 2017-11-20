@@ -35,6 +35,7 @@ fileDecoder =
             (oneOf
                 [ sceneDecoder |> andThen (\s -> succeed (SceneFile s))
                 , characterDecoder |> andThen (\c -> succeed (CharacterFile c))
+                , folderDecoder
                 ]
             )
         )
@@ -75,3 +76,23 @@ characterDecoder : Decoder Character
 characterDecoder =
     succeed Character
         |: (field "aliases" (list string))
+
+
+folderDecoder : Decoder FileType
+folderDecoder =
+    let
+        stringToFolderType s =
+            case s of
+                "scene" ->
+                    succeed (FolderFile SceneFolder)
+
+                "character" ->
+                    succeed (FolderFile CharacterFolder)
+
+                "location" ->
+                    succeed (FolderFile LocationFolder)
+
+                _ ->
+                    fail ("Unrecognised scene status: " ++ s)
+    in
+        string |> andThen stringToFolderType

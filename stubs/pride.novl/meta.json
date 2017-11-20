@@ -3,7 +3,7 @@
   "files": {
     "0": {
       "name": "Chapter One",
-      "parentId": null,
+      "parentId": "d74ec73c-69bc-4807-ae1d-0d772f1e905a",
       "position": 0,
       "type": "scene",
       "meta": {
@@ -17,7 +17,7 @@
     },
     "1": {
       "name": "Chapter Two",
-      "parentId": null,
+      "parentId": "d74ec73c-69bc-4807-ae1d-0d772f1e905a",
       "position": 1,
       "type": "scene",
       "meta": {
@@ -31,7 +31,7 @@
     },
     "2": {
       "name": "Chapter Three",
-      "parentId": null,
+      "parentId": "d74ec73c-69bc-4807-ae1d-0d772f1e905a",
       "position": 2,
       "type": "scene",
       "meta": {
@@ -42,10 +42,18 @@
         "locations": [],
         "wordTarget": null
       }
+    },
+    "d74ec73c-69bc-4807-ae1d-0d772f1e905a": {
+      "name": "Part One",
+      "parentId": null,
+      "position": 3,
+      "type": "folder",
+      "meta": "scene"
     }
   },
   "openFiles": [
+    "d74ec73c-69bc-4807-ae1d-0d772f1e905a",
     "0"
   ],
-  "activeFile": "0"
+  "activeFile": "d74ec73c-69bc-4807-ae1d-0d772f1e905a"
 }
