@@ -50,7 +50,7 @@ fileEncoder file =
     in
         object
             [ ( "name", string file.name )
-            , ( "parent", maybeStringEncoder file.parentId )
+            , ( "parentId", maybeStringEncoder file.parentId )
             , ( "position", int file.position )
             , ( "type", string type_ )
             , ( "meta", meta )
