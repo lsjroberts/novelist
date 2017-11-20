@@ -20,7 +20,8 @@ type Msg
 type DataMsg
     = AddCharacter
     | AddLocation
-    | AddScene
+    | AddScene (Maybe FileId)
+    | AddSceneFolder
     | RenameFile FileId String
     | SetWordTarget String
 

@@ -87,11 +87,16 @@ updateData msg model =
                 File "New Location" Nothing <|
                     LocationFile
 
-        AddScene ->
+        AddScene parent ->
             addFile model Activity.Manuscript <|
-                File "New Scene" Nothing <|
+                File "New Scene" parent <|
                     SceneFile <|
                         Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
+
+        AddSceneFolder ->
+            addFile model Activity.Manuscript <|
+                File "New Part" Nothing <|
+                    FolderFile SceneFolder
 
         RenameFile fileId newName ->
             { model

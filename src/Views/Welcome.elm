@@ -26,7 +26,7 @@ view =
                     , row Link
                         [ spacing <| innerScale 2
                         , verticalCenter
-                        , onClick (Data AddScene)
+                        , onClick (Data <| AddScene Nothing)
                         ]
                         [ largeIcon
                             |> Icon.file
@@ -43,7 +43,7 @@ view =
                         [ row Link
                             [ spacing <| innerScale 2
                             , verticalCenter
-                            , onClick (Data AddScene)
+                            , onClick (Data <| AddScene Nothing)
                             ]
                             [ largeIcon
                                 |> Icon.book
@@ -59,7 +59,7 @@ view =
                     , row Link
                         [ spacing <| innerScale 2
                         , verticalCenter
-                        , onClick (Data AddScene)
+                        , onClick (Data <| AddScene Nothing)
                         ]
                         [ text "novelist.io/help"
                         ]
@@ -73,7 +73,7 @@ view =
                     , row Link
                         [ spacing <| innerScale 2
                         , verticalCenter
-                        , onClick (Data AddScene)
+                        , onClick (Data <| AddScene Nothing)
                         ]
                         [ largeIcon
                             |> Icon.rocket

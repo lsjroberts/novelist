@@ -61,11 +61,11 @@ viewManuscriptHeader =
         [ smallIcon
             |> Icon.file
             |> html
-            |> el (Explorer ExplorerHeaderAction) [ onClick (Data AddScene) ]
+            |> el (Explorer ExplorerHeaderAction) [ onClick (Data <| AddScene Nothing) ]
         , smallIcon
             |> Icon.fileDirectory
             |> html
-            |> el (Explorer ExplorerHeaderAction) []
+            |> el (Explorer ExplorerHeaderAction) [ onClick (Data AddSceneFolder) ]
         ]
     ]
 
@@ -171,7 +171,7 @@ viewFolder activity files maybeActive maybeParent =
     in
         column (Explorer ExplorerFolder) [] <|
             showFiles
-                ++ [ viewAddFile activity ]
+                ++ [ viewAddFile activity maybeParent ]
 
 
 viewFile isActive fileId fileType name =
@@ -198,7 +198,7 @@ viewFile isActive fileId fileType name =
         ]
 
 
-viewAddFile activity =
+viewAddFile activity maybeParent =
     let
         ( msg, icon ) =
             case activity of
@@ -206,7 +206,7 @@ viewAddFile activity =
                     ( Data AddCharacter, Icon.gistSecret )
 
                 Activity.Manuscript ->
-                    ( Data AddScene, Icon.file )
+                    ( Data <| AddScene maybeParent, Icon.file )
 
                 Activity.Locations ->
                     ( Data AddLocation, Icon.globe )

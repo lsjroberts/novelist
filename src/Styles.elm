@@ -109,12 +109,19 @@ styleSheet theme =
         , style InputText
             [ Color.background (.active theme)
             , Color.text (.text theme)
+            , focus
+                [ Shadow.box { offset = ( 0, 0 ), size = 0, blur = 0, color = Color.black }
+                ]
             , variation Light
                 [ Color.background (.background theme)
                 , Color.border (.active theme)
                 , Border.bottom 1
                 , hover [ Color.background (.background theme) ]
-                , focus [ Color.background (.background theme) ]
+                , focus
+                    [ Color.background (.background theme)
+                    , Color.border (.text theme)
+                    , Shadow.box { offset = ( 0, 0 ), size = 0, blur = 0, color = Color.black }
+                    ]
                 ]
             ]
         , style Link
