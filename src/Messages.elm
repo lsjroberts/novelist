@@ -18,8 +18,10 @@ type Msg
 
 
 type DataMsg
-    = AddCharacter
-    | AddLocation
+    = AddCharacter (Maybe FileId)
+    | AddCharacterFolder
+    | AddLocation (Maybe FileId)
+    | AddLocationFolder
     | AddScene (Maybe FileId)
     | AddSceneFolder
     | RenameFile FileId String

@@ -73,9 +73,9 @@ testCharacters newUuid newSeed =
         newSeed
         newUuid
         (Dict.fromList
-            [ ( "0", File "Bob" Nothing <| CharacterFile { aliases = [ "Robert" ] } )
-            , ( "1", File "Alice" Nothing <| CharacterFile { aliases = [] } )
-            , ( "2", File "Sam" Nothing <| CharacterFile { aliases = [] } )
+            [ ( "0", File "Bob" Nothing 0 <| CharacterFile { aliases = [ "Robert" ] } )
+            , ( "1", File "Alice" Nothing 1 <| CharacterFile { aliases = [] } )
+            , ( "2", File "Sam" Nothing 2 <| CharacterFile { aliases = [] } )
             ]
         )
         [ "0" ]
@@ -90,55 +90,51 @@ testScenes newUuid newSeed =
                 newUuid
                 (Dict.fromList
                     [ ( "0"
-                      , File "Prologue" Nothing <|
+                      , File "Prologue" Nothing 0 <|
                             SceneFile
                                 { synopsis = ""
                                 , status = Draft
                                 , tags = []
-                                , position = 0
                                 , characters = Dict.fromList []
                                 , locations = []
                                 , wordTarget = Nothing
                                 }
                       )
                     , ( "1"
-                      , File "One" (Just "3") <|
+                      , File "One" (Just "3") 0 <|
                             SceneFile
                                 { synopsis = ""
                                 , status = Draft
                                 , tags = []
-                                , position = 0
                                 , characters = Dict.fromList []
                                 , locations = []
                                 , wordTarget = Nothing
                                 }
                       )
                     , ( "2"
-                      , File "Two" (Just "3") <|
+                      , File "Two" (Just "3") 1 <|
                             SceneFile
                                 { synopsis = ""
                                 , status = Draft
                                 , tags = []
-                                , position = 0
                                 , characters = Dict.fromList []
                                 , locations = []
                                 , wordTarget = Nothing
                                 }
                       )
-                    , ( "3", File "Part One" Nothing (FolderFile SceneFolder) )
+                    , ( "3", File "Part One" Nothing 1 (FolderFile SceneFolder) )
                     , ( "4"
-                      , File "Three" (Just "5") <|
+                      , File "Three" (Just "5") 0 <|
                             SceneFile
                                 { synopsis = ""
                                 , status = Draft
                                 , tags = []
-                                , position = 0
                                 , characters = Dict.fromList []
                                 , locations = []
                                 , wordTarget = Nothing
                                 }
                       )
-                    , ( "5", File "Part Two" Nothing (FolderFile SceneFolder) )
+                    , ( "5", File "Part Two" Nothing 2 (FolderFile SceneFolder) )
                     ]
                 )
                 [ "0" ]

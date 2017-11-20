@@ -51,6 +51,7 @@ fileEncoder file =
         object
             [ ( "name", string file.name )
             , ( "parent", maybeStringEncoder file.parentId )
+            , ( "position", int file.position )
             , ( "type", string type_ )
             , ( "meta", meta )
             ]
@@ -62,7 +63,6 @@ sceneEncoder scene =
         [ ( "synopsis", string scene.synopsis )
         , ( "status", string (toString scene.status) )
         , ( "tags", list [] )
-        , ( "position", int scene.position )
         , ( "characters", object [] )
         , ( "locations", list [] )
         , ( "wordTarget", maybeIntEncoder scene.wordTarget )

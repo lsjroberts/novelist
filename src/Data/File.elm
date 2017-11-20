@@ -11,6 +11,7 @@ type alias FileId =
 type alias File =
     { name : String
     , parentId : Maybe FileId
+    , position : Int
     , fileType : FileType
     }
 
@@ -32,7 +33,6 @@ type alias Scene =
     { synopsis : String
     , status : SceneStatus
     , tags : List String
-    , position : Int
     , characters : Dict FileId SceneCharacter
     , locations : List FileId
     , wordTarget : Maybe Int
@@ -66,20 +66,74 @@ fileIcon fileType =
             Icon.globe
 
 
-characters : Dict FileId File -> Dict FileId File
-characters files =
-    Dict.filter
-        (\fileId file ->
-            case file.fileType of
-                CharacterFile a ->
+scenes : Dict FileId File -> Dict FileId File
+scenes =
+    filterByType
+        (\fileType ->
+            case fileType of
+                SceneFile a ->
+                    True
+
+                FolderFile SceneFolder ->
                     True
 
                 _ ->
                     False
         )
-        files
+
+
+characters : Dict FileId File -> Dict FileId File
+characters =
+    filterByType
+        (\fileType ->
+            case fileType of
+                CharacterFile a ->
+                    True
+
+                FolderFile CharacterFolder ->
+                    True
+
+                _ ->
+                    False
+        )
+
+
+locations : Dict FileId File -> Dict FileId File
+locations =
+    filterByType
+        (\fileType ->
+            case fileType of
+                LocationFile ->
+                    True
+
+                FolderFile LocationFolder ->
+                    True
+
+                _ ->
+                    False
+        )
+
+
+filterByType : (FileType -> Bool) -> Dict FileId File -> Dict FileId File
+filterByType fn =
+    Dict.filter (\fileId file -> fn file.fileType)
 
 
 except : Dict FileId File -> FileId -> Dict FileId File
 except files fileId =
     Dict.filter (\id f -> not (id == fileId)) files
+
+
+children : Maybe FileId -> Dict FileId File -> Dict FileId File
+children maybeParent =
+    Dict.filter (\fileId file -> file.parentId == maybeParent)
+
+
+nextPosition : Dict FileId File -> Int
+nextPosition files =
+    files
+        |> Dict.values
+        |> List.map .position
+        |> List.maximum
+        |> Maybe.withDefault 0
+        |> (+) 1

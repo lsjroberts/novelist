@@ -77,11 +77,11 @@ viewCharactersHeader =
         [ smallIcon
             |> Icon.gistSecret
             |> html
-            |> el (Explorer ExplorerHeaderAction) []
+            |> el (Explorer ExplorerHeaderAction) [ onClick (Data <| AddCharacter Nothing) ]
         , smallIcon
             |> Icon.fileDirectory
             |> html
-            |> el (Explorer ExplorerHeaderAction) []
+            |> el (Explorer ExplorerHeaderAction) [ onClick (Data AddCharacterFolder) ]
         ]
     ]
 
@@ -93,11 +93,11 @@ viewLocationsHeader =
         [ smallIcon
             |> Icon.globe
             |> html
-            |> el (Explorer ExplorerHeaderAction) []
+            |> el (Explorer ExplorerHeaderAction) [ onClick (Data <| AddLocation Nothing) ]
         , smallIcon
             |> Icon.fileDirectory
             |> html
-            |> el (Explorer ExplorerHeaderAction) []
+            |> el (Explorer ExplorerHeaderAction) [ onClick (Data AddLocationFolder) ]
         ]
     ]
 
@@ -141,12 +141,14 @@ viewFolder activity files maybeActive maybeParent =
             file.parentId == maybeParent
 
         viewFileInner fileId file =
-            case file.fileType of
+            ( file.position
+            , case file.fileType of
                 FolderFile _ ->
                     column NoStyle
                         []
                         [ viewFile False fileId file.fileType file.name
-                        , el NoStyle [ paddingLeft <| innerScale 2 ] <| viewFolder activity files maybeActive (Just fileId)
+                        , el NoStyle [ paddingLeft <| innerScale 2 ] <|
+                            viewFolder activity files maybeActive (Just fileId)
                         ]
 
                 _ ->
@@ -161,6 +163,7 @@ viewFolder activity files maybeActive maybeParent =
                         fileId
                         file.fileType
                         file.name
+            )
 
         showFiles =
             files
@@ -168,6 +171,8 @@ viewFolder activity files maybeActive maybeParent =
                 |> Dict.filter filterByParent
                 |> Dict.map viewFileInner
                 |> Dict.values
+                |> List.sortBy Tuple.first
+                |> List.map Tuple.second
     in
         column (Explorer ExplorerFolder) [] <|
             showFiles
@@ -203,13 +208,13 @@ viewAddFile activity maybeParent =
         ( msg, icon ) =
             case activity of
                 Activity.Characters ->
-                    ( Data AddCharacter, Icon.gistSecret )
+                    ( Data <| AddCharacter maybeParent, Icon.gistSecret )
 
                 Activity.Manuscript ->
                     ( Data <| AddScene maybeParent, Icon.file )
 
                 Activity.Locations ->
-                    ( Data AddLocation, Icon.globe )
+                    ( Data <| AddLocation maybeParent, Icon.globe )
 
                 _ ->
                     ( NoOp, Icon.file )

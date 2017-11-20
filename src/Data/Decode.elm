@@ -27,9 +27,10 @@ decoder createModel =
 
 fileDecoder : Decoder File
 fileDecoder =
-    map3 File
+    map4 File
         (field "name" string)
         (field "parentId" (maybe string))
+        (field "position" int)
         (field "meta"
             (oneOf
                 [ sceneDecoder |> andThen (\s -> succeed (SceneFile s))
@@ -45,7 +46,6 @@ sceneDecoder =
         |: (field "synopsis" string)
         |: (field "status" sceneStatusDecoder)
         |: (field "tags" (list string))
-        |: (field "position" int)
         |: (field "characters" (dict sceneCharacterDecoder))
         |: (field "locations" (list string))
         |: (field "wordTarget" (maybe int))

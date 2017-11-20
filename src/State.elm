@@ -76,26 +76,36 @@ update msg model =
 updateData : DataMsg -> Model -> ( Model, Cmd Msg )
 updateData msg model =
     case msg of
-        AddCharacter ->
+        AddCharacter parent ->
             addFile model Activity.Characters <|
-                File "New Character" Nothing <|
+                File "New Character" parent (nextPosition (children parent (characters model.files))) <|
                     CharacterFile <|
                         Character []
 
-        AddLocation ->
+        AddCharacterFolder ->
+            addFile model Activity.Characters <|
+                File "New Group" Nothing (nextPosition (children Nothing (scenes model.files))) <|
+                    FolderFile CharacterFolder
+
+        AddLocation parent ->
             addFile model Activity.Locations <|
-                File "New Location" Nothing <|
+                File "New Location" parent (nextPosition (children parent (locations model.files))) <|
                     LocationFile
+
+        AddLocationFolder ->
+            addFile model Activity.Locations <|
+                File "New Group" Nothing (nextPosition (children Nothing (locations model.files))) <|
+                    FolderFile LocationFolder
 
         AddScene parent ->
             addFile model Activity.Manuscript <|
-                File "New Scene" parent <|
+                File "New Scene" parent (nextPosition (children parent (scenes model.files))) <|
                     SceneFile <|
-                        Scene "" Draft [] 999 (Dict.fromList []) [] Nothing
+                        Scene "" Draft [] (Dict.fromList []) [] Nothing
 
         AddSceneFolder ->
             addFile model Activity.Manuscript <|
-                File "New Part" Nothing <|
+                File "New Part" Nothing (nextPosition (children Nothing (scenes model.files))) <|
                     FolderFile SceneFolder
 
         RenameFile fileId newName ->
