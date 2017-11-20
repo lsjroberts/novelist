@@ -3,12 +3,13 @@
   "files": {
     "0": {
       "name": "Chapter One",
+      "parentId": null,
+      "position": 0,
       "type": "scene",
       "meta": {
         "synopsis": "Mr and Mrs Bennet have a conversation. Maecenas sed diam eget risus varius blandit sit amet non magna. Sed posuere consectetur est at lobortis.",
         "status": "Draft",
         "tags": [],
-        "position": 0,
         "characters": {},
         "locations": [],
         "wordTarget": null
@@ -16,12 +17,13 @@
     },
     "1": {
       "name": "Chapter Two",
+      "parentId": null,
+      "position": 1,
       "type": "scene",
       "meta": {
         "synopsis": "",
         "status": "Draft",
         "tags": [],
-        "position": 1,
         "characters": {},
         "locations": [],
         "wordTarget": null
@@ -29,18 +31,21 @@
     },
     "2": {
       "name": "Chapter Three",
+      "parentId": null,
+      "position": 2,
       "type": "scene",
       "meta": {
         "synopsis": "",
         "status": "Draft",
         "tags": [],
-        "position": 2,
         "characters": {},
         "locations": [],
         "wordTarget": null
       }
     }
   },
-  "openFiles": [],
+  "openFiles": [
+    "0"
+  ],
   "activeFile": "0"
 }
