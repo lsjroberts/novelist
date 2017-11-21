@@ -45,6 +45,9 @@ viewHeader activity =
                 Activity.Search ->
                     viewSearchHeader
 
+                Activity.Editor ->
+                    viewEditorHeader
+
                 _ ->
                     [ el NoStyle [] empty ]
     in
@@ -107,6 +110,10 @@ viewSearchHeader =
     [ el NoStyle [] <| text "Search" ]
 
 
+viewEditorHeader =
+    [ el NoStyle [] <| text "Editor" ]
+
+
 viewExplorer activity files maybeActive maybeDropId search =
     case activity of
         Activity.Search ->
@@ -121,7 +128,7 @@ viewFolder activity files maybeActive maybeParent maybeDropId =
         filterByActivity fileId file =
             case file.fileType of
                 FolderFile SceneFolder ->
-                    activity == Activity.Manuscript
+                    activity == Activity.Manuscript || activity == Activity.Editor
 
                 FolderFile CharacterFolder ->
                     activity == Activity.Characters
@@ -130,7 +137,7 @@ viewFolder activity files maybeActive maybeParent maybeDropId =
                     activity == Activity.Locations
 
                 SceneFile _ ->
-                    activity == Activity.Manuscript
+                    activity == Activity.Manuscript || activity == Activity.Editor
 
                 CharacterFile _ ->
                     activity == Activity.Characters

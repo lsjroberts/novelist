@@ -189,6 +189,7 @@ function createMonacoEditor(contents) {
 
     // -- Attach a listener to automatically save the file
     const model = editor.getModel();
+
     model.onDidChangeContent(() => {
         const value = model.getValue();
         writeFile(activeFileId, value);
@@ -204,7 +205,59 @@ function createMonacoEditor(contents) {
 
     var viewZoneId = null;
 
-    editor.onMouseDown(e => {
+    editor.onMouseDown(event => {
+        const model = editor.getModel();
+        const lineNumber = event.target.position.lineNumber;
+        const text = model.getValueInRange({
+            startLineNumber: lineNumber,
+            endLineNumber: lineNumber + 1
+        });
+        const tokens = monaco.editor.tokenize(text, 'novel').shift();
+        for (let i = 0; i < tokens.length - 1; i++) {
+            tokens[i].length = tokens[i + 1].offset - tokens[i].offset;
+        }
+        tokens[tokens.length - 1].length =
+            text.length - tokens[tokens.length - 1].offset;
+        const tokenTexts = tokens.map(token =>
+            text.slice(token.offset, token.offset + token.length)
+        );
+
+        let tokenAtPositionIndex = -1;
+        let offset = 0;
+        for (let i = 0; i < tokens.length; i++) {
+            offset += tokens[i].offset + tokens[i].length;
+            if (event.target.position.column <= offset) {
+                tokenAtPositionIndex = i;
+                break;
+            }
+        }
+
+        console.log(
+            tokenAtPositionIndex,
+            tokens[tokenAtPositionIndex],
+            tokenTexts[tokenAtPositionIndex]
+        );
+
+        editor.changeViewZones(function(changeAccessor) {
+            if (viewZoneId) changeAccessor.removeZone(viewZoneId);
+
+            if (tokenAtPositionIndex === -1) return;
+
+            if (tokens[tokenAtPositionIndex].type !== 'character.novel') return;
+
+            var domNode = document.createElement('div');
+            domNode.style.background = '#F1F1F1';
+            domNode.textContent = `Character: ${tokenTexts[
+                tokenAtPositionIndex
+            ]}`;
+
+            viewZoneId = changeAccessor.addZone({
+                afterLineNumber: lineNumber,
+                heightInLines: 6,
+                domNode: domNode
+            });
+        });
+
         return;
 
         editor.changeViewZones(function(changeAccessor) {

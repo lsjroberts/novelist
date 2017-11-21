@@ -68,7 +68,8 @@ view model =
             case model.activity of
                 Just (Data.Activity.Editor) ->
                     [ viewActivity
-                    , viewEditorMode
+                    , viewExplorer
+                    , viewWorkspace
                     , viewPalette
                     ]
 

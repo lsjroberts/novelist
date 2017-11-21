@@ -28,17 +28,10 @@ amdRequire(['vs/editor/editor.main'], function() {
         tokenizer: {
             root: [
                 ['["“][^"”]+["”]?', 'speech'],
-                [
-                    /[A-Z]\w*('s)?/,
-                    {
-                        cases: {
-                            '@keywords': { token: 'character' }
-                        }
-                    }
-                ]
+                ['Mr. Bennet', 'character'],
+                ['Mrs. Bennet', 'character']
             ]
-        },
-        keywords: ['Gared', 'Ser Waymar Royce', 'Royce', 'Will']
+        }
     });
 
     monaco.languages.setLanguageConfiguration('novel', {
@@ -74,7 +67,7 @@ amdRequire(['vs/editor/editor.main'], function() {
     const speechThemeRules = defaultThemeRules.concat([
         // { token: "character", foreground: "B58900" },
         // { token: "speech", foreground: "2AA198" }
-        // { token: "character", foreground: "3377B9" },
+        { token: 'character', foreground: '3377B9' },
         // { token: "character", foreground: "B14FA2" },
         // { token: "speech", foreground: "40831E" }
         { token: 'speech', foreground: 'B14FA2' }
