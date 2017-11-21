@@ -1,5 +1,6 @@
 module Views.Main exposing (view)
 
+import Data.Activity
 import Data.File exposing (..)
 import Data.Model exposing (..)
 import Dict exposing (Dict)
@@ -11,6 +12,7 @@ import Html exposing (Html, program)
 import Messages exposing (..)
 import Styles exposing (..)
 import Views.ActivityBar
+import Views.EditorMode
 import Views.Explorer
 import Views.MetaPanel
 import Views.Palette
@@ -40,13 +42,45 @@ view model =
 
                 Nothing ->
                     Nothing
+
+        dropId =
+            DragDrop.getDropId model.dragDropFiles
+
+        viewActivity =
+            Views.ActivityBar.view model.activity
+
+        viewEditorMode =
+            Views.EditorMode.view
+
+        viewExplorer =
+            Views.Explorer.view model.activity model.files model.activeFile dropId model.search
+
+        viewWorkspace =
+            Views.Workspace.view model.files model.openFiles model.activeFile model.fileContents wordTarget
+
+        viewMetaPanel =
+            Views.MetaPanel.view model.files activeFile
+
+        viewPalette =
+            Views.Palette.view model.files model.palette
+
+        viewSections =
+            case model.activity of
+                Just (Data.Activity.Editor) ->
+                    [ viewActivity
+                    , viewEditorMode
+                    , viewPalette
+                    ]
+
+                _ ->
+                    [ viewActivity
+                    , viewExplorer
+                    , viewWorkspace
+                    , viewMetaPanel
+                    , viewPalette
+                    ]
     in
         Element.viewport (styleSheet model.theme) <|
             row Body
                 [ height (percent 100) ]
-                [ Views.ActivityBar.view model.activity
-                , Views.Explorer.view model.activity model.files model.activeFile (DragDrop.getDropId model.dragDropFiles) model.search
-                , Views.Workspace.view model.files model.openFiles model.activeFile model.fileContents wordTarget
-                , Views.MetaPanel.view model.files activeFile
-                , Views.Palette.view model.files model.palette
-                ]
+                viewSections

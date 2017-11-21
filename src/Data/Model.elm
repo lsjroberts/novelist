@@ -57,7 +57,7 @@ init seed =
         ( newUuid, newSeed ) =
             Random.Pcg.step Uuid.uuidGenerator (Random.Pcg.initialSeed seed)
     in
-        ( testScenes newUuid newSeed
+        ( testEditor newUuid newSeed
         , Cmd.none
         )
 
@@ -168,3 +168,11 @@ testSearch newUuid newSeed =
                         }
                     )
         }
+
+
+testEditor newUuid newSeed =
+    let
+        model =
+            testScenes newUuid newSeed
+    in
+        { model | activity = Just Data.Activity.Editor }
