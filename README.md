@@ -4,14 +4,14 @@ A Writer's Environment
 
 ## Development
 
-Run:
+Build electron app:
 
 ```
-elm reactor
+npm run start
 ```
 
-and :
+Run live-reload website for debugging elm (no filesystem):
 
 ```
-http-server
+npm run dev
 ```
