@@ -90,22 +90,156 @@ amdRequire(['vs/editor/editor.main'], function() {
 
     monaco.languages.registerHoverProvider('novel', {
         provideHover: function(model, position) {
-            const word = model.getWordAtPosition(position);
+            const token = getTokenAtPosition(model, position);
+
             return {
                 range: new monaco.Range(
                     position.lineNumber,
-                    word.startColumn,
+                    token.offset + 1,
                     position.lineNumber,
-                    word.endColumn
+                    token.offset + token.length + 1
                 ),
                 contents: [
-                    `**${word.word}**`,
+                    `**${token.text}**`,
                     { language: 'novel', value: 'A character' }
                 ]
             };
         }
     });
 });
+
+let editor;
+
+function destroyMonacoEditor() {
+    if (editor) {
+        const model = editor.getModel();
+        if (model) model.dispose();
+        editor.dispose();
+    }
+}
+
+function createMonacoEditor(contents) {
+    destroyMonacoEditor();
+
+    // -- Create the editor
+    editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+        automaticLayout: true, // TODO: this occurs every 100ms, do it better
+        language: 'novel',
+        lineHeight: 18 * 1.8,
+        lineNumbers: false,
+        fontFamily: 'Cochin',
+        fontSize: 18,
+        minimap: {
+            enabled: false,
+            renderCharacters: false
+        },
+        occurrencesHighlight: false,
+        scrollBeyondLastLine: false,
+        theme: 'novelist-speech',
+        value: contents,
+        wordWrap: 'wordWrapColumn',
+        wordWrapColumn: 70
+    });
+
+    // -- Attach a listener to automatically save the file
+    const model = editor.getModel();
+
+    model.onDidChangeContent(() => {
+        const value = model.getValue();
+        writeFile(activeFileId, value);
+    });
+
+    // editor.addAction({
+    //     id: 'novelist-character-add',
+    //     label: 'Character: Add new character',
+    //     run: () => {
+    //         console.log('creating a new character');
+    //     }
+    // });
+
+    var viewZoneId = null;
+
+    editor.onMouseDown(event => {
+        const token = getTokenAtPosition(model, event.target.position);
+
+        editor.changeViewZones(function(changeAccessor) {
+            if (viewZoneId) changeAccessor.removeZone(viewZoneId);
+
+            if (!token) return;
+
+            if (token.type !== 'character.novel') return;
+
+            var domNode = document.createElement('div');
+            domNode.style.background = '#F1F1F1';
+            domNode.textContent = `Character: ${token.text}`;
+
+            viewZoneId = changeAccessor.addZone({
+                afterLineNumber: event.target.position.lineNumber,
+                heightInLines: 6,
+                domNode: domNode
+            });
+        });
+
+        return;
+
+        // editor.changeViewZones(function(changeAccessor) {
+        //     var domNode = document.createElement('div');
+        //     domNode.style.background = '#F1F1F1';
+
+        //     const model = editor.getModel();
+
+        //     const selection = editor.getSelection();
+
+        //     if (!selection.isEmpty()) {
+        //         domNode.textContent = `New Character: ${model.getValueInRange(
+        //             selection
+        //         )}`;
+        //     } else {
+        //         domNode.textContent = `New Character: ${model.getWordAtPosition(
+        //             e.target.position
+        //         ).word}`;
+        //     }
+
+        //     if (viewZoneId) changeAccessor.removeZone(viewZoneId);
+        //     viewZoneId = changeAccessor.addZone({
+        //         afterLineNumber: e.target.position.lineNumber,
+        //         heightInLines: 6,
+        //         domNode: domNode
+        //     });
+        // });
+    });
+}
+
+function getTokenAtPosition(model, position) {
+    const lineNumber = position.lineNumber;
+    const text = model.getValueInRange({
+        startLineNumber: lineNumber,
+        endLineNumber: lineNumber + 1
+    });
+    const tokens = monaco.editor.tokenize(text, 'novel').shift();
+    for (let i = 0; i < tokens.length - 1; i++) {
+        tokens[i].length = tokens[i + 1].offset - tokens[i].offset;
+    }
+    tokens[tokens.length - 1].length =
+        text.length - tokens[tokens.length - 1].offset;
+    const tokenTexts = tokens.map(token =>
+        text.slice(token.offset, token.offset + token.length)
+    );
+
+    let tokenAtPositionIndex = -1;
+    let offset = 0;
+    for (let i = 0; i < tokens.length; i++) {
+        offset += tokens[i].offset + tokens[i].length;
+        if (position.column <= offset) {
+            tokenAtPositionIndex = i;
+            break;
+        }
+    }
+
+    return Object.assign({}, tokens[tokenAtPositionIndex], {
+        text: tokenTexts[tokenAtPositionIndex]
+    });
+}
 
 const colorsHash = {
     base03: '#002b36',
