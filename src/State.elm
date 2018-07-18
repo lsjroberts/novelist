@@ -32,6 +32,9 @@ update msg model =
                 Ui uiMsg ->
                     updateUi uiMsg model
 
+                Prose proseMsg ->
+                    updateProse proseMsg model
+
                 OpenProjectSubscription payload ->
                     decode (createModel model.currentSeed model.currentUuid) payload ! []
 
@@ -256,6 +259,25 @@ updateUi msg model =
                 -- |> update (Ui ClosePalette)
                 !
                     []
+
+
+updateProse : ProseMsg -> Model -> ( Model, Cmd Msg )
+updateProse msg model =
+    case model.prose of
+        Just prose ->
+            case msg of
+                SetActiveParagraph index ->
+                    { model
+                        | prose =
+                            Just
+                                { paragraphs = prose.paragraphs
+                                , activeParagraph = Just index
+                                }
+                    }
+                        ! []
+
+        Nothing ->
+            model ! []
 
 
 addFile model activity file =

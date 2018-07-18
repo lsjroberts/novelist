@@ -62,6 +62,10 @@ type WelcomeStyle
 type WorkspaceStyle
     = CharacterEditor
     | CharacterEditorTitle
+    | Prose
+    | ProseEditor
+    | ProseEditorParagraph
+    | ProseTitle
     | SceneEditor
     | TabBar
     | Tab
@@ -69,6 +73,7 @@ type WorkspaceStyle
 
 type Variations
     = Active
+    | Inactive
     | Light
     | DropTarget
 
@@ -187,6 +192,23 @@ styleSheet theme =
         , style (Workspace CharacterEditorTitle)
             [ Font.typeface <| fontStack Serif
             , Font.size <| fontScale 4
+            ]
+        , style (Workspace Prose)
+            []
+        , style (Workspace ProseEditor)
+            [ Font.typeface <| fontStack Serif
+            , Font.size <| fontScale 3
+            , Font.lineHeight 1.6
+            ]
+        , style (Workspace ProseEditorParagraph)
+            [ prop "text-indent" "1em"
+            , variation Active [ Color.text (.text theme) ]
+            , variation Inactive [ Color.text (rgb 200 200 200) ]
+            ]
+        , style (Workspace ProseTitle)
+            [ Font.typeface <| fontStack Serif
+            , Font.size <| fontScale 6
+            , Font.center
             ]
         , style (Workspace SceneEditor)
             []

@@ -12,6 +12,7 @@ type Msg
     = NoOp
     | Data DataMsg
     | Ui UiMsg
+    | Prose ProseMsg
     | OpenProjectSubscription String
     | UpdateFileSubscription String
     | SearchSubscription String
@@ -40,3 +41,7 @@ type UiMsg
     | SearchName String
     | SetActivity Activity
     | SetPalette PaletteStatus
+
+
+type ProseMsg
+    = SetActiveParagraph Int

@@ -1,6 +1,7 @@
 module Views.Workspace exposing (view)
 
 import Data.File exposing (..)
+import Data.Prose
 import Dict exposing (Dict)
 import Element exposing (..)
 import Element.Attributes exposing (..)
@@ -16,15 +17,16 @@ import Views.Icons exposing (smallIcon)
 import Views.Welcome
 import Views.Workspace.Character
 import Views.Workspace.Folder
+import Views.Workspace.Prose
 
 
-view files openFiles activeFile fileContents wordTarget =
+view files openFiles activeFile fileContents prose wordTarget =
     case activeFile of
         Just _ ->
             column NoStyle
                 [ width fill ]
                 [ viewTabBar files openFiles activeFile
-                , viewEditor files activeFile fileContents
+                , viewEditor files activeFile fileContents prose
                 , viewStatusBar wordTarget
                 ]
 
@@ -69,8 +71,8 @@ viewTab fileId file isActive =
         ]
 
 
-viewEditor : Dict FileId File -> Maybe FileId -> Maybe String -> Element Styles Variations Msg
-viewEditor files activeFile fileContents =
+viewEditor : Dict FileId File -> Maybe FileId -> Maybe String -> Maybe Data.Prose.Prose -> Element Styles Variations Msg
+viewEditor files activeFile fileContents maybeProse =
     let
         maybeFile =
             Maybe.Extra.unwrap
@@ -83,7 +85,12 @@ viewEditor files activeFile fileContents =
                 ( Just fileId, Just file ) ->
                     case file.fileType of
                         SceneFile scene ->
-                            viewMonacoEditor fileContents
+                            case maybeProse of
+                                Just prose ->
+                                    Views.Workspace.Prose.view prose
+
+                                Nothing ->
+                                    el Placeholder [ width fill, height fill ] empty
 
                         CharacterFile character ->
                             Views.Workspace.Character.view (characters files) fileId file character

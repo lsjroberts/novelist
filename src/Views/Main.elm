@@ -56,7 +56,7 @@ view model =
             Views.Explorer.view model.activity model.files model.activeFile dropId model.search
 
         viewWorkspace =
-            Views.Workspace.view model.files model.openFiles model.activeFile model.fileContents wordTarget
+            Views.Workspace.view model.files model.openFiles model.activeFile model.fileContents model.prose wordTarget
 
         viewMetaPanel =
             Views.MetaPanel.view model.files activeFile
