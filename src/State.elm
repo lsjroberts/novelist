@@ -39,7 +39,15 @@ update msg model =
                     decode (createModel model.currentSeed model.currentUuid) payload ! []
 
                 UpdateFileSubscription payload ->
-                    { model | fileContents = Just payload } ! []
+                    { model
+                        | fileContents = Just payload
+                        , prose =
+                            Just
+                                { paragraphs = payload |> String.split "\n"
+                                , activeParagraph = Nothing
+                                }
+                    }
+                        ! []
 
                 SearchSubscription payload ->
                     case model.search of
